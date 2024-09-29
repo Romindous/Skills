@@ -1,0 +1,26 @@
+package ru.romindous.skills.menus.selects;
+
+import javax.annotation.Nullable;
+import org.bukkit.entity.Player;
+import ru.komiss77.utils.inventory.InventoryProvider;
+import ru.romindous.skills.Survivor;
+import ru.romindous.skills.skills.Skill;
+
+public abstract class SvSelect implements InventoryProvider {
+
+    protected final Survivor sv;
+    protected final @Nullable Skill sk;
+    protected final int skIx;
+
+    protected SvSelect(final Survivor sv, final int skIx, final @Nullable Skill sk) {
+        this.sv = sv;
+        this.sk = sk;
+        this.skIx = skIx;
+    }
+
+    protected void openLast(final Player p) {
+        sv.abMenu.skillIx = skIx;
+        p.closeInventory();
+        sv.skillInv.open(p);
+    }
+}
