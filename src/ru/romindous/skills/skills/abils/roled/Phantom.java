@@ -61,12 +61,13 @@ public class Phantom implements Ability.AbilReg {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, cls);
                 final Chain chn = ch.event(fe);
                 ee.setDamage(0d);
-                fe.setDamage(DAMAGE.modify(chn, lvl) * dmg);
-                cls.damage(fe.getDamage(), fe.getDamageSource());
 
                 //TODO effect
 
-                next(chn);
+                next(chn, () -> {
+                    fe.setDamage(DAMAGE.modify(chn, lvl) * dmg);
+                    cls.damage(fe.getDamage(), fe.getDamageSource());
+                });
                 return true;
             }
             public String id() {
@@ -195,14 +196,16 @@ public class Phantom implements Ability.AbilReg {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                //TODO effect
                 final Chain chn = ch.event(makeDamageEvent(caster, tgt));
                 final int time = (int) (TIME.modify(chn, lvl) * 20d);
                 tgt.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, time, amp));
                 tgt.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, time, amp));
-                defKBLe(caster, tgt, true);
 
-                next(chn);
+                //TODO effect
+
+                next(chn, () -> {
+                    defKBLe(caster, tgt, true);
+                });
                 return true;
             }
             public String id() {
@@ -356,15 +359,18 @@ public class Phantom implements Ability.AbilReg {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(makeDamageEvent(caster, tgt));
-                Bleeding.bleed(tgt, DAMAGE.modify(chn, lvl), TIME.modify(chn, lvl), caster);
-
+                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
+                final Chain chn = ch.event(fe);
+                fe.setDamage(DAMAGE.modify(chn, lvl));
                 final Location loc = EntityUtil.center(tgt);
                 new ParticleBuilder(Particle.SWEEP_ATTACK).extra(0d)
                     .allPlayers().location(loc).count(1).spawn();
                 Bleeding.effect(tgt);
 
-                next(chn);
+                next(chn, () -> {
+                    Bleeding.bleed(tgt, fe.getDamage(),
+                        TIME.modify(chn, lvl), caster);
+                });
                 return true;
             }
             public String id() {

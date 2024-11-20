@@ -63,7 +63,7 @@ public class MySqlLst implements Listener {
         if (save == null) {
             SM.randomJoin(p, sv.firstJoin);
         } else {
-            MoveUtil.safeTP(p, save, false);//p.teleport(save);
+            MoveUtil.safeTP(p, save);//p.teleport(save);
         }
 
         Main.diary.give(p);

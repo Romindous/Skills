@@ -26,13 +26,13 @@ public class Beast extends SednaMob {
         return Zoglin.class;
     }
 
-    private final double minSize = mobConfig("min_size", 0.6d),
-        maxSize = mobConfig("max_size", 1.0d);
+    private final double minSize = mobConfig("min_scl", 0.6d),
+        maxSize = mobConfig("scale", 1.0d);
 
 
     @Override
     public Map<Attribute, Double> attributes() {
-        atts.put(Attribute.GENERIC_SCALE, minSize + (Ostrov.random.nextDouble() * (maxSize - minSize)));
+        atts.put(Attribute.SCALE, minSize + (Ostrov.random.nextDouble() * (maxSize - minSize)));
         return atts;
     }
 

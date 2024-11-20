@@ -64,7 +64,7 @@ public class SelSelect extends SvSelect {
             final Selector.SelState sl = en.getKey();
             if (!sv.canUse(sl.sel()) || sl.sel().equals(Selector.CASTER)) continue;
             if (Selector.SAME.equals(sl.sel())) {
-                its.set(slot, ClickableItem.from(new ItemBuilder(sl.sel().item(sl.lvl()))
+                its.set(slot, ClickableItem.from(new ItemBuilder(sl.sel().display(sl.lvl()))
                     .amount(en.getValue()).lore("").lore(TCUtil.P + "Клик - Выбрать").build(), e -> {
                         if (sk == null) {
                             openLast(p);
@@ -77,12 +77,12 @@ public class SelSelect extends SvSelect {
                 ));
                 continue;
             }
-            its.set(slot, ClickableItem.from(new ItemBuilder(sl.sel().item(sl.lvl())).lore("")
+            its.set(slot, ClickableItem.from(new ItemBuilder(sl.sel().display(sl.lvl())).lore("")
                 .lore(TCUtil.P + "Клик - Выбрать").lore("<red>Выброс" + TCUtil.P + " - Выдать предметом").build(), e -> {
                     switch (e.getClick()) {
                         case DROP, CONTROL_DROP:
                             if (sv.change(sl, -1) < 0) return;
-                            ItemUtil.giveItemsTo(p, sl.sel().item(sl.lvl()));
+                            ItemUtil.giveItemsTo(p, sl.sel().drop(sl.lvl()));
                             reopen(p, its);
                             return;
                         default:

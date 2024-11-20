@@ -13,8 +13,8 @@ public class ChasMod {
     public ChasMod(final Scroll ability, final String id, final Chastic chs) {
         this.id = id;
         this.chs = chs;
-        this.base = ability.value(id, 1d);
-        this.scale = ability.value(id, 0d);
+        this.base = ability.value(id + "_base", 1d);
+        this.scale = ability.value(id + "_scale", 0d);
     }
 
     public double modify(final Chain ch, final int lvl) {

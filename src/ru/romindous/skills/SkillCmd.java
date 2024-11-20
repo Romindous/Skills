@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import ru.komiss77.ApiOstrov;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.ScreenUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.TimeUtil;
@@ -22,34 +23,38 @@ import ru.romindous.skills.menus.MainMenu;
 import ru.romindous.skills.menus.RoleSelectMenu;
 import ru.romindous.skills.menus.StatsMenu;
 import ru.romindous.skills.menus.WorldMenu;
+import ru.romindous.skills.objects.Scroll;
+import ru.romindous.skills.skills.abils.Ability;
+import ru.romindous.skills.skills.mods.Modifier;
+import ru.romindous.skills.skills.sels.Selector;
 
 
 public class SkillCmd implements CommandExecutor, TabCompleter {
 
     private static final List <String> subCmd;
-    
+
     static {
-        subCmd = Arrays.asList("select", "menu", "stats", "ability", "world", "add", "reset", "debug", "pet");
+        subCmd = Arrays.asList("select", "menu", "stats", "ability", "world", "give", "add", "reset", "debug", "pet");
     }
-    
-    
-    
+
+
+
     @Override
     public List<String> onTabComplete(CommandSender cs, Command cmnd, String command, String[] arg) {
-        
+
         if (arg.length==1) return subCmd;
-        
+
         final List <String> sugg = new ArrayList<>();
 //System.out.println("l="+strings.length+" 0="+strings[0]);
         switch (arg.length) {
-            
+
             //case 1:
-                //0- пустой (то,что уже введено)
-                //return subCmd;
-                //for (Player p : Bukkit.getOnlinePlayers()) {
-                //    if (p.getName().startsWith(arg[0])) sugg.add(p.getName());
-                //}
-                //break;
+            //0- пустой (то,что уже введено)
+            //return subCmd;
+            //for (Player p : Bukkit.getOnlinePlayers()) {
+            //    if (p.getName().startsWith(arg[0])) sugg.add(p.getName());
+            //}
+            //break;
 
             case 2:
                 //1-то,что вводится (обновляется после каждой буквы
@@ -68,6 +73,13 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                             sugg.add("stat");
                         }
                         break;
+                    case "give":
+                        if (ApiOstrov.isLocalBuilder(cs)) {
+                            sugg.add("sel");
+                            sugg.add("abil");
+                            sugg.add("mod");
+                        }
+                        break;
                     case "reset":
                         break;
                     case "world":
@@ -79,71 +91,89 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                         break;
                 }
                 //if (strings[0].equalsIgnoreCase("build") || strings[0].equalsIgnoreCase("destroy") ) {
-                    //for (final String s : argList) {
-                    //    if (s.startsWith(arg[0])) sugg.add(s);
-                    //}
+                //for (final String s : argList) {
+                //    if (s.startsWith(arg[0])) sugg.add(s);
+                //}
                 //sugg.add("читы");
                 //sugg.add("гриф");
                 //sugg.add("неадекват");
                 //}
                 break;
 
-                
+
             case 3:
                 //2-то,что вводится (обновляется после каждой буквы
 //System.out.println("l="+strings.length+" 0="+strings[0]+" 1="+strings[1]);
-                if (arg[0].equalsIgnoreCase("add") ) {
-                    sugg.add("5");
-                    sugg.add("10");
-                    sugg.add("100");
-                    sugg.add("1000");
+                switch (arg[0].toLowerCase()) {
+                    case "add":
+                        sugg.add("5");
+                        sugg.add("10");
+                        sugg.add("100");
+                        sugg.add("1000");
+                        break;
+                    case "give":
+                        switch (arg[1].toLowerCase()) {
+                            case "sel":
+                                sugg.addAll(Selector.VALUES.keySet());
+                                break;
+                            case "abil":
+                                sugg.addAll(Ability.VALUES.keySet());
+                                break;
+                            case "mod":
+                                sugg.addAll(Modifier.VALUES.keySet());
+                                break;
+                        }
+                        break;
                 }
                 break;
 
             case 4:
                 //3-то,что вводится (обновляется после каждой буквы
-//System.out.println("l="+strings.length+" 0="+strings[0]+" 1="+strings[1]);
-                //if (strings[0].equalsIgnoreCase("build") || strings[0].equalsIgnoreCase("destroy") ) {
-                if (arg[0].equalsIgnoreCase("add")
-                    && cs instanceof ConsoleCommandSender) {
-                    sugg.addAll(PM.getOplayersNames());
+                switch (arg[0].toLowerCase()) {
+                    case "add":
+                        if (cs instanceof ConsoleCommandSender) {
+                            sugg.addAll(PM.getOplayersNames());
+                        }
+                        break;
+                    case "give":
+                        sugg.add("1");
+                        break;
                 }
-                //}
                 break;
         }
-        
-       return sugg;
+
+        return sugg;
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
     @Override
     public boolean onCommand(CommandSender cs, Command cmnd, String string, String[] arg) {
-        
+
         final Player p = cs instanceof Player ? (Player) cs : null;
         final Survivor sv = p==null ? null : PM.getOplayer(p, Survivor.class);
-        
+
         if (p!=null && (sv==null || sv.mysqlError) ) { //командует игрок, но его данные не загружены - отказ
             p.sendMessage(TCUtil.form("§cДанные не были загружены, команда отключена!"));
             return true;
         }
-        
-        
-        
-        
 
-        
+
+
+
+
+
         //обработка команд, возможных от консоли и билдера
-        
+
         if (arg.length>=1) switch (arg[0]) {
-                
+
             case "add" -> {
                 if (!ApiOstrov.isLocalBuilder(cs, true)) {
                     return true;
@@ -199,70 +229,114 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                 cs.sendMessage("§aДобавлено §b"+ammount+" §aк §b"+arg[1]);
                 return true;
             }
-                
 
-           case "reset" -> {
+            case "give" -> {
+                if (!ApiOstrov.isLocalBuilder(cs, true)) {
+                    return true;
+                }
+                if (arg.length<4) {
+                    cs.sendMessage("§c/skill give <sel|abil|mod> <name> <lvl>");
+                    return true;
+                }
+                if (!(cs instanceof final Player pl)) {
+                    cs.sendMessage("§cНе консольная комманда!");
+                    return true;
+                }
+                final Survivor srv = PM.getOplayer(pl, Survivor.class);
+                if (srv==null) {
+                    cs.sendMessage("§c"+arg[3]+": Survivor==null!");
+                    return true;
+                }
+                if (srv.mysqlError) {
+                    cs.sendMessage("§cОшибка загрузки данных игрока "+arg[3]+" : loadError");
+                    return true;
+                }
+                final Scroll sc;
+                switch (arg[1].toLowerCase()) {
+                    case "sel":
+                        sc = Selector.VALUES.get(arg[2].toLowerCase());
+                        break;
+                    case "abil":
+                        sc = Ability.VALUES.get(arg[2].toLowerCase());
+                        break;
+                    case "mod":
+                        sc = Modifier.VALUES.get(arg[2].toLowerCase());
+                        break;
+                    default:
+                        cs.sendMessage("§c"+arg[1]+" - нет такого параметра");
+                        return true;
+                }
+                if (sc == null) {
+                    cs.sendMessage("§cНет свитка с названием " + arg[2]);
+                    return true;
+                }
+                pl.getWorld().dropItem(EntityUtil.center(pl), sc.drop(ApiOstrov.getInteger(arg[3], 1)));
+                cs.sendMessage("§aВыдан свиток §b"+sc.id()+" §aк §b"+pl.getName());
+                return true;
+            }
+
+            case "reset" -> {
                /*if (!ApiOstrov.isLocalBuilder(cs, true)) {
                    //return true;
                }*/
-               if (cs instanceof ConsoleCommandSender && arg.length<2) {
-                   cs.sendMessage("§cНужно указать ник!");
-                   return true;
-               }
-               final Player pl;
-               final Survivor srv;
-               if (arg.length==2) {
-                   pl = Bukkit.getPlayer(arg[1]);
-                   if (pl==null) {
-                       cs.sendMessage("§cИгрока "+arg[1]+" нет на сервере!");
-                       return true;
-                   }
-                   srv = PM.getOplayer(pl, Survivor.class);
-               } else {
-                   pl = p;
-                   srv = sv;
-               }
-               if (srv==null) {
-                   cs.sendMessage("§c"+arg[1]+": Survivor==null!");
-                   return true;
-               }
+                if (cs instanceof ConsoleCommandSender && arg.length<2) {
+                    cs.sendMessage("§cНужно указать ник!");
+                    return true;
+                }
+                final Player pl;
+                final Survivor srv;
+                if (arg.length==2) {
+                    pl = Bukkit.getPlayer(arg[1]);
+                    if (pl==null) {
+                        cs.sendMessage("§cИгрока "+arg[1]+" нет на сервере!");
+                        return true;
+                    }
+                    srv = PM.getOplayer(pl, Survivor.class);
+                } else {
+                    pl = p;
+                    srv = sv;
+                }
+                if (srv==null) {
+                    cs.sendMessage("§c"+arg[1]+": Survivor==null!");
+                    return true;
+                }
                /*if (srv.mysqlError) {
                    cs.sendMessage("§cОшибка загрузки данных игрока "+arg[1]+" : loadError");
                    return true;
                }*/
-               if (p != null && p.getEntityId() == pl.getEntityId()) {
-                   ConfirmationGUI.open(p, "Весь ваш прогресс сбросится?", b -> {
-                       if (b) SM.resetPlayer(cs, pl);
-                   });
-               } else if (ApiOstrov.isLocalBuilder(cs, true)) {
-                   if (p == null) {
-                       SM.resetPlayer(cs, pl);
-                   } else {
-                       ConfirmationGUI.open(p, "Сбросить прогресс " + pl.getName() + "?", b -> {
-                           if (b) SM.resetPlayer(cs, pl);
-                       });
-                   }
-               }
-               return true;
+                if (p != null && p.getEntityId() == pl.getEntityId()) {
+                    ConfirmationGUI.open(p, "Весь ваш прогресс сбросится?", b -> {
+                        if (b) SM.resetPlayer(cs, pl);
+                    });
+                } else if (ApiOstrov.isLocalBuilder(cs, true)) {
+                    if (p == null) {
+                        SM.resetPlayer(cs, pl);
+                    } else {
+                        ConfirmationGUI.open(p, "Сбросить прогресс " + pl.getName() + "?", b -> {
+                            if (b) SM.resetPlayer(cs, pl);
+                        });
+                    }
+                }
+                return true;
             }
-                
-        }        
-        
-        
-        
-        
-        
-        
-        
-        
+
+        }
+
+
+
+
+
+
+
+
         //ниже только команды игрока
-        
+
         if (p == null) {
             cs.sendMessage("§c"+arg[0]+" с консоли не работает");
             return true;
-        }      
-        
-        
+        }
+
+
         if (arg.length==0 || arg[0].equalsIgnoreCase("menu")) {
 //p.sendMessage("open main menu");
             if (sv.role ==null) {
@@ -270,25 +344,25 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
             } else {
 //p.sendMessage("открыть меню соотв.классу");
                 SmartInventory.builder()
-                        .id("Menu"+p.getName())
-                        .provider(new MainMenu())
-                        .size(6, 9)
-                        .title("           §c§lГлавное Меню")
-                        .build()
-                        .open(p);
+                    .id("Menu"+p.getName())
+                    .provider(new MainMenu())
+                    .size(6, 9)
+                    .title("           §c§lГлавное Меню")
+                    .build()
+                    .open(p);
             }
             return true;
         }
-        
-        
-        
 
-        
-        
-        
+
+
+
+
+
+
         switch (arg[0]) {
-            
-            
+
+
             case "world" -> {
                 if (PM.inBattle(p.getName())) {
                     p.sendMessage(Main.prefix + "§cВы не можете сменить мир во время битвы!");
@@ -300,12 +374,12 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                         p.sendMessage(Main.prefix + "§cМенять мир командой могут только билдеры!");
                         return true;
                     }
-                    
+
                     if (ss==null) {
                         p.sendMessage(Main.prefix + "§cНет мира "+arg[1]+"!");
                         return true;
                     }
-                    
+
                     WorldMenu.moveTo(p, ss, false);
                 } else {
                     SmartInventory.builder()
@@ -318,7 +392,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                 }
                 return true;
             }
-                
+
             case "select" -> {
                 if (arg.length==1) {
                     RoleSelectMenu.skillSelect.open(p);  //меню должно парсить команду /skill select <скилл>
@@ -342,9 +416,9 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                                 return true;
                             }
                         }
-                        
+
                         for (final Stat st : Stat.values()) {
-                        	sv.statsPoints += sv.getStat(st);
+                            sv.statsPoints += sv.getStat(st);
                             sv.setStat(st, 0);
                         }
                     }
@@ -361,25 +435,25 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                 }
                 return true;
             }
-                
 
-                
-                
+
+
+
             case "stats" -> {
                 if (sv.role ==null) {
                     RoleSelectMenu.skillSelect.open(p);
                     return true;
                 }
                 SmartInventory.builder()
-                        .type(InventoryType.HOPPER)
-                        .id("Stats "+p.getName())
-                        .provider(new StatsMenu())
-                        .title("§3§l    Прокачка Статистики")
-                        .build().open(p);
+                    .type(InventoryType.HOPPER)
+                    .id("Stats "+p.getName())
+                    .provider(new StatsMenu())
+                    .title("§3§l    Прокачка Статистики")
+                    .build().open(p);
                 return true;
             }
-                
-                
+
+
             case "ability" -> {
                 if (sv.role ==null) {
                     RoleSelectMenu.skillSelect.open(p);
@@ -388,8 +462,8 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                 sv.skillInv.open(p);
                 return true;
             }
-            
-            
+
+
             case "pet" -> {
                 Main.petMgr.petCmd(p, sv);
                 return true;
@@ -409,16 +483,16 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                 return true;
             }                */
         }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
         return true;
     }
 
@@ -476,5 +550,5 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
     }*/
 
 
-    
+
 }

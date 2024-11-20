@@ -26,6 +26,7 @@ public abstract class Selector implements Scroll {//подборник
     private static int id_count = 0;
     final int nid = id_count++;
 
+    public static final String prefix = "sels.";
     public static final String data = "sel";
 
     public final ChasMod MANA_MUL = new ChasMod(this, "mana_mul", Chastic.MANA);
@@ -73,7 +74,7 @@ public abstract class Selector implements Scroll {//подборник
         dscs.add(" ");
         dscs.add(TCUtil.N + "Выбирает:");
         for (final String d : descs()) {
-            String ed = d.replace(CLR, rarity().clr);
+            String ed = d.replace(CLR, rarity().color());
             for (final ChasMod st : stats()) {
                 ed = ed.replace(st.id, st.chs.color()
                     + StringUtil.toSigFigs(st.calc(lvl), SIG_FIGS));

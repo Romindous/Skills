@@ -18,7 +18,7 @@ public abstract class Modifier implements Scroll {//модификатор
     public static final Map<Rarity, List<Modifier>> RARITIES = new HashMap<>();
 
     public static final String prefix = "mods.";
-    public static final String data = "sel";
+    public static final String data = "mod";
 
     private static int id_count = 0;
     final int nid = id_count++;

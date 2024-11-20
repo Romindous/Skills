@@ -1,6 +1,9 @@
 package ru.romindous.skills.listeners;
 
-import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -11,29 +14,32 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
+import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.Survivor;
+import ru.romindous.skills.config.ConfigVars;
+import ru.romindous.skills.enums.Rarity;
 import ru.romindous.skills.enums.Stat;
 import ru.romindous.skills.enums.Trigger;
 import ru.romindous.skills.events.PlayerKillEntityEvent;
 import ru.romindous.skills.mobs.SednaMob;
+import ru.romindous.skills.objects.Scroll;
+import ru.romindous.skills.skills.abils.Ability;
+import ru.romindous.skills.skills.mods.Modifier;
+import ru.romindous.skills.skills.sels.Selector;
 
 
 public class DeathLst implements Listener {
-
-    private static final LinkedHashMap<Integer, Float> farmLocs = new LinkedHashMap<>();
-    private static final int LOC_ENCD = 10;
-    private static final int COORD_DEL = 4;
-    private static final int PER_PLAYER = 6;
-    private static final float DROP_MUL = 0.8f;
+//    private static final float DROP_MUL = 0.8f;
+//    private static final float SRL_CH_DEL = 10f;
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerDth(final PlayerDeathEvent e) {
@@ -75,8 +81,7 @@ public class DeathLst implements Listener {
     public static void onCustomDeath(final EntityDeathEvent e, final SednaMob sm) {
         if (!(e.getEntity() instanceof final Mob mob)) return;
         final Player killer;
-        final EntityDamageEvent ee = mob.getLastDamageCause();
-        if (ee.getDamageSource().getCausingEntity() instanceof final Player pl) {
+        if (EntityUtil.lastDamager(mob, true) instanceof final Player pl) {
             killer = pl;
         } else killer = null;
         /*if (ee instanceof final EntityDamageByEntityEvent event) {
@@ -125,7 +130,7 @@ public class DeathLst implements Listener {
         //если постоянно убивать мобов в одном и том же месте (ака фармилка / моб-дробилка)
         //то опыта бедут все меньше и меньше даватся
         //bfr - сам буфер
-        final Location kLoc = killer.getLocation();
+        /*final Location kLoc = killer.getLocation();
         final int encd = ((kLoc.blockX() >> COORD_DEL) << LOC_ENCD) + (kLoc.blockZ() >> COORD_DEL);
         final Float bfr = farmLocs.get(encd);
         final float mult = bfr == null ? 1f : bfr * DROP_MUL;
@@ -134,9 +139,10 @@ public class DeathLst implements Listener {
             farmLocs.pollLastEntry();
         }
 
-        if (mult < 0.1f) return;
-        final double mhp = mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
-        final int exp = (int) (mult * Stat.exp(mhp, kSv.getStat(Stat.ACCURACY)));
+        if (mult < 0.1f) return;//checkpoint*/
+
+        final double mhp = mob.getAttribute(Attribute.MAX_HEALTH).getBaseValue();
+        final int exp = (int) Stat.exp(mhp, kSv.getStat(Stat.ACCURACY));
 
         float dropNum = (float) Stat.drops(1d, kSv.getStat(Stat.PASSIVE));
         final ItemStack hnd = killer.getInventory().getItemInMainHand();
@@ -151,12 +157,53 @@ public class DeathLst implements Listener {
         e.setDroppedExp(el.getExp());
         kSv.addMana(killer, el.getMana());
 
-        final Location loc = mob.getLocation();
+        final Location loc = EntityUtil.center(mob);
+//        final float thresh = SRL_CH_DEL / Math.max(exp, 1);
         for (int d = Ostrov.random.nextInt((int) el.getDrops()) + 1; d != 0; d--) {
             for (final ItemStack it : sm.loot().genRolls(ItemStack.class)) {
                 loc.getWorld().dropItemNaturally(loc, it);
             }
+
+//            if (Main.srnd.nextFloat() > thresh)
+            dropScroll(loc);
         }
+    }
+
+    private static final int SC_ROLL = ConfigVars.get("drops.scroll", 1000);
+    private static void dropScroll(final Location loc) {
+        final Scroll sc;
+        switch (Main.srnd.nextInt(SC_ROLL)) {
+            case 0://selector
+                sc = randScroll(Selector.RARITIES);
+                break;
+            case 1://ability
+                sc = randScroll(Ability.RARITIES);
+                break;
+            case 2://modifier
+                sc = randScroll(Modifier.RARITIES);
+                break;
+            default: return;
+        }
+
+        final TextColor tc = TCUtil.getTextColor(sc.rarity().color());
+        Nms.colorGlow(loc.getWorld().dropItemNaturally(loc, sc.drop(1)),
+            NamedTextColor.nearestTo(tc), false);
+    }
+
+    private static final Rarity[] RAR_VALS = Rarity.values();
+    private static final int RAR_CH = getMaxRar();
+    private static int getMaxRar() {
+        int rar = 0;
+        for (int i = 1; i != RAR_VALS.length; i++)
+            rar += i << 1;
+        return rar;
+    }
+
+    private static <S extends Scroll> S randScroll(final Map<Rarity, List<S>> values) {
+        int ch = Main.srnd.nextInt(RAR_CH);
+        int i = 0; for (;ch != 0; i++) ch = ch >> 1;
+        final List<S> rsc = values.get(RAR_VALS[i]);
+        return rsc.get(Main.srnd.nextInt(rsc.size()));
     }
 
     /*@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -376,7 +423,7 @@ public class DeathLst implements Listener {
             	}
             }
             
-            if (kSv.getAbilityChance(Ability.ПОРОЖДЕНИЕ) > 60 && mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() > 10d) {
+            if (kSv.getAbilityChance(Ability.ПОРОЖДЕНИЕ) > 60 && mob.getAttribute(Attribute.MAX_HEALTH).getBaseValue() > 10d) {
             	for (int i = Main.srnd.nextInt(kSv.getAbilityLvl(Ability.ПОРОЖДЕНИЕ)) + 1; i > 0; i--) {
             		kSv.setUseStamp(Ability.ПОРОЖДЕНИЕ);
                     final Mob mb = (Mob) deathLoc.getWorld().spawnEntity(deathLoc, Main.subServer.mobType, false);//, false);

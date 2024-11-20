@@ -62,7 +62,7 @@ public class EntityDamageLst implements Listener {
 
         double dmg = e.getDamage();
         if (e.getDamageSource().getDirectEntity() instanceof Projectile) {
-            dmg = dmgr.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue();
+            dmg = dmgr.getAttribute(Attribute.ATTACK_DAMAGE).getValue();
         }
         if (dmg < 1d) return;
 
@@ -166,7 +166,7 @@ public class EntityDamageLst implements Listener {
         double dmg = e.getDamage();
         if (dmg < 1d) return;
         if (ENVIRONMENT.contains(dt)) {
-            dmg = ent.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() * envDmgPer * dmg;
+            dmg = ent.getAttribute(Attribute.MAX_HEALTH).getBaseValue() * envDmgPer * dmg;
         } else if (FALL.contains(dt)) {
             if (ent instanceof Mob) {
                 e.setCancelled(true);

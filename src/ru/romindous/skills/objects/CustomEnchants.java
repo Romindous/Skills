@@ -1,4 +1,4 @@
-package ru.romindous.skills.utils;
+package ru.romindous.skills.objects;
 
 public class CustomEnchants {
     /*
@@ -205,7 +205,7 @@ public class CustomEnchants {
         break;
 
     case "vampirism":
-        final double mx = damager.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+        final double mx = damager.getAttribute(Attribute.MAX_HEALTH).getBaseValue();
         final double hl = damage * 0.02d * en.getValue();//e.getFinalDamage() * 0.1d * en.getValue();
         damager.setHealth(damager.getHealth() + hl > mx ? mx : damager.getHealth() + hl);
         w.playSound(dloc, Sound.ENTITY_WITCH_DRINK, 0.4f, 1.4f);

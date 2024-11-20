@@ -2,9 +2,7 @@ package ru.romindous.skills.skills.abils.roled;
 
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import com.destroystokyo.paper.ParticleBuilder;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -19,7 +17,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.LocUtil;
@@ -28,16 +25,11 @@ import ru.romindous.skills.Main;
 import ru.romindous.skills.enums.Chastic;
 import ru.romindous.skills.enums.Rarity;
 import ru.romindous.skills.enums.Role;
-import ru.romindous.skills.enums.Trigger;
-import ru.romindous.skills.events.EntityCastEvent;
 import ru.romindous.skills.listeners.ShotLst;
 import ru.romindous.skills.skills.ChasMod;
-import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.abils.Chain;
 import ru.romindous.skills.skills.abils.InvCondition;
-
-import static ru.romindous.skills.enums.Trigger.*;
 
 public class Mage implements Ability.AbilReg {
     @Override
@@ -56,12 +48,14 @@ public class Mage implements Ability.AbilReg {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
                 fe.setDamage(DAMAGE.modify(chn, lvl));
-                tgt.damage(fe.getDamage(), fe.getDamageSource());
-                tgt.setFireTicks((int) (TIME.modify(chn, lvl) * 20));
-                tgt.getWorld().strikeLightningEffect(tgt.getLocation());
-                defKBLe(tgt);
 
-                next(chn);
+                tgt.getWorld().strikeLightningEffect(tgt.getLocation());
+
+                next(chn, () -> {
+                    tgt.damage(fe.getDamage(), fe.getDamageSource());
+                    tgt.setFireTicks((int) (TIME.modify(chn, lvl) * 20));
+                    defKBLe(tgt);
+                });
                 return true;
             }
             public String id() {
@@ -146,7 +140,7 @@ public class Mage implements Ability.AbilReg {
                 final Chain chn = ch.event(ch.on(this));
                 final int regen = (int) HEAL.modify(chn, lvl);
                 final double abs = caster.getAbsorptionAmount() + regen;
-                final AttributeInstance ain = caster.getAttribute(Attribute.GENERIC_MAX_ABSORPTION);
+                final AttributeInstance ain = caster.getAttribute(Attribute.MAX_ABSORPTION);
                 if (ain == null) return false;
                 if (ain.getBaseValue() < abs) ain.setBaseValue(abs);
                 caster.setAbsorptionAmount(Math.min(abs, ain.getValue()));

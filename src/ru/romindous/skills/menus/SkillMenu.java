@@ -154,7 +154,7 @@ public class SkillMenu implements InventoryProvider {
             final int pos = slot;
             final int spc = (pos << 1);
             final Ability.AbilState as = sk.abils[slot];
-            its.set(28 + spc, ClickableItem.from(new ItemBuilder(as.abil().item(as.lvl()))
+            its.set(28 + spc, ClickableItem.from(new ItemBuilder(as.abil().display(as.lvl()))
                 .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- заменить")
                 .lore(TCUtil.A + "Q " + TCUtil.N + "- убрать способность").build(), e -> {
                 switch (e.getClick()) {
@@ -172,9 +172,9 @@ public class SkillMenu implements InventoryProvider {
             }));
             final Selector.SelState ss = sk.sels[slot];
             if (Selector.CASTER.equals(ss.sel())) {
-                its.set(28 + spc - 9, ClickableItem.empty(ss.sel().item(ss.lvl())));
+                its.set(28 + spc - 9, ClickableItem.empty(ss.sel().display(ss.lvl())));
             } else {
-                its.set(28 + spc - 9, ClickableItem.from(new ItemBuilder(ss.sel().item(ss.lvl()))
+                its.set(28 + spc - 9, ClickableItem.from(new ItemBuilder(ss.sel().display(ss.lvl()))
                     .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- заменить").build(), e -> {
                     switch (e.getClick()) {
                         case DROP, CONTROL_DROP:
@@ -212,7 +212,7 @@ public class SkillMenu implements InventoryProvider {
         for (; slot != sk.mods.length; slot++) {
             final int pos = slot;
             final Modifier.ModState as = sk.mods[slot];
-            its.set(46 + pos, ClickableItem.from(new ItemBuilder(as.mod().item(as.lvl()))
+            its.set(46 + pos, ClickableItem.from(new ItemBuilder(as.mod().display(as.lvl()))
                 .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- заменить")
                 .lore(TCUtil.A + "Q " + TCUtil.N + "- убрать модификатор").build(), e -> {
                 switch (e.getClick()) {

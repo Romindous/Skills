@@ -9,10 +9,12 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.items.ItemRoll;
 import ru.komiss77.utils.FastMath;
+import ru.komiss77.utils.ItemBuilder;
 import ru.romindous.skills.objects.SkillMats;
 import ru.romindous.skills.mobs.SednaMob;
 
@@ -34,13 +36,13 @@ public class Crawler extends SednaMob {
         return Map.of();
     }
 
-    private static final ItemStack WEB = new ItemStack(Material.COBWEB);
+    private static final ItemStack WEB = new ItemBuilder(ItemType.COBWEB).build();
 
     @Override
     protected void onTarget(final EntityTargetEvent e) {
-        if (e.getEntity() instanceof final Mob mb) {
+        if (e.getTarget() instanceof LivingEntity && e.getEntity() instanceof final Mob mb) {
             final Snowball sb = mb.launchProjectile(Snowball.class, FastMath.getShotVec(
-                e.getTarget().getLocation().subtract(mb.getLocation()).toVector(), 1.6d), s -> {
+                e.getTarget().getLocation().subtract(mb.getLocation()).toVector(), 1.2d), s -> {
                 s.setItem(WEB);
             });
 
@@ -52,7 +54,6 @@ public class Crawler extends SednaMob {
 
     @Override
     protected void onExtra(final EntityEvent e) {
-        super.onExtra(e);
         if (e instanceof final ProjectileHitEvent ee) {
             final Projectile prj = ee.getEntity();
             if (!prj.isValid()) return;
@@ -71,9 +72,9 @@ public class Crawler extends SednaMob {
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_string", new ItemStack(Material.STRING), 1, 1, 2), 2)
-        .add(new ItemRoll(key().value() + "_meat", SkillMats.CRAWLER.getItem(Material.MUTTON), 3, 1), 1)
-        .add(new ItemRoll(key().value() + "_eye", new ItemStack(Material.SPIDER_EYE), 2, 1), 1)
+        .add(new ItemRoll(key().value() + "_string", new ItemBuilder(ItemType.STRING).build(), 1, 1, 2), 2)
+        .add(new ItemRoll(key().value() + "_meat", SkillMats.CRAWLER.item(ItemType.MUTTON), 3, 1), 1)
+        .add(new ItemRoll(key().value() + "_eye", new ItemBuilder(ItemType.SPIDER_EYE).build(), 2, 1), 1)
         .build(1, 2);
 
     @Override

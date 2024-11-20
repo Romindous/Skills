@@ -1,5 +1,9 @@
-main: ru.romindous.Main
+main: ru.romindous.skills.Main
 name: Skills
 version: 1.0
 author: Romindous
 api-version: 1.18
+
+commands:
+  skill:
+    description: The command for GR game

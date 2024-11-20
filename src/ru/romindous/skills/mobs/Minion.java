@@ -40,17 +40,20 @@ public abstract class Minion extends SednaMob {
 
     public static final int SPOT_DST = 40;
 
-    private final AreaSpawner.SpawnCondition empty = new AreaSpawner
-        .SpawnCondition(0, CreatureSpawnEvent.SpawnReason.CUSTOM);
+    private static final String prefix = "mob.mini.";
 
-    @Override
-    protected AreaSpawner.SpawnCondition condition() {
-        return empty;
+    protected String prefix() {
+        return prefix;
     }
 
     @Override
-    protected AreaSpawner spawner() {
-        return null;
+    protected AreaSpawner.SpawnCondition condition() {
+        return COND_EMPTY;
+    }
+
+    @Override
+    protected int spawnCd() {
+        return -1;
     }
 
     @Override
@@ -133,7 +136,7 @@ public abstract class Minion extends SednaMob {
     }
 
     public LivingEntity spawn(final Location loc, final LivingEntity owner) {
-        final AreaSpawner.SpawnCondition cnd = spawner().getCondition(new WXYZ(loc), getEntClass());
+        final AreaSpawner.SpawnCondition cnd = spawner().condition(new WXYZ(loc), getEntClass());
         return loc.getWorld().spawn(loc, getEntClass(), cnd.reason(), false, e -> apply(e, owner));
     }
 

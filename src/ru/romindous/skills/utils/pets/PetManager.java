@@ -127,7 +127,7 @@ public class PetManager /*implements IPetManager*/ {/*
         if (e.getTarget() instanceof Mob) {
             final LivingEntity le = (LivingEntity) e.getTarget();
             if (le.getHealth() <= e.getDamage()) {
-                SM.getSurvivor(e.getOwner().getPlayer()).addXp(e.getOwner().getPlayer(), (int) (le.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue() * 0.1d));
+                SM.getSurvivor(e.getOwner().getPlayer()).addXp(e.getOwner().getPlayer(), (int) (le.getAttribute(Attribute.MAX_HEALTH).getBaseValue() * 0.1d));
             }
         }
     }

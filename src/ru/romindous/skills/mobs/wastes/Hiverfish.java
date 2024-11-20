@@ -1,7 +1,7 @@
 package ru.romindous.skills.mobs.wastes;
 
+import java.util.Map;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
@@ -13,14 +13,14 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import ru.komiss77.Ostrov;
-import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.items.ItemRoll;
-import ru.romindous.skills.objects.SkillMats;
-import ru.romindous.skills.mobs.Mobs;
+import ru.komiss77.modules.rolls.RollTree;
+import ru.komiss77.utils.ItemBuilder;
+import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
-
-import java.util.Map;
+import ru.romindous.skills.objects.SkillMats;
 
 public class Hiverfish extends SednaMob {
 
@@ -43,7 +43,8 @@ public class Hiverfish extends SednaMob {
         super.onAttack(e);
         if (e.isCancelled()) return;
         if (!(e.getDamageSource().getCausingEntity() instanceof final Mob mb)) return;
-        Mobs.CLUTCHER.spawn(e.getEntity().getLocation());
+        if (DamageType.THORNS.equals(e.getDamageSource().getDamageType())) return;
+        Main.mobs.CLUTCHER.spawn(e.getEntity().getLocation());
     }
 
     private static final float THORN = 0.4f;
@@ -54,7 +55,7 @@ public class Hiverfish extends SednaMob {
         if (e.isCancelled()) return;
         if (!(e.getEntity() instanceof final Mob mb)) return;
         if (e.getDamageSource().getCausingEntity() instanceof final LivingEntity dmgr && Ostrov.random.nextFloat() < THORN) {
-            dmgr.damage(mb.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getBaseValue() * THORN,
+            dmgr.damage(mb.getAttribute(Attribute.ATTACK_DAMAGE).getBaseValue() * THORN,
                 DamageSource.builder(DamageType.THORNS).withCausingEntity(mb).withDirectEntity(mb).build());
         }
 
@@ -66,14 +67,14 @@ public class Hiverfish extends SednaMob {
         if (!(e.getEntity() instanceof final Mob mb)) return;
         final Location loc = mb.getLocation();
         for (int i = Ostrov.random.nextInt(3) + 1; i != 0; i--) {
-            Mobs.CLUTCHER.spawn(loc);
+            Main.mobs.CLUTCHER.spawn(loc);
         }
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_bone", new ItemStack(Material.BONE), 1, 1), 2)
-        .add(new ItemRoll(key().value() + "_scales", SkillMats.SILVER.getItem(Material.PHANTOM_MEMBRANE), 2, 1, 1), 1)
-        .add(new ItemRoll(key().value() + "_meal", new ItemStack(Material.BONE_MEAL), 2, 1), 1)
+        .add(new ItemRoll(key().value() + "_bone", new ItemBuilder(ItemType.BONE).build(), 1, 1), 2)
+        .add(new ItemRoll(key().value() + "_scales", SkillMats.SILVER.item(ItemType.PHANTOM_MEMBRANE), 2, 1, 1), 1)
+        .add(new ItemRoll(key().value() + "_meal", new ItemBuilder(ItemType.BONE_MEAL).build(), 2, 1), 1)
         .build(1, 2);
 
     @Override

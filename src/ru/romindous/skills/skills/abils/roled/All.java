@@ -2,7 +2,6 @@ package ru.romindous.skills.skills.abils.roled;
 
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
@@ -10,12 +9,10 @@ import org.bukkit.entity.SkeletonHorse;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.TCUtil;
-import ru.komiss77.version.Nms;
 import ru.romindous.skills.enums.Chastic;
 import ru.romindous.skills.enums.Rarity;
 import ru.romindous.skills.enums.Role;
@@ -78,12 +75,13 @@ public class All implements Ability.AbilReg {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
                 fe.setDamage(DAMAGE.modify(chn, lvl));
-                tgt.damage(fe.getDamage(), fe.getDamageSource());
-                defKBLe(caster, tgt, false);
 
                 //TODO effect
 
-                next(chn);
+                next(chn, () -> {
+                    tgt.damage(fe.getDamage(), fe.getDamageSource());
+                    defKBLe(caster, tgt, false);
+                });
                 return true;
             }
             public String id() {
@@ -119,13 +117,13 @@ public class All implements Ability.AbilReg {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
                 fe.setDamage(DAMAGE.modify(chn, lvl));
-                Nms.swing(caster, EquipmentSlot.HAND);
-                tgt.damage(fe.getDamage(), fe.getDamageSource());
-                defKBLe(caster, tgt, true);
 
                 //TODO effect
 
-                next(chn);
+                next(chn, () -> {
+                    tgt.damage(fe.getDamage(), fe.getDamageSource());
+                    defKBLe(caster, tgt, true);
+                });
                 return true;
             }
             public String id() {
@@ -251,21 +249,18 @@ public class All implements Ability.AbilReg {
 
         new Ability() {//Смягчение
             final ChasMod HEALTH = new ChasMod(this, "health", Chastic.REGENERATION);
-            final ChasMod REGEN = new ChasMod(this, "regen", Chastic.DAMAGE_TAKEN);
+            final ChasMod DAMAGE = new ChasMod(this, "regen", Chastic.DAMAGE_TAKEN);
             protected ChasMod[] stats() {
-                return new ChasMod[] {HEALTH, REGEN};
+                return new ChasMod[] {HEALTH, DAMAGE};
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
                 if (!(ch.event() instanceof final EntityDamageEvent ee
                     && ee.getEntity().getEntityId() == caster.getEntityId())) return false;
                 final double dmg = ee.getDamage();
-                final double mxHP = caster.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
                 final Chain chn = ch.event(ch.on(this));
                 if (dmg < caster.getHealth() * HEALTH.modify(chn, lvl)) return false;
-                final double nhp = caster.getHealth() + REGEN.modify(chn, lvl);
-                if (nhp > mxHP) return false;
-                caster.setHealth(nhp);
+                ee.setDamage(dmg + DAMAGE.modify(chn, lvl));
 
                 EntityUtil.effect(caster, Sound.BLOCK_DECORATED_POT_HIT, 0.8f, Particle.DAMAGE_INDICATOR);
 
@@ -279,7 +274,7 @@ public class All implements Ability.AbilReg {
                 return "Смягчение";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Смягчает полученный урон на " + REGEN.id + " ед." + TCUtil.N + "если он",
+                TCUtil.N + "Смягчает полученный урон на " + DAMAGE.id + " ед." + TCUtil.N + "если он",
                 TCUtil.N + "равен или более " + HEALTH.id + "x " + TCUtil.N + "здоровья пользователя"};
             public String[] descs() {
                 return desc;

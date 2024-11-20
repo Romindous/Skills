@@ -272,11 +272,13 @@ public class Archer implements Ability.AbilReg {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
                 fe.setDamage(DAMAGE.modify(chn, lvl));
-                tgt.damage(fe.getDamage());
-                tgt.setNoDamageTicks(0);
+
                 EntityUtil.effect(tgt, Sound.ENTITY_FOX_TELEPORT, 0.8f, Particle.REVERSE_PORTAL);
 
-                next(chn);
+                next(chn, () -> {
+                    tgt.damage(fe.getDamage(), fe.getDamageSource());
+                    tgt.setNoDamageTicks(0);
+                });
                 return true;
             }
             public String id() {

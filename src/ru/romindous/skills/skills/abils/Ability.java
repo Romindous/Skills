@@ -1,5 +1,6 @@
 package ru.romindous.skills.skills.abils;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 import org.bukkit.Location;
@@ -30,20 +31,26 @@ public abstract class Ability implements Scroll {//способность
     public static final Map<Rarity, List<Ability>> RARITIES = new HashMap<>();
 
     public static final ArrayList<InterNext> nexts = new ArrayList<>();
-    public record InterNext(Chain ch, int time) {
-        public void run() {ch.sk().step(ch);}
+    public record InterNext(Chain ch, int time, @Nullable Runnable rn) {
+        public void run() {
+            ch.sk().step(ch);
+            if (rn != null) rn.run();
+        }
     }
 
     public void next(final Chain chain) {
-        nexts.add(new InterNext(chain, MainTask.tick));
+        nexts.add(new InterNext(chain, MainTask.tick, null));
     }
 
-    public static final String prefix = "abils.";
-    public static final String data = "sel";
+    public void next(final Chain chain, final Runnable run) {
+        nexts.add(new InterNext(chain, MainTask.tick, run));
+    }
 
-    public static final int stepCd = ConfigVars.get(prefix + ".stepCd", 10);
-    public static final double defKB = ConfigVars.get(prefix + ".defKb", 1d);
-    public static final double defDY = ConfigVars.get(prefix + ".defY", 1d);
+    public static final String data = "abil";
+
+    public static final int stepCd = ConfigVars.get(data + ".stepCd", 10);
+    public static final double defKB = ConfigVars.get(data + ".defKb", 1d);
+    public static final double defDY = ConfigVars.get(data + ".defY", 1d);
 
     public final ChasMod MANA = new ChasMod(this, "mana", Chastic.MANA);
     public final ChasMod CD = new ChasMod(this, "cd", Chastic.COOLDOWN);
@@ -109,7 +116,7 @@ public abstract class Ability implements Scroll {//способность
         if (selfCast()) dscs.add(TCUtil.P + "Всегда подбирает только пользователя!");
         dscs.add(" ");
         for (final String d : descs()) {
-            String ed = d.replace(CLR, rarity().clr);
+            String ed = d.replace(CLR, rarity().color());
             for (final ChasMod st : stats()) {
                 ed = ed.replace(st.id, st.chs.color()
                     + StringUtil.toSigFigs(st.calc(lvl), SIG_FIGS));

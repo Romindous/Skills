@@ -3,7 +3,9 @@ package ru.romindous.skills.enums;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.GameRule;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import ru.romindous.skills.Main;
 
@@ -52,20 +54,41 @@ public enum SubServer {
     }
 
     public static void init() {
+        final World w = Bukkit.getWorlds().getFirst();
+
+        w.setGameRule(GameRule.DO_MOB_LOOT, true);
+        w.setGameRule(GameRule.DO_MOB_SPAWNING, true);
+        w.setGameRule(GameRule.DO_WEATHER_CYCLE, true);
+        w.setGameRule(GameRule.MOB_GRIEFING, true);
+        w.setGameRule(GameRule.PLAYERS_SLEEPING_PERCENTAGE, 0);
         switch (Main.subServer) {
             case WASTES:
+                w.setTime(18000l);
+                w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+                w.setGameRule(GameRule.RANDOM_TICK_SPEED, 2);
+                w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
                 break;
             case KRIOLITE:
+                w.setTime(16000l);
+                w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+                w.setGameRule(GameRule.RANDOM_TICK_SPEED, 0);
+                w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+                w.setThundering(true);
+                w.setStorm(true);
+                w.setWeatherDuration(Integer.MAX_VALUE);
+                w.setThunderDuration(Integer.MAX_VALUE);
                 break;
-            case LOCUS:
+            case LOCUS, TERRA:
+                w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+                w.setGameRule(GameRule.RANDOM_TICK_SPEED, 4);
+                w.setGameRule(GameRule.DO_PATROL_SPAWNING, true);
                 break;
-            case INFERNAL:
+            case AQUAROD, KALEUM, INFERNAL:
+                w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+                w.setGameRule(GameRule.RANDOM_TICK_SPEED, 2);
+                w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
                 break;
-            case AQUAROD:
-                break;
-            case KALEUM:
-                break;
-            case TERRA:
+            default:
                 break;
         }
     }

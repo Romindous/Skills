@@ -1,24 +1,23 @@
 package ru.romindous.skills.mobs.minons;
 
+import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.ZombieVillager;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.items.ItemRoll;
+import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.world.AreaSpawner;
 import ru.romindous.skills.mobs.Minion;
 
-import java.util.Map;
-
-public class MiniSilverfish extends Minion {
+public class MiniRat extends Minion {
 
     @Override
     protected AreaSpawner.SpawnCondition condition() {
-        return new AreaSpawner.SpawnCondition(mobConfig("amount", 2), CreatureSpawnEvent.SpawnReason.NATURAL);
+        return COND_EMPTY;
+//        return new AreaSpawner.SpawnCondition(mobConfig("amount", 2), CreatureSpawnEvent.SpawnReason.NATURAL);
     }
 
     @Override

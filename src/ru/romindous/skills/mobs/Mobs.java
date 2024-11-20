@@ -1,17 +1,19 @@
 package ru.romindous.skills.mobs;
 
-import ru.romindous.skills.mobs.minons.MiniSilverfish;
+import ru.romindous.skills.mobs.minons.MiniRat;
 import ru.romindous.skills.mobs.wastes.*;
 
-public interface Mobs {
+public class Mobs {
 
-    SednaMob BEAST = new Beast(),
+    public final SednaMob BEAST = new Beast(),
     BONED = new Boned(), CLUTCHER = new Clutcher(),
     CRAWLER = new Crawler(), HIVERFISH = new Hiverfish(),
     INFECTED = new Infected(), ROTTING = new Rotting(),
     SPORED = new Spored(), STEED = new Steed();
 
-    Minion MINI_SILVERFISH = new MiniSilverfish();
+    public final Minion MINI_SILVERFISH = new MiniRat();
 
-    static void init() {}
+    static void init() {
+
+    }
 }

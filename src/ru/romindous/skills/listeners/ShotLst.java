@@ -100,7 +100,7 @@ public class ShotLst implements Listener {
                     sv.trigger(Trigger.RANGED_HIT, e, pl);
                 } else if (shoter instanceof Mob) {  //дальняя атака энтити
                     final Vector vec = prj.getVelocity();
-                	vec.multiply(shoter.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getBaseValue() * 0.1d + 1d);
+                	vec.multiply(shoter.getAttribute(Attribute.ATTACK_DAMAGE).getBaseValue() * 0.1d + 1d);
                     prj.setVelocity(vec);
                 }
                 return;

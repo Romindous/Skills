@@ -1,40 +1,34 @@
 package ru.romindous.skills.mobs.wastes;
 
+import java.util.Map;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
-import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.items.ItemRoll;
-import ru.komiss77.modules.world.AreaSpawner;
+import ru.komiss77.modules.rolls.RollTree;
+import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
-
-import java.util.Map;
 
 public class Boned extends SednaMob {
 
-    private final AreaSpawner.SpawnCondition empty = new AreaSpawner
-        .SpawnCondition(0, CreatureSpawnEvent.SpawnReason.NATURAL);
-
-    @Override
-    protected AreaSpawner.SpawnCondition condition() {
-        return empty;
-    }
-
-    @Override
-    protected AreaSpawner spawner() {
-        return null;
-    }
-
     public String biome() {
-        return "bloody_desert";
+        return "iron_hills";
     }
 
     @Override
     protected Class<? extends LivingEntity> getEntClass() {
         return Skeleton.class;
+    }
+
+    private final double scale = mobConfig("scale", 1d);
+    private final double min_scl = mobConfig("min_scl", 0.6d);
+    @Override
+    public Map<Attribute, Double> attributes() {
+        atts.put(Attribute.SCALE, (min_scl - scale) * Main.srnd.nextDouble() + scale);
+        return atts;
     }
 
     @Override
@@ -51,49 +45,4 @@ public class Boned extends SednaMob {
     public RollTree loot() {
         return drop;
     }
-
-    /*private static class WebGoal implements Goal<Mob> {
-
-        private static final GoalKey<Mob> key = GoalKey.of(Mob.class, new NamespacedKey(Ostrov.instance, "web"));
-
-        private final Mob mob;
-
-        private WebGoal(final Mob mob) {
-            this.mob = mob;
-        }
-
-        @Override
-        public boolean shouldActivate() {
-            return true;
-        }
-
-        @Override
-        public boolean shouldStayActive() {
-            return true;
-        }
-
-        @Override
-        public void start() {
-        }
-
-        @Override
-        public void stop() {
-        }
-
-        @Override
-        public void tick() {
-        }
-
-        @Override
-        public @NotNull
-        GoalKey<Mob> getKey() {
-            return key;
-        }
-
-        @Override
-        public @NotNull
-        EnumSet<GoalType> getTypes() {
-            return EnumSet.of(GoalType.MOVE, GoalType.LOOK);
-        }
-    }*/
 }

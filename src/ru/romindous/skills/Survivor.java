@@ -165,7 +165,7 @@ public class Survivor extends Oplayer /*implements Transfer*/ {
     private static final String BOARD_MANA = "mana";
 
     private void resetBoard(final HumanEntity pl) {
-        score.getSideBar().reset().title(role.getName())
+        score.getSideBar().reset().title(role == null ? "§8Не Выбран" : role.getName())
             .add(" ")
             .add(BOARD_LVL, TCUtil.N + "Уровень: " + TCUtil.A + getLevel())
             .add(BOARD_HP, TCUtil.N + "ХП: " + getHeartIcon((int) pl.getHealth()) + "/" + maxHP)
@@ -384,7 +384,7 @@ public class Survivor extends Oplayer /*implements Transfer*/ {
 
     //из recalcStats и PlayerRespawnEvent
     public void applySkill(final Player p) {
-        p.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(maxHP);
+        p.getAttribute(Attribute.MAX_HEALTH).setBaseValue(maxHP);
         p.setHealthScaled(true);
         p.setHealthScale((maxHP << 1) / SM.HP_PER_HEART);
 
@@ -607,13 +607,13 @@ public class Survivor extends Oplayer /*implements Transfer*/ {
     public void setMobChars(final Mob mob) {
         //прокачка характеристик в зависимости от мира
         final float cf = getMobCoof();
-        scaleAtr(mob.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED), cf * mobSpeed);
-        scaleAtr(mob.getAttribute(Attribute.GENERIC_FLYING_SPEED), cf * mobSpeed);
-        scaleAtr(mob.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE), cf * mobKbRes);
-        scaleAtr(mob.getAttribute(Attribute.GENERIC_FOLLOW_RANGE), cf * mobFollow);
-        scaleAtr(mob.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE), cf * mobDamage);
-        scaleAtr(mob.getAttribute(Attribute.GENERIC_MAX_HEALTH), cf * mobHealth);
-        mob.setHealth(mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
+        scaleAtr(mob.getAttribute(Attribute.MOVEMENT_SPEED), cf * mobSpeed);
+        scaleAtr(mob.getAttribute(Attribute.FLYING_SPEED), cf * mobSpeed);
+        scaleAtr(mob.getAttribute(Attribute.KNOCKBACK_RESISTANCE), cf * mobKbRes);
+        scaleAtr(mob.getAttribute(Attribute.FOLLOW_RANGE), cf * mobFollow);
+        scaleAtr(mob.getAttribute(Attribute.ATTACK_DAMAGE), cf * mobDamage);
+        scaleAtr(mob.getAttribute(Attribute.MAX_HEALTH), cf * mobHealth);
+        mob.setHealth(mob.getAttribute(Attribute.MAX_HEALTH).getBaseValue());
 
         Stat.modMob(mob, getStat(Stat.CONTROL));
     }

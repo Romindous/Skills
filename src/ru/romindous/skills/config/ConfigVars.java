@@ -8,7 +8,7 @@ import ru.romindous.skills.Main;
 
 public class ConfigVars {
 
-    private static final String conDir = "mobs/vars.yml";
+    private static final String conDir = "vars.yml";
 
     private static final Map<String, Double> vars = new HashMap<>();
 
@@ -19,7 +19,8 @@ public class ConfigVars {
     private static void loadKeys(final ConfigurationSection cs) {
         for (final String key : cs.getKeys(false)) {
             final ConfigurationSection child = cs.getConfigurationSection(key);
-            if (child == null) vars.put(cs.getName() + "." + key, cs.getDouble(key));
+//          Ostrov.log("loaded " + cs.getCurrentPath() + "." + key + " is " + cs.getDouble(key));
+            if (child == null) vars.put(cs.getCurrentPath() + "." + key, cs.getDouble(key));
             else loadKeys(child);
         }
     }
@@ -29,7 +30,7 @@ public class ConfigVars {
         if (d == null) {
             vars.put(id, (double) value);
             final OConfig config = Main.configManager.getNewConfig(conDir);
-            config.set(id, (double) value);
+            config.set(id, value);
             config.saveConfig();
             return value;
         }
@@ -37,14 +38,14 @@ public class ConfigVars {
     }
 
     public static double get(final String id, final double value) {
-        final Double f = vars.get(id);
-        if (f == null) {
+        final Double d = vars.get(id);
+        if (d == null) {
             vars.put(id, value);
             final OConfig config = Main.configManager.getNewConfig(conDir);
             config.set(id, value);
             config.saveConfig();
             return value;
         }
-        return f;
+        return d;
     }
 }

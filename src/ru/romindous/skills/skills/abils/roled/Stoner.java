@@ -81,12 +81,13 @@ public class Stoner implements Ability.AbilReg {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
                 fe.setDamage(DAMAGE.modify(chn, lvl));
-                tgt.damage(fe.getDamage(), fe.getDamageSource());
-                defKBLe(caster, tgt, true);
 
                 //TODO effect
 
-                next(chn);
+                next(chn, () -> {
+                    tgt.damage(fe.getDamage(), fe.getDamageSource());
+                    defKBLe(caster, tgt, true);
+                });
                 return true;
             }
             public String id() {
@@ -125,7 +126,7 @@ public class Stoner implements Ability.AbilReg {
                 final LivingEntity caster = ch.caster();
                 final Chain chn = ch.event(ch.on(this));
                 final double abs = caster.getAbsorptionAmount() + HEAL.modify(chn, lvl);
-                final AttributeInstance ain = caster.getAttribute(Attribute.GENERIC_MAX_ABSORPTION);
+                final AttributeInstance ain = caster.getAttribute(Attribute.MAX_ABSORPTION);
                 if (ain == null) return false;
                 if (ain.getBaseValue() < abs) ain.setBaseValue(abs);
                 caster.setAbsorptionAmount(Math.min(abs, ain.getValue()));
@@ -410,12 +411,13 @@ public class Stoner implements Ability.AbilReg {
                 final EntityDamageEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
                 fe.setDamage(DAMAGE.modify(chn, lvl));
-                tgt.damage(fe.getDamage(), fe.getDamageSource());
-                defKBLe(caster, tgt, false);
 
                 EntityUtil.effect(caster, Sound.ENCHANT_THORNS_HIT, 0.8f, Particle.ENCHANTED_HIT);
 
-                next(chn);
+                next(chn, () -> {
+                    tgt.damage(fe.getDamage(), fe.getDamageSource());
+                    defKBLe(caster, tgt, false);
+                });
                 return true;
             }
             public String id() {

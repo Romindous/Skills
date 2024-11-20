@@ -59,12 +59,12 @@ public class AbilSelect extends SvSelect {
             switch (slot / 9) {case 0, 8: slot++; continue;}
             final Ability.AbilState ab = en.getKey();
             if (!sv.canUse(ab.abil())) continue;
-            its.set(slot, ClickableItem.from(new ItemBuilder(ab.abil().item(ab.lvl())).amount(en.getValue()).lore("")
+            its.set(slot, ClickableItem.from(new ItemBuilder(ab.abil().display(ab.lvl())).amount(en.getValue()).lore("")
                 .lore(TCUtil.P + "Клик - Выбрать").lore("<red>Выброс" + TCUtil.P + " - Выдать предметом").build(), e -> {
                     switch (e.getClick()) {
                         case DROP, CONTROL_DROP:
                             if (sv.change(ab, -1) < 0) return;
-                            ItemUtil.giveItemsTo(p, ab.abil().item(ab.lvl()));
+                            ItemUtil.giveItemsTo(p, ab.abil().drop(ab.lvl()));
                             reopen(p, its);
                             return;
                     }

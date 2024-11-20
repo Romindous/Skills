@@ -3,7 +3,7 @@ package ru.romindous.skills.skills.abils.roled;
 
 import ru.romindous.skills.skills.abils.Ability;
 
-public abstract class Necros implements Ability.AbilReg {
+public class Necros implements Ability.AbilReg {
     @Override
     public void register() {
 

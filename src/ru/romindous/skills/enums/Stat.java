@@ -265,23 +265,23 @@ public enum Stat {
 
     public static void modMini(final Mob mb, final int control) {
         final double rt = rootate(control);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_MAX_HEALTH), mobHealthMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_ARMOR), mobArmorMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS), mobArmorMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE), mobDamageMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED), mobSpeedMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_FLYING_SPEED), mobSpeedMul * rt);
-        mb.setHealth(mb.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
+        Survivor.scaleAtr(mb.getAttribute(Attribute.MAX_HEALTH), mobHealthMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.ARMOR), mobArmorMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.ARMOR_TOUGHNESS), mobArmorMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.ATTACK_DAMAGE), mobDamageMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.MOVEMENT_SPEED), mobSpeedMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.FLYING_SPEED), mobSpeedMul * rt);
+        mb.setHealth(mb.getAttribute(Attribute.MAX_HEALTH).getBaseValue());
     }
 
     public static void modMob(final Mob mb, final int control) {
         final double rt = rootate(control);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_MAX_HEALTH), -mobHealthMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_ARMOR), -mobArmorMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS), -mobArmorMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE), -mobDamageMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED), -mobSpeedMul * rt);
-        Survivor.scaleAtr(mb.getAttribute(Attribute.GENERIC_FLYING_SPEED), -mobSpeedMul * rt);
-        mb.setHealth(mb.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
+        Survivor.scaleAtr(mb.getAttribute(Attribute.MAX_HEALTH), -mobHealthMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.ARMOR), -mobArmorMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.ARMOR_TOUGHNESS), -mobArmorMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.ATTACK_DAMAGE), -mobDamageMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.MOVEMENT_SPEED), -mobSpeedMul * rt);
+        Survivor.scaleAtr(mb.getAttribute(Attribute.FLYING_SPEED), -mobSpeedMul * rt);
+        mb.setHealth(mb.getAttribute(Attribute.MAX_HEALTH).getBaseValue());
     }
 }

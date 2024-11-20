@@ -207,6 +207,7 @@ public class Assasin implements Ability.AbilReg {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
                 addEffect(tgt, PotionEffectType.BLINDNESS, TIME.modify(chn, lvl), amp, false);
+
                 //TODO effect
 
                 next(chn);
@@ -283,12 +284,16 @@ public class Assasin implements Ability.AbilReg {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(makeDamageEvent(caster, tgt));
-                Bleeding.bleed(tgt, DAMAGE.modify(chn, lvl),
-                    TIME.modify(chn, lvl), caster);
+                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
+                final Chain chn = ch.event(fe);
+                fe.setDamage(DAMAGE.modify(chn, lvl));
+
                 Bleeding.effect(tgt);
 
-                next(chn);
+                next(chn, () -> {
+                    Bleeding.bleed(tgt, fe.getDamage(),
+                        TIME.modify(chn, lvl), caster);
+                });
                 return true;
             }
             public String id() {

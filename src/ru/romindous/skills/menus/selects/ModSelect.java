@@ -63,12 +63,12 @@ public class ModSelect extends SvSelect {
             }
             final Modifier.ModState md = en.getKey();
             if (!sv.canUse(md.mod())) continue;
-            its.set(slot, ClickableItem.from(new ItemBuilder(md.mod().item(md.lvl())).amount(en.getValue()).lore("")
+            its.set(slot, ClickableItem.from(new ItemBuilder(md.mod().display(md.lvl())).amount(en.getValue()).lore("")
                 .lore(TCUtil.P + "Клик - Выбрать").lore("<red>Выброс" + TCUtil.P + " - Выдать предметом").build(), e -> {
                     switch (e.getClick()) {
                         case DROP, CONTROL_DROP:
                             if (sv.change(md, -1) < 0) return;
-                            ItemUtil.giveItemsTo(p, md.mod().item(md.lvl()));
+                            ItemUtil.giveItemsTo(p, md.mod().drop(md.lvl()));
                             reopen(p, its);
                             return;
                     }

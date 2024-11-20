@@ -1,7 +1,6 @@
 package ru.romindous.skills.skills.abils.roled;
 
 
-import java.util.ArrayList;
 import com.destroystokyo.paper.ParticleBuilder;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -105,19 +104,19 @@ public class Warrior implements Ability.AbilReg {
                 final Location fin = start.add(dir.multiply(dst));
                 fin.setYaw(-fin.getYaw());
                 fin.setPitch(-fin.getPitch());
-                final ArrayList<Chain> evs = new ArrayList<>();
 
                 //TODO effect
+
                 for (final LivingEntity le : getChArcLents(fin, dst, arc, ent -> Main.canAttack(caster, ent, false))) {
                     final EntityDamageByEntityEvent fe = makeDamageEvent(caster, le);
                     final Chain chn = ch.event(fe);
                     fe.setDamage(DAMAGE.modify(chn, lvl));
-                    le.damage(fe.getDamage(), fe.getDamageSource());
-                    defKBLe(caster, le, true);
-                    evs.add(chn);
-                }
 
-                for (final Chain c : evs) next(c);
+                    next(chn, () -> {
+                        le.damage(fe.getDamage(), fe.getDamageSource());
+                        defKBLe(caster, le, true);
+                    });
+                }
                 return true;
             }
             public String id() {
@@ -163,11 +162,13 @@ public class Warrior implements Ability.AbilReg {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
                 fe.setDamage(DAMAGE.modify(chn, lvl) * light);
-                tgt.damage(fe.getDamage(), fe.getDamageSource());
 
                 new ParticleBuilder(Particle.WHITE_ASH).location(tlc).offset(0.4d, 0.8d, 0.4d).extra(0).count(light << 4);
                 tlc.getWorld().playSound(tlc, Sound.BLOCK_LARGE_AMETHYST_BUD_BREAK, 1f, light * 0.1f);
-                next(chn);
+
+                next(chn, () -> {
+                    tgt.damage(fe.getDamage(), fe.getDamageSource());
+                });
                 return true;
             }
             public String id() {
@@ -318,11 +319,13 @@ public class Warrior implements Ability.AbilReg {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
                 fe.setDamage(DAMAGE.modify(chn, lvl) * ee.getDamage());
-                tgt.damage(fe.getDamage(), fe.getDamageSource());
+
                 Nms.swing(caster, EquipmentSlot.HAND);
                 EntityUtil.effect(caster, Sound.ITEM_SHIELD_BREAK, 0.6f, Particle.SCRAPE);
 
-                next(chn);
+                next(chn, () -> {
+                    tgt.damage(fe.getDamage(), fe.getDamageSource());
+                });
                 return true;
             }
             public String id() {

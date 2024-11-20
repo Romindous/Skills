@@ -1,20 +1,28 @@
 package ru.romindous.skills.enums;
 
 public enum Rarity {
-    COMMON("§fКонсута"),
-    UNCOM("§aИнсолита"),
-    RARE("§9Рария"),
-    EPIC("§5Хероика"),
-    MYTHIC("§3Фабулоса"),
-    LEGEND("§6Традитиа"),
-    ABNORMAL("§чАлиа"),
-    ERROR("§к#?&]%;");
+    COMMON("Консута", "§f"),
+    UNCOM("Инсолита", "§a"),
+    RARE("Рария", "§9"),
+    EPIC("Хероика", "§5"),
+    MYTHIC("Фабулоса", "§3"),
+    LEGEND("Традитиа", "§6"),
+    ABNORMAL("Алиа", "§ч"),
+    ERROR("#?&]%;", "§к");
 
-    public final String name;
-    public final String clr;
+    private final String name;
+    private final String clr;
 
-    Rarity(final String name) {
+    Rarity(final String name, final String clr) {
         this.name = name;
-        this.clr = name.substring(0, 2);
+        this.clr = clr;
+    }
+
+    public String getName() {
+        return clr + name;
+    }
+
+    public String color() {
+        return clr;
     }
 }

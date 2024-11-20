@@ -19,8 +19,8 @@ import ru.komiss77.modules.items.CustomMats;
 import ru.komiss77.modules.rolls.Roll;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.ItemBuilder;
+import ru.romindous.skills.Main;
 import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.mobs.Mobs;
 
 public class SkillMats {
 
@@ -107,7 +107,7 @@ public class SkillMats {
         protected void onAttack(final EquipmentSlot[] es, final EntityDamageByEntityEvent e) {
             if (has(es, EquipmentSlot.HAND) && Roll.roll(chance)
                 && e.getDamageSource().getCausingEntity() instanceof final LivingEntity le) {
-                final LivingEntity mini = Mobs.MINI_SILVERFISH.spawn(e.getEntity().getLocation(), le);
+                final LivingEntity mini = Main.mobs.MINI_SILVERFISH.spawn(e.getEntity().getLocation(), le);
                 mini.setNoDamageTicks(10);
             }
         }
@@ -121,7 +121,7 @@ public class SkillMats {
                 }
             }
             if (spawn && e.getEntity() instanceof final LivingEntity le) {
-                final LivingEntity mini = Mobs.MINI_SILVERFISH.spawn(le.getLocation(), le);
+                final LivingEntity mini = Main.mobs.MINI_SILVERFISH.spawn(le.getLocation(), le);
                 mini.setNoDamageTicks(10);
             }
         }
