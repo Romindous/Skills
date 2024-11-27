@@ -25,8 +25,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import ru.komiss77.ApiOstrov;
 import ru.komiss77.OStrap;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
-import ru.komiss77.utils.ItemBuilder;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Survivor;
@@ -136,7 +136,7 @@ public class InteractLst implements Listener {
                         }
                     }
 
-                    if (hm == Material.GLASS_BOTTLE) {
+                    if (ItemType.GLASS_BOTTLE.equals(hm.asItemType())) {
                         switch (b.getType()) {
                             case CAULDRON, WATER_CAULDRON, BEE_NEST, BEEHIVE:
                                 break;
@@ -146,7 +146,7 @@ public class InteractLst implements Listener {
                                     cpd.setBerries(false);
                                     b.setBlockData(cpd, false);
                                     hand.setAmount(hand.getAmount() - 1);
-                                    ItemUtil.giveItemsTo(p, new ItemBuilder(Material.POTION).basePotion(clr).build());
+                                    ItemUtil.giveItemsTo(p, new ItemBuilder(ItemType.POTION).basePotion(clr).build());
                                     p.getWorld().playSound(p.getEyeLocation(), Sound.ITEM_BOTTLE_FILL_DRAGONBREATH, 1f, 1.2f);
                                 }
                                 e.setCancelled(true);
@@ -209,7 +209,7 @@ public class InteractLst implements Listener {
     public void onEat(final PlayerItemConsumeEvent e) {
         final Player p = e.getPlayer();
         final ItemStack it = e.getItem();
-        if (it.getType() == Material.POTION) {
+        if (ItemUtil.is(it, ItemType.POTION)) {
             final PotionMeta pm = (PotionMeta) it.getItemMeta();
             if (pm.getBasePotionType() == clr) {
                 p.removePotionEffect(PotionEffectType.WEAKNESS);
@@ -223,7 +223,7 @@ public class InteractLst implements Listener {
     	if (e.getEntity() != null && e.getEntity().getType() == EntityType.PLAYER) {
     		final Player p = (Player) e.getEntity();
     		final ItemStack is = p.getInventory().getItemInMainHand();
-            if (is.getType() == Material.FLINT_AND_STEEL && is.hasItemMeta()) {
+            if (is.getType() == ItemType.FLINT_AND_STEEL && is.hasItemMeta()) {
         		final Survivor sv = PM.getOplayer(p, Survivor.class);
                 QM.tryCompleteQuest(p, Quest.LightPortal, 1, true);
                 switch (SkillMats.getCstmItm(is.getItemMeta())) {

@@ -33,8 +33,8 @@ public class MoveTask /*implements Task*/ {/*
         //cuboid = new Cuboid( new Location(w, target.x - 2, target.y - 2, target.z - 2), new Location(w, target.x + 2, target.y + 2, target.z + 2) );
         cuboid = new Cuboid( 4, 4, 4 ); //создать кубоид, точка спавна будет в центре
         cuboid.allign(targetLoc); //переместить кубоид на локацию с совмещением спавна
-        targetLoc.getBlock().setType(Material.REINFORCED_DEEPSLATE, false);//w.getBlockAt(target.x, target.y, target.z).setType(Material.REINFORCED_DEEPSLATE, false);
-        targetLoc.getBlock().getRelative(BlockFace.UP).setType(Material.SCULK_SHRIEKER, false);//w.getBlockAt(target.x, target.y + 1, target.z).setType(Material.SCULK_SHRIEKER, false);
+        targetLoc.getBlock().setType(ItemType.REINFORCED_DEEPSLATE, false);//w.getBlockAt(target.x, target.y, target.z).setType(ItemType.REINFORCED_DEEPSLATE, false);
+        targetLoc.getBlock().getRelative(BlockFace.UP).setType(ItemType.SCULK_SHRIEKER, false);//w.getBlockAt(target.x, target.y + 1, target.z).setType(ItemType.SCULK_SHRIEKER, false);
         
         mark = w.spawn(targetLoc, Shulker.class, SpawnReason.CUSTOM);//w.spawn(new Location(w, target.x + 0.5d, target.y - 0.5d, target.z + 0.5d), Shulker.class);
         mark.setAI(false);
@@ -101,8 +101,8 @@ public class MoveTask /*implements Task*/ {/*
             p.hideBossBar(timeBar);
             p.sendMessage(Main.prefix + "§7Время вышло, Вы не доставили §сНПС §7вовремя!");
         }
-        w.getBlockAt(target.x, target.y, target.z).setType(Material.AIR);
-        w.getBlockAt(target.x, target.y + 1, target.z).setType(Material.AIR);
+        w.getBlockAt(target.x, target.y, target.z).setBlockData(Main.AIR_DATA);
+        w.getBlockAt(target.x, target.y + 1, target.z).setBlockData(Main.AIR_DATA);
         npc.remove();
         mark.remove();
         Task.occupied.remove(encode);

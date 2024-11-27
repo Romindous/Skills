@@ -15,13 +15,13 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
         for (int i = 0; i < 27; i++) {
             switch (i) {
                 case 13:
-                    invIts[13] = new ItemBuilder(Material.IRON_NUGGET).name("§7->").build();
+                    invIts[13] = new ItemBuilder(ItemType.IRON_NUGGET).name("§7->").build();
                     break;
                 case 9:
-                    invIts[9] = new ItemBuilder(Material.CHEST).name("§dФормированый").build();
+                    invIts[9] = new ItemBuilder(ItemType.CHEST).name("§dФормированый").build();
                     break;
                 default:
-                    invIts[i] = new ItemBuilder(Material.LIGHT_GRAY_STAINED_GLASS_PANE).name("§0.").build();
+                    invIts[i] = new ItemBuilder(ItemType.LIGHT_GRAY_STAINED_GLASS_PANE).name("§0.").build();
                     break;
             }
         }
@@ -33,21 +33,21 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
         this.view = view;
         final Recipe rc = Crafts.getRecipe(new NamespacedKey(Crafts.space, key), Recipe.class);
         if (rc instanceof ShapelessRecipe) {
-        	tp = Material.ENDER_CHEST;
+        	tp = ItemType.ENDER_CHEST;
 		} else if (rc instanceof FurnaceRecipe) {
-        	tp = Material.FURNACE;
+        	tp = ItemType.FURNACE;
 		} else if (rc instanceof SmokingRecipe) {
-        	tp = Material.SMOKER;
+        	tp = ItemType.SMOKER;
 		} else if (rc instanceof BlastingRecipe) {
-        	tp = Material.BLAST_FURNACE;
+        	tp = ItemType.BLAST_FURNACE;
 		} else if (rc instanceof CampfireRecipe) {
-        	tp = Material.CAMPFIRE;
+        	tp = ItemType.CAMPFIRE;
 		} else if (rc instanceof SmithingRecipe) {
-        	tp = Material.SMITHING_TABLE;
+        	tp = ItemType.SMITHING_TABLE;
 		} else if (rc instanceof StonecuttingRecipe) {
-        	tp = Material.STONECUTTER;
+        	tp = ItemType.STONECUTTER;
 		} else {
-        	tp = Material.CHEST;
+        	tp = ItemType.CHEST;
 		}
     }
     
@@ -60,34 +60,34 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
 	        switch (tp) {
 	            case CHEST:
 	            default:
-	            	tp = Material.ENDER_CHEST;
+	            	tp = ItemType.ENDER_CHEST;
 	                break;
 	            case ENDER_CHEST:
-	            	tp = Material.FURNACE;
+	            	tp = ItemType.FURNACE;
 	                break;
 	            case FURNACE:
-	            	tp = Material.SMOKER;
+	            	tp = ItemType.SMOKER;
 	                break;
 	            case SMOKER:
-	            	tp = Material.BLAST_FURNACE;
+	            	tp = ItemType.BLAST_FURNACE;
 	                break;
 	            case BLAST_FURNACE:
-	            	tp = Material.CAMPFIRE;
+	            	tp = ItemType.CAMPFIRE;
 	                break;
 	            case CAMPFIRE:
-	            	tp = Material.SMITHING_TABLE;
+	            	tp = ItemType.SMITHING_TABLE;
 	                break;
 	            case SMITHING_TABLE:
-	            	tp = Material.STONECUTTER;
+	            	tp = ItemType.STONECUTTER;
 	                break;
 	            case STONECUTTER:
-	            	tp = Material.CHEST;
+	            	tp = ItemType.CHEST;
 	                break;
 	        }
 	        reopen(p, its);
         }) : ClickableItem.empty(makeIcon(tp)));
-        its.set(16, view ? ClickableItem.empty(new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE)) : 
-        	ClickableItem.from(new ItemBuilder(Material.GREEN_CONCRETE_POWDER).name("§aГотово!").build(), e -> {
+        its.set(16, view ? ClickableItem.empty(ItemType.LIGHT_GRAY_STAINED_GLASS_PANE)) : 
+        	ClickableItem.from(new ItemBuilder(ItemType.GREEN_CONCRETE_POWDER).name("§aГотово!").build(), e -> {
             if (e.getEvent() instanceof InventoryClickEvent) {
             	((InventoryClickEvent) e.getEvent()).setCancelled(true);
             }
@@ -112,7 +112,7 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
             switch (inv.getItem(9).getType()) {
             case SMOKER:
                 it = inv.getItem(11);
-                if (it == null || it.getType() == Material.AIR) {
+                if (it == null || it.getType() == ItemType.AIR) {
                     p.sendMessage("§cСначала закончите крафт!");
                     return;
                 }
@@ -123,7 +123,7 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
                 break;
             case BLAST_FURNACE:
                 it = inv.getItem(11);
-                if (it == null || it.getType() == Material.AIR) {
+                if (it == null || it.getType() == ItemType.AIR) {
                     p.sendMessage("§cСначала закончите крафт!");
                     return;
                 }
@@ -134,7 +134,7 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
                 break;
             case CAMPFIRE:
                 it = inv.getItem(11);
-                if (it == null || it.getType() == Material.AIR) {
+                if (it == null || it.getType() == ItemType.AIR) {
                     p.sendMessage("§cСначала закончите крафт!");
                     return;
                 }
@@ -145,7 +145,7 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
                 break;
             case FURNACE:
                 it = inv.getItem(11);
-                if (it == null || it.getType() == Material.AIR) {
+                if (it == null || it.getType() == ItemType.AIR) {
                     p.sendMessage("§cСначала закончите крафт!");
                     return;
                 }
@@ -171,7 +171,7 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
                 break;
             case STONECUTTER:
                 it = inv.getItem(11);
-                if (it == null || it.getType() == Material.AIR) {
+                if (it == null || it.getType() == ItemType.AIR) {
                     p.sendMessage("§cСначала закончите крафт!");
                     return;
                 }
@@ -378,21 +378,21 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
         switch (mt) {
             case CHEST:
             default:
-            	return new ItemBuilder(Material.CHEST).name("§dФормированый").build();
+            	return new ItemBuilder(ItemType.CHEST).name("§dФормированый").build();
             case ENDER_CHEST:
-            	return new ItemBuilder(Material.ENDER_CHEST).name("§5Безформенный").build();
+            	return new ItemBuilder(ItemType.ENDER_CHEST).name("§5Безформенный").build();
             case FURNACE:
-            	return new ItemBuilder(Material.FURNACE).name("§6Печевой").build();
+            	return new ItemBuilder(ItemType.FURNACE).name("§6Печевой").build();
             case SMOKER:
-            	return new ItemBuilder(Material.SMOKER).name("§cЗапекающий").build();
+            	return new ItemBuilder(ItemType.SMOKER).name("§cЗапекающий").build();
             case BLAST_FURNACE:
-            	return new ItemBuilder(Material.BLAST_FURNACE).name("§7Плавильный").build();
+            	return new ItemBuilder(ItemType.BLAST_FURNACE).name("§7Плавильный").build();
             case CAMPFIRE:
-            	return new ItemBuilder(Material.CAMPFIRE).name("§eКостерный").build();
+            	return new ItemBuilder(ItemType.CAMPFIRE).name("§eКостерный").build();
             case SMITHING_TABLE:
-            	return new ItemBuilder(Material.SMITHING_TABLE).name("§fКующий").build();
+            	return new ItemBuilder(ItemType.SMITHING_TABLE).name("§fКующий").build();
             case STONECUTTER:
-            	return new ItemBuilder(Material.STONECUTTER).name("§7Режущий").build();
+            	return new ItemBuilder(ItemType.STONECUTTER).name("§7Режущий").build();
         }
     }
     

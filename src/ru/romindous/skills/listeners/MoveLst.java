@@ -2,9 +2,10 @@ package ru.romindous.skills.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockType;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,6 +15,7 @@ import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
+import ru.romindous.skills.Main;
 import ru.romindous.skills.Survivor;
 import ru.romindous.skills.enums.Trigger;
 
@@ -25,12 +27,12 @@ public class MoveLst implements Listener {
         if (e.getEntityType() == EntityType.PLAYER) {
             final Player p = (Player) e.getEntity();
             final Block b = e.getEntity().getLocation().getBlock();
-            if (b.getType() == Material.NETHER_PORTAL) {
-                b.setType(Material.AIR);
+            if (BlockType.NETHER_PORTAL.equals(b.getType().asBlockType())) {
+                b.setBlockData(Main.AIR_DATA);
             } else {
                 for (final BlockFace bf : RehabLst.near) {
-                    if (b.getRelative(bf).getType() == Material.NETHER_PORTAL) {
-                        b.getRelative(bf).setType(Material.AIR);
+                    if (BlockType.NETHER_PORTAL.equals(b.getRelative(bf).getType().asBlockType())) {
+                        b.getRelative(bf).setBlockData(Main.AIR_DATA);
                         break;
                     }
                 }

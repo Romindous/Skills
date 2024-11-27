@@ -102,13 +102,13 @@ public class InventoryLst implements Listener {
     public void onTrdGet(final VillagerAcquireTradeEvent e) {
         final MerchantRecipe mr = e.getRecipe();
         final ItemStack rs = mr.getResult();
-        if (rs != null && rs.getType() == Material.EMERALD) {
-            rs.setType(Material.COPPER_BLOCK);
+        if (rs != null && rs.getType() == ItemType.EMERALD) {
+            rs.setType(ItemType.COPPER_BLOCK);
             final MerchantRecipe mc = new MerchantRecipe(rs, mr.getUses(), mr.getMaxUses(), mr.hasExperienceReward(), mr.getVillagerExperience(), mr.getPriceMultiplier(), mr.shouldIgnoreDiscounts());
             final List<ItemStack> its = mr.getIngredients();
             for (final ItemStack it : its) {
-                if (it != null && it.getType() == Material.EMERALD) {
-                    it.setType(Material.COPPER_BLOCK);
+                if (it != null && it.getType() == ItemType.EMERALD) {
+                    it.setType(ItemType.COPPER_BLOCK);
                 }
             }
             mc.setIngredients(its);
@@ -116,8 +116,8 @@ public class InventoryLst implements Listener {
         } else {
             final List<ItemStack> its = mr.getIngredients();
             for (final ItemStack it : its) {
-                if (it != null && it.getType() == Material.EMERALD) {
-                    it.setType(Material.COPPER_BLOCK);
+                if (it != null && it.getType() == ItemType.EMERALD) {
+                    it.setType(ItemType.COPPER_BLOCK);
                 }
             }
             mr.setIngredients(its);
@@ -129,7 +129,7 @@ public class InventoryLst implements Listener {
     	if (e.getDestination().getType() == InventoryType.HOPPER && e.getSource().getType() == InventoryType.CHEST) {
     		final InventoryHolder ih = e.getSource().getHolder();
     		if (ih instanceof BlockInventoryHolder) {
-    			if (((BlockInventoryHolder) ih).getBlock().getType() == Material.CHEST) {
+    			if (((BlockInventoryHolder) ih).getBlock().getType() == ItemType.CHEST) {
     				e.setCancelled(true);
     			}
     		} else if (ih instanceof DoubleChest) {

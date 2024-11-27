@@ -1,13 +1,13 @@
 package ru.romindous.skills.menus;
 
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import ru.komiss77.ApiOstrov;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
-import ru.komiss77.utils.ItemBuilder;
 import ru.komiss77.utils.TimeUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
@@ -25,8 +25,8 @@ public class RoleSelectMenu implements InventoryProvider {
         .title("§9§lВыбери Роль")
         .build();
 
-    private static final ItemStack cyan = new ItemBuilder(Material.CYAN_STAINED_GLASS_PANE).name("§0.").build();
-    private static final ItemStack gray = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name("§0.").build();
+    private static final ItemStack cyan = new ItemBuilder(ItemType.CYAN_STAINED_GLASS_PANE).name("§0.").build();
+    private static final ItemStack gray = new ItemBuilder(ItemType.GRAY_STAINED_GLASS_PANE).name("§0.").build();
 
     @Override
     public void init(final Player p, final InventoryContent content) {
@@ -51,19 +51,18 @@ public class RoleSelectMenu implements InventoryProvider {
 
         if (timeLeft > 0 && !ApiOstrov.isLocalBuilder(p)) {
             for (final Role rl : Role.values()) {
-                content.set((i & 1) == 0 ? i : i + 9, ClickableItem.empty(
+                content.set((i & 1) == 1 ? i : i + 9, ClickableItem.empty(
                     new ItemBuilder(rl.getIcon())
                         .lore(sv.role == rl ? "§fТвой класс сейчас" : "")
                         .lore("§cДо смены: " + TimeUtil.secondToTime(timeLeft))
                         .build()
                 ));
-                i++;
+                i += i == 12 ? 2 : 1;
             }
         } else {
-
             for (final Role rl : Role.values()) {
                 final boolean eq = sv.role == rl;
-                content.set((i & 1) == 0 ? i : i + 9, ClickableItem.from(
+                content.set((i & 1) == 1 ? i : i + 9, ClickableItem.from(
                     new ItemBuilder(rl.getIcon())
                             .lore(eq ? "§fТвой класс сейчас" : "")
                             .lore(!eq || sv.role == null ? "" : "§7Перевыбор класса - §cполный сброс §7характеристик!")
@@ -71,12 +70,12 @@ public class RoleSelectMenu implements InventoryProvider {
                         p.closeInventory();
                         p.performCommand("skill select " + rl.name());
                     }));
-                i++;
+                i += i == 12 ? 2 : 1;
             }
 
         }
 
-        content.set(4, ClickableItem.empty(new ItemBuilder(Material.NETHER_STAR).name("§7<-- §fДоступные Классы §7-->").build()));
+        content.set(4, ClickableItem.empty(new ItemBuilder(ItemType.NETHER_STAR).name("§7<-- §fДоступные Классы §7-->").build()));
     }
 
 }

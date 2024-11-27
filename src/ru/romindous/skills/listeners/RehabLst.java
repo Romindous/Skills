@@ -103,7 +103,6 @@ public class RehabLst implements Listener {
     @EventHandler (priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onFood(final FoodLevelChangeEvent e) {
         final HumanEntity pl = e.getEntity();
-        e.setFoodLevel(20);
         final ItemStack it = e.getItem();
         if (ItemUtil.isBlank(it, false)) return;
         final Survivor sv = PM.getOplayer(pl, Survivor.class);

@@ -44,7 +44,7 @@ public class Mine /*extends CuBlock*/ {/*
 					final Location bl = new Location(in, lc.x + 0.5d, lc.y + 0.5d, lc.z + 0.5d);
 					final Block b = bl.getBlock();
 					final BlockData bd = b.getBlockData();
-					b.setType(Material.AIR, false);
+					b.setBlockData(Main.AIR_DATA, false);
 					in.spawnParticle(Particle.BLOCK_CRACK, bl, 32, 0.4d, 0.4d, 0.4d, 0d, bd);
 					in.playSound(bl, bd.getSoundGroup().getBreakSound(), 1f, 1f);
 					in.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, getLoc(in), 16, 0.4d, 0.6d, 0.4d, 0d);

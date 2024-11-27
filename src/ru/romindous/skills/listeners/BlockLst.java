@@ -1,7 +1,6 @@
 package ru.romindous.skills.listeners;
 
 import org.bukkit.Axis;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -316,7 +315,7 @@ public class BlockLst implements Listener {
 
         switch (b.getType()) {
             case MELON_STEM, PUMPKIN_STEM, BEETROOTS, WHEAT, POTATOES, CARROTS:
-            	if (b.getRelative(BlockFace.DOWN).getType() == Material.FARMLAND) {
+            	if (BlockType.FARMLAND.equals(b.getRelative(BlockFace.DOWN).getType().asBlockType())) {
                     final Farmland fl = (Farmland) b.getRelative(BlockFace.DOWN).getBlockData();
                     if (fl.getMoisture() == 0) {
                     	e.setBuild(false);
@@ -449,10 +448,7 @@ public class BlockLst implements Listener {
             
             final Orientable or = BlockType.NETHER_PORTAL.createBlockData();
             or.setAxis(Axis.Z);
-            for (final Block pb : pbs) {
-                pb.setType(Material.NETHER_PORTAL, false);
-                pb.setBlockData(or, false);
-            }
+            for (final Block pb : pbs) pb.setBlockData(or, false);
         } else {
         	dr = bf.getModX();
             while (!Nms.fastType(w, loc.x, loc.y, loc.z).isSolid() && width < 20) {
@@ -499,9 +495,8 @@ public class BlockLst implements Listener {
                 }
             }
 
-            for (final Block pb : pbs) {
-                pb.setType(Material.NETHER_PORTAL, false);
-            }
+            final Orientable or = BlockType.NETHER_PORTAL.createBlockData();
+            for (final Block pb : pbs) pb.setBlockData(or, false);
         }
         return true;
     }

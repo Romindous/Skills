@@ -87,7 +87,7 @@ public class PetManager /*implements IPetManager*/ {/*
 
         if (mpp.hasMyPet()) {
             final MyPet mp = mpp.getMyPet();
-            return ClickableItem.of(new ItemBuilder(Material.RABBIT_HIDE).name("§e§kk§6 Твой Питомец §e§kk")
+            return ClickableItem.of(new ItemBuilder(ItemType.RABBIT_HIDE).name("§e<obf>k</obf>§6 Твой Питомец §e<obf>k")
                     .lore("")
                     .lore("§7Имя: " + mp.getPetName())
                     .lore("§7Уровень: §6" + mp.getExperience().getLevel())
@@ -112,7 +112,7 @@ public class PetManager /*implements IPetManager*/ {/*
                         p.closeInventory();
                     });
         } else {
-            return ClickableItem.of(new ItemBuilder(Material.RABBIT_HIDE).name("§e§kk§6 Твой Питомец §e§kk")
+            return ClickableItem.of(new ItemBuilder(ItemType.RABBIT_HIDE).name("§e<obf>k</obf>§6 Твой Питомец §e<obf>k")
                     .lore("")
                     .lore("§6ЛКМ §7- создать питомца")
                     .build(), e -> {

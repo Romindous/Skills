@@ -3,7 +3,8 @@ package ru.romindous.skills.menus;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
-import ru.komiss77.utils.ItemBuilder;
+import org.bukkit.inventory.ItemType;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
 import ru.komiss77.utils.inventory.InventoryProvider;
@@ -22,7 +23,7 @@ public class TestMenu implements InventoryProvider {
             
             for (final InventoryType it : InventoryType.values()) {
 
-                content.add( ClickableItem.from(new ItemBuilder(Material.SLIME_BALL)
+                content.add( ClickableItem.from(new ItemBuilder(ItemType.SLIME_BALL)
                     .name(it.name())
                     .lore("§fклик - открыть в этом типе")
                     .build(), e-> {
@@ -42,7 +43,7 @@ public class TestMenu implements InventoryProvider {
             
         } else {
             
-            content.add( ClickableItem.from(new ItemBuilder(Material.SLIME_BALL)
+            content.add( ClickableItem.from(new ItemBuilder(ItemType.SLIME_BALL)
                 .name("назад")
                 .build(), e-> {
                     current = InventoryType.CHEST;
@@ -61,7 +62,7 @@ public class TestMenu implements InventoryProvider {
         
         /*for (final InventoryType it : InventoryType.values()) {
 
-            content.add( ClickableItem.of(new ItemBuilder(Material.SLIME_BALL)
+            content.add( ClickableItem.of(new ItemBuilder(ItemType.SLIME_BALL)
                 .name(it.name())
                 .lore("§fклик - открыть в этом типе")
                 .build(), e-> {

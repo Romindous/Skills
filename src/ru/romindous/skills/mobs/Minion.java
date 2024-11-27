@@ -47,6 +47,11 @@ public abstract class Minion extends SednaMob {
     }
 
     @Override
+    protected AreaSpawner spawner() {
+        return null;
+    }
+
+    @Override
     protected AreaSpawner.SpawnCondition condition() {
         return COND_EMPTY;
     }
@@ -54,6 +59,11 @@ public abstract class Minion extends SednaMob {
     @Override
     protected int spawnCd() {
         return -1;
+    }
+
+    @Override
+    public String biome() {
+        return "";
     }
 
     @Override
@@ -136,7 +146,7 @@ public abstract class Minion extends SednaMob {
     }
 
     public LivingEntity spawn(final Location loc, final LivingEntity owner) {
-        final AreaSpawner.SpawnCondition cnd = spawner().condition(new WXYZ(loc), getEntClass());
+        final AreaSpawner.SpawnCondition cnd = spawner().condition(new WXYZ(loc));
         return loc.getWorld().spawn(loc, getEntClass(), cnd.reason(), false, e -> apply(e, owner));
     }
 

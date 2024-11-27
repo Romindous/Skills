@@ -82,7 +82,7 @@ public class CustomEnchants {
     case "baloon":
         if (Main.srnd.nextInt(4) < en.getValue()) {
             targetLe.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 20 * en.getValue(), 0));
-            final FallingBlock fb = w.spawnFallingBlock(targetLe.getEyeLocation(), Material.CHORUS_FLOWER.createBlockData());
+            final FallingBlock fb = w.spawnFallingBlock(targetLe.getEyeLocation(), ItemType.CHORUS_FLOWER.createBlockData());
             fb.setHurtEntities(false);
             fb.setDropItem(false);
             targetLe.addPassenger(fb);
@@ -161,7 +161,7 @@ public class CustomEnchants {
                     for (int z = (int) Math.floor(bx.getMinZ()); z <= bx.getMaxZ(); z++) {
                         final Block b = w.getBlockAt(x, y, z);
                         if (b.getType().isAir()) {
-                            b.setType(Material.PACKED_ICE);
+                            b.setType(ItemType.PACKED_ICE);
                             ics.add(new BaseBlockPosition(x, y, z));
                         }
                     }
@@ -221,7 +221,7 @@ public class CustomEnchants {
             cuboid.allign(target.getEyeLocation());
             for (final Block b : cuboid.getBlocks(target.getWorld())) {
                 if (b.getType().isAir()) {
-                    b.setType(Material.PACKED_ICE);
+                    b.setType(ItemType.PACKED_ICE);
                 }
             }
 
@@ -230,7 +230,7 @@ public class CustomEnchants {
                 public void run() {
                     target.setAI(true);
                     for (final Block b : cuboid.getBlocks(target.getWorld())) {
-                        if (b.getType()==Material.PACKED_ICE) {
+                        if (b.getType()==ItemType.PACKED_ICE) {
                             b.breakNaturally();
                             b.getWorld().spawnParticle(Particle.BLOCK_CRACK, b.getLocation().add(0.5, 0.5, 0.5), 15, 0.6, 0.6, 0.6, SM.iceBlockData);
                         }

@@ -217,7 +217,7 @@ public class Warrior implements Ability.AbilReg {
 
                 if (caster instanceof final Player pl) {
                     if (!pl.isBlocking()) return false;
-                    pl.setCooldown(Material.SHIELD, cd * 20);
+                    pl.setCooldown(ItemType.SHIELD, cd * 20);
                 }
 
                 final Location elc = caster.getEyeLocation();

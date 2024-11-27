@@ -3,7 +3,8 @@ package ru.romindous.skills.utils.pets;
 import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import ru.komiss77.utils.ItemBuilder;
+import org.bukkit.inventory.ItemType;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.Survivor;
@@ -18,7 +19,7 @@ public class PetVanilla implements IPetManager {
 
     @Override
     public ClickableItem getMenuItem(final Player p) {
-        return ClickableItem.empty(new ItemBuilder(Material.RABBIT_HIDE).name("§8§kk§7 Твой Питомец §8§kk")
+        return ClickableItem.empty(new ItemBuilder(ItemType.RABBIT_HIDE).name("§8<obf>k</obf>§7 Твой Питомец §8<obf>k")
                 .lore("")
                 .lore("§7Питомцы недоступны на данный момент...")
                 .build());

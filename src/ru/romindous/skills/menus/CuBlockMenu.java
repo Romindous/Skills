@@ -2,15 +2,15 @@ package ru.romindous.skills.menus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.inventory.meta.Damageable;
-import ru.komiss77.utils.ItemBuilder;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
@@ -46,9 +46,9 @@ public class CuBlockMenu implements InventoryProvider {
         final ItemStack it = cube.getItem();
         final ItemBuilder bld;
         if (ItemUtil.isBlank(it, false)) {
-        	bld = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name("§7Передача душ§7!");
+        	bld = new ItemBuilder(ItemType.GRAY_STAINED_GLASS_PANE).name("§7Передача душ§7!");
         } else if (cube.souls == cube.cbt.maxSouls) {
-    		bld = new ItemBuilder(Material.BLUE_STAINED_GLASS_PANE).name("§7Души §9заполнены§7!");
+    		bld = new ItemBuilder(ItemType.BLUE_STAINED_GLASS_PANE).name("§7Души §9заполнены§7!");
         } else {
         	final int sub;
             switch (cube.cbt) {
@@ -56,46 +56,46 @@ public class CuBlockMenu implements InventoryProvider {
                     if (it.hasItemMeta() && it.getItemMeta() instanceof final Damageable db) {
                         if (db.getDamage() > 0) {
                         	bld = cube.souls < Math.min(Math.max(1, cube.souls >> 1), db.getDamage())
-                                ? new ItemBuilder(Material.BROWN_STAINED_GLASS_PANE).name("§7Недостаточно §4душ§7!")//(§9" + cube.souls + "✞§7)
-                                : new ItemBuilder(Material.GREEN_STAINED_GLASS_PANE).name("§7Проходит §2починка§7!");
+                                ? new ItemBuilder(ItemType.BROWN_STAINED_GLASS_PANE).name("§7Недостаточно §4душ§7!")//(§9" + cube.souls + "✞§7)
+                                : new ItemBuilder(ItemType.GREEN_STAINED_GLASS_PANE).name("§7Проходит §2починка§7!");
                         } else {
-                        	bld = new ItemBuilder(Material.LIME_STAINED_GLASS_PANE).name("§7Инструмент §aцелен§7!");
+                        	bld = new ItemBuilder(ItemType.LIME_STAINED_GLASS_PANE).name("§7Инструмент §aцелен§7!");
                         }
                     } else {
-                    	bld = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name("§7Передача душ§7!");
+                    	bld = new ItemBuilder(ItemType.GRAY_STAINED_GLASS_PANE).name("§7Передача душ§7!");
                     }
                     break;
                 case FEED:
                 	sub = /*Feed.burnAmt(it.getType())*/0;
                 	
                 	if (sub == 0) {
-                		bld = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name("§7Ожидание §4пищи§7!");
+                		bld = new ItemBuilder(ItemType.GRAY_STAINED_GLASS_PANE).name("§7Ожидание §4пищи§7!");
                 		break;
                 	}
                 	
                 	if (sub > 0) {
                 		bld = it.getAmount() < sub
-                            ? new ItemBuilder(Material.BROWN_STAINED_GLASS_PANE).name("§7Недостаточно §4пищи§7!")
-                            : new ItemBuilder(Material.RED_STAINED_GLASS_PANE).name("§7Поедание §cпищи§7!");
+                            ? new ItemBuilder(ItemType.BROWN_STAINED_GLASS_PANE).name("§7Недостаточно §4пищи§7!")
+                            : new ItemBuilder(ItemType.RED_STAINED_GLASS_PANE).name("§7Поедание §cпищи§7!");
                 	} else {
-                		bld = new ItemBuilder(Material.RED_STAINED_GLASS_PANE).name("§7Поедание §cпищи§7!");
+                		bld = new ItemBuilder(ItemType.RED_STAINED_GLASS_PANE).name("§7Поедание §cпищи§7!");
                 	}
                     break;
                 case FUSE:
                     sub = /*Feed.fuseAmt(it.getType())*/0;
                 	
                 	if (sub == 0) {
-                		bld = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name("§7Ожидание §5сосуда§7!");
+                		bld = new ItemBuilder(ItemType.GRAY_STAINED_GLASS_PANE).name("§7Ожидание §5сосуда§7!");
                 		break;
                 	}
 
             		bld = cube.souls < sub 
-                        ? new ItemBuilder(Material.BROWN_STAINED_GLASS_PANE).name("§7Недостаточно §4душ§7!")
-                        : new ItemBuilder(Material.RED_STAINED_GLASS_PANE).name("§7Наполнение §dсосуда§7!");
+                        ? new ItemBuilder(ItemType.BROWN_STAINED_GLASS_PANE).name("§7Недостаточно §4душ§7!")
+                        : new ItemBuilder(ItemType.RED_STAINED_GLASS_PANE).name("§7Наполнение §dсосуда§7!");
             		
                     break;
                 default:
-                	bld = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name("§7Передача душ§7!");
+                	bld = new ItemBuilder(ItemType.GRAY_STAINED_GLASS_PANE).name("§7Передача душ§7!");
                     break;
             }
         }

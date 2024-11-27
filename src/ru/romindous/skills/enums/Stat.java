@@ -8,7 +8,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Mob;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import ru.komiss77.utils.ItemBuilder;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Survivor;

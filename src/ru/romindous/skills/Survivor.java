@@ -82,7 +82,7 @@ public class Survivor extends Oplayer /*implements Transfer*/ {
     public Survivor(final HumanEntity pl) {
         super(pl);
         for (final Stat st : Stat.values()) {
-            stats.put(st, 1);
+            stats.put(st, 0);
         }
         transId = SM.tId++;
         resetBoard(pl);

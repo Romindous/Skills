@@ -1,10 +1,12 @@
 package ru.romindous.skills.mobs.wastes;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.destroystokyo.paper.ParticleBuilder;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
@@ -23,11 +25,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.items.ItemRoll;
+import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.world.WXYZ;
 import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.version.Nms;
+import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
 
 public class Spored extends SednaMob {
@@ -68,7 +72,7 @@ public class Spored extends SednaMob {
                 Ostrov.sync(() -> {
                     final Block b2 = loc.getBlock();
                     if (b2.getType() == MOSS.getType()) {
-                        b2.setType(Material.AIR, false);
+                        b2.setBlockData(Main.AIR_DATA, false);
                         EntityUtil.effect(spawn(loc), Sound.BLOCK_BIG_DRIPLEAF_BREAK,
                             0.6f, Particle.HAPPY_VILLAGER);
                     }
@@ -100,7 +104,7 @@ public class Spored extends SednaMob {
                 Ostrov.sync(() -> {
                     final Block b2 = bl.getBlock();
                     if (b2.getType() == MOSS.getType()) {
-                        b2.setType(Material.AIR, false);
+                        b2.setBlockData(Main.AIR_DATA, false);
                         EntityUtil.effect(spawn(bl.getCenterLoc()),
                             Sound.BLOCK_BIG_DRIPLEAF_BREAK, 0.6f, Particle.HAPPY_VILLAGER);
                     }
@@ -110,9 +114,9 @@ public class Spored extends SednaMob {
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_powder", new ItemStack(Material.STRING), 2, 1, 2), 2)
-        .add(new ItemRoll(key().value() + "_seeds", new ItemStack(Material.WHEAT_SEEDS), 2, 1, 2), 1)
-        .build(1, 1);
+        .add(new ItemRoll(key().value() + "_powder", ItemType.GUNPOWDER.createItemStack(), 1, 1), 2)
+        .add(new ItemRoll(key().value() + "_seeds", ItemType.WHEAT_SEEDS.createItemStack(), 0, 1), 1)
+        .add(new NARoll(), 1).build(1, 1);
 
     @Override
     public RollTree loot() {

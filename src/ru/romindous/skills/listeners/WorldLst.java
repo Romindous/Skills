@@ -1,8 +1,8 @@
 package ru.romindous.skills.listeners;
 
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockType;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.event.EventHandler;
@@ -19,17 +19,17 @@ public class WorldLst implements Listener  {
     //жестко багануло Skills.jar//ru.romindous.skills.listener.WorldLst.wastesWaterControl(WorldLst.java:22)
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void wastesWaterControl(final BlockPhysicsEvent e) {
-        if (e.getBlock().getType() == Material.WATER && Main.subServer == SubServer.WASTES) {
+        if (BlockType.WATER.equals(e.getBlock().getType().asBlockType()) && Main.subServer == SubServer.WASTES) {
             int i = 0;
             for (final BlockFace bf : RehabLst.near) {
                 final Block bl = e.getBlock().getRelative(bf);
-                if ((bl.getType() == Material.WATER && ((Levelled) bl.getBlockData()).getLevel() == 0) || 
+                if ((BlockType.WATER.equals(bl.getType().asBlockType()) && ((Levelled) bl.getBlockData()).getLevel() == 0) ||
                 	(bl.getBlockData() instanceof Waterlogged && ((Waterlogged) bl.getBlockData()).isWaterlogged())) {
                     i++;
                 }
             }
             if (i > 1) {
-                final Levelled nw = (Levelled) Material.WATER.createBlockData();
+                final Levelled nw = BlockType.WATER.createBlockData();
                 nw.setLevel(1);
                 e.getBlock().setBlockData(nw);
             }

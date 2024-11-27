@@ -2,14 +2,14 @@ package ru.romindous.skills.menus;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import ru.komiss77.ApiOstrov;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
-import ru.komiss77.utils.ItemBuilder;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TimeUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
@@ -35,21 +35,21 @@ public class MainMenu implements InventoryProvider {
     private static final ClickableItem worlds;
     
     static {
-        orange = new ItemBuilder( Material.ORANGE_STAINED_GLASS_PANE).name("§0.").build();
-        red = new ItemBuilder( Material.RED_STAINED_GLASS_PANE).name("§0.").build();
-        vines = new ItemBuilder( Material.WEEPING_VINES).name("§0.").build();
-        redstone = new ItemBuilder( Material.REDSTONE_BLOCK).name("§0.").build();
-        shroom = new ItemBuilder( Material.SHROOMLIGHT).name("§0.").build();
+        orange = new ItemBuilder(ItemType.ORANGE_STAINED_GLASS_PANE).name("§0.").build();
+        red = new ItemBuilder(ItemType.RED_STAINED_GLASS_PANE).name("§0.").build();
+        vines = new ItemBuilder(ItemType.WEEPING_VINES).name("§0.").build();
+        redstone = new ItemBuilder(ItemType.REDSTONE_BLOCK).name("§0.").build();
+        shroom = new ItemBuilder(ItemType.SHROOMLIGHT).name("§0.").build();
         
         empty = new ItemStack[54];
         for (int i = 0; i < 54; i++) {
             if (i / 9 == 0) {
-                empty[i] = (i & 1) == 0 ? orange : red;//new ItemBuilder((i & 1) == 0 ? Material.ORANGE_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE).name("§0.").build();
+                empty[i] = (i & 1) == 0 ? orange : red;//new ItemBuilder((i & 1) == 0 ? ItemType.ORANGE_STAINED_GLASS_PANE : ItemType.RED_STAINED_GLASS_PANE).name("§0.").build();
             } else {
                 switch (i % 9) {
                     case 0:
                     case 8:
-                        empty[i] = vines; //ew ItemBuilder(Material.WEEPING_VINES).name("§0.").build();
+                        empty[i] = vines; //ew ItemBuilder(ItemType.WEEPING_VINES).name("§0.").build();
                         break;
                     default:
                         break;
@@ -59,19 +59,19 @@ public class MainMenu implements InventoryProvider {
         empty[0] = redstone;                      empty[8] = redstone;
         empty[45] = shroom;                       empty[53] = shroom;
         
-        worlds = ClickableItem.from(new ItemBuilder(Material.RAW_COPPER_BLOCK).name("§4§kk§6 Мировое Смещение §4§kk")
+        worlds = ClickableItem.from(new ItemBuilder(ItemType.RAW_COPPER_BLOCK).name("§4<obf>k</obf>§6 Мировое Смещение §4<obf>k")
             .lore("§6ЛКМ §7- открытые миры")
             .build(), e -> {
-                if (e.getEvent() instanceof InventoryClickEvent) {
-                    ((Player) ((InventoryClickEvent) e.getEvent()).getWhoClicked()).performCommand("skill world");
+                if (e.getEvent() instanceof final InventoryClickEvent ev) {
+                    ((Player) ev.getWhoClicked()).performCommand("skill world");
                 }
         });
         
-        ability = ClickableItem.from(new ItemBuilder(Material.SWEET_BERRIES).name("§4§kk§c Кластер Навыков §4§kk")
+        ability = ClickableItem.from(new ItemBuilder(ItemType.SWEET_BERRIES).name("§4<obf>k</obf>§c Кластер Навыков §4<obf>k")
             .lore("§6ЛКМ §7- навыки класса")
             .build(), e -> {
-                if (e.getEvent() instanceof InventoryClickEvent) {
-                    ((Player) ((InventoryClickEvent) e.getEvent()).getWhoClicked()).performCommand("skill ability");
+                if (e.getEvent() instanceof final InventoryClickEvent ev) {
+                    ((Player) ev.getWhoClicked()).performCommand("skill ability");
                 }
         });
     }
@@ -94,8 +94,8 @@ public class MainMenu implements InventoryProvider {
         }
 
         content.set(13, ability);
-        /*content.set(13, ClickableItem.of(new ItemBuilder(Material.FIRE_CORAL)
-                .name("§4§kk§c Древо Навыков §4§kk")
+        /*content.set(13, ClickableItem.of(new ItemBuilder(ItemType.FIRE_CORAL)
+                .name("§4<obf>k</obf>§c Древо Навыков §4<obf>k")
                 .lore("§6ЛКМ §7- навыки класса")
                 .build(), e -> {
                     //p.closeInventory();
@@ -108,7 +108,7 @@ public class MainMenu implements InventoryProvider {
         
         
         
-        content.set(20, ClickableItem.from(new ItemBuilder(Material.TOTEM_OF_UNDYING).name("§6§kk§e Статистика §6§kk")
+        content.set(20, ClickableItem.from(new ItemBuilder(ItemType.TOTEM_OF_UNDYING).name("§6<obf>k</obf>§e Статистика §6<obf>k")
             .lore("")
             .lore(sv.statsPoints >0 ? "§f§lДоступно очков" : "§8Доступно очков")
             .lore(sv.statsPoints >0 ? "§f§lстатистики : §b§l"+sv.statsPoints : "§8статистики : §70")
@@ -126,7 +126,7 @@ public class MainMenu implements InventoryProvider {
         
 
         //табло
-        content.set(38, ClickableItem.from(new ItemBuilder(sv.showScoreBoard ? Material.GLOW_ITEM_FRAME : Material.ITEM_FRAME).name("§7Отображение Табло")
+        content.set(38, ClickableItem.from(new ItemBuilder(sv.showScoreBoard ? ItemType.GLOW_ITEM_FRAME : ItemType.ITEM_FRAME).name("§7Отображение Табло")
                 .lore("")
                 .lore(sv.showScoreBoard ? "§aВключено" : "§5Выключено")
                 .lore(sv.showScoreBoard ? "§7ЛКМ - выключить" : "§7ЛКМ - включить")
@@ -148,7 +148,7 @@ public class MainMenu implements InventoryProvider {
         }));         
         
 //табло
-        content.set(39, ClickableItem.from(new ItemBuilder(sv.showActionBar ? Material.GLOW_ITEM_FRAME : Material.ITEM_FRAME).name("§7Отображение Строки")
+        content.set(39, ClickableItem.from(new ItemBuilder(sv.showActionBar ? ItemType.GLOW_ITEM_FRAME : ItemType.ITEM_FRAME).name("§7Отображение Строки")
             .lore("")
             .lore(sv.showActionBar ? "§aВключено" : "§5Выключено")
             .lore(sv.showActionBar ? "§7ЛКМ - выключить" : "§7ЛКМ - включить")
@@ -170,7 +170,7 @@ public class MainMenu implements InventoryProvider {
         
         
         
-        /*content.set(42, ClickableItem.from(new ItemBuilder(Material.WRITABLE_BOOK).name("§c§kk§e Книга Изделий §c§kk")
+        /*content.set(42, ClickableItem.from(new ItemBuilder(ItemType.WRITABLE_BOOK).name("§c<obf>k</obf>§e Книга Изделий §c<obf>k")
             .lore("")
             .lore("§6ЛКМ §7- посмотреть крафты")
             .lore("")
@@ -204,8 +204,8 @@ public class MainMenu implements InventoryProvider {
             
             lore.add("§7До смены класса:");
             lore.add("§c"+ TimeUtil.secondToTime(timeLeft));
-            content.set(49, ClickableItem.empty(new ItemBuilder(Material.CAMPFIRE)
-                .name("§c§kk "+sv.role.getName()+" §c§kk") //.name("§c§kk§6 Статистика Игры §c§kk")
+            content.set(49, ClickableItem.empty(new ItemBuilder(ItemType.CAMPFIRE)
+                .name("§c<obf>k</obf> "+sv.role.getName()+" §c<obf>k") //.name("§c<obf>k</obf>§6 Статистика Игры §c<obf>k")
                 .lore(lore)
                 .build()
                 )
@@ -220,8 +220,8 @@ public class MainMenu implements InventoryProvider {
                 lore.add("§8*(легенда меняет без штрафа)");
             }
             
-            content.set(49, ClickableItem.from(new ItemBuilder(Material.CAMPFIRE)
-                    .name("§c§kk "+sv.role.getName()+" §c§kk") //.name("§c§kk§6 Статистика Игры §c§kk")
+            content.set(49, ClickableItem.from(new ItemBuilder(ItemType.CAMPFIRE)
+                    .name("§c<obf>k</obf> "+sv.role.getName()+" §c<obf>k") //.name("§c<obf>k</obf>§6 Статистика Игры §c<obf>k")
                     .lore(lore)
                     .build(), e-> {
                         p.performCommand("skill select");

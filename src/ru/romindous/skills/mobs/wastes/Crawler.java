@@ -1,7 +1,7 @@
 package ru.romindous.skills.mobs.wastes;
 
+import java.util.Map;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityEvent;
@@ -11,14 +11,14 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.Ostrov;
-import ru.komiss77.modules.rolls.RollTree;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.items.ItemRoll;
+import ru.komiss77.modules.rolls.NARoll;
+import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.utils.FastMath;
-import ru.komiss77.utils.ItemBuilder;
-import ru.romindous.skills.objects.SkillMats;
+import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
-
-import java.util.Map;
+import ru.romindous.skills.objects.SkillMats;
 
 public class Crawler extends SednaMob {
 
@@ -64,7 +64,7 @@ public class Crawler extends SednaMob {
                 Ostrov.sync(() -> {
                     final Block bl = loc.getBlock();
                     if (bl.getType() == WEB.getType()) {
-                        bl.setType(Material.AIR, false);
+                        bl.setBlockData(Main.AIR_DATA, false);
                     }
                 }, 100);
             }
@@ -72,10 +72,10 @@ public class Crawler extends SednaMob {
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_string", new ItemBuilder(ItemType.STRING).build(), 1, 1, 2), 2)
-        .add(new ItemRoll(key().value() + "_meat", SkillMats.CRAWLER.item(ItemType.MUTTON), 3, 1), 1)
-        .add(new ItemRoll(key().value() + "_eye", new ItemBuilder(ItemType.SPIDER_EYE).build(), 2, 1), 1)
-        .build(1, 2);
+        .add(new ItemRoll(key().value() + "_string", new ItemBuilder(ItemType.STRING).build(), 0, 2), 4)
+        .add(new ItemRoll(key().value() + "_meat", SkillMats.CRAWLER.item(ItemType.MUTTON), 1, 0), 1)
+        .add(new ItemRoll(key().value() + "_eye", new ItemBuilder(ItemType.SPIDER_EYE).build(), 1, 0), 2)
+        .add(new NARoll(), 4).build(1, 1);
 
     @Override
     public RollTree loot() {

@@ -7,9 +7,9 @@ import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.GoalKey;
 import com.destroystokyo.paper.entity.ai.GoalType;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Silverfish;
@@ -18,9 +18,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.items.ItemRoll;
+import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
-import ru.komiss77.utils.ItemBuilder;
 import ru.romindous.skills.mobs.SednaMob;
 import ru.romindous.skills.objects.SkillMats;
 
@@ -113,31 +114,31 @@ public class Clutcher extends SednaMob {
         final Block b = loc.add(0d, -1d, 0d).getBlock();
         final boolean stn = switch (b.getType()) {
             case STONE -> {
-                b.setType(Material.INFESTED_STONE, false);
+                b.setBlockData(BlockType.INFESTED_STONE.createBlockData(), false);
                 yield true;
             }
             case DEEPSLATE -> {
-                b.setType(Material.INFESTED_DEEPSLATE, false);
+                b.setBlockData(BlockType.INFESTED_DEEPSLATE.createBlockData(), false);
                 yield true;
             }
             case STONE_BRICKS -> {
-                b.setType(Material.INFESTED_STONE_BRICKS, false);
+                b.setBlockData(BlockType.INFESTED_STONE_BRICKS.createBlockData(), false);
                 yield true;
             }
             case COBBLESTONE -> {
-                b.setType(Material.INFESTED_COBBLESTONE, false);
+                b.setBlockData(BlockType.INFESTED_COBBLESTONE.createBlockData(), false);
                 yield true;
             }
             case CHISELED_STONE_BRICKS -> {
-                b.setType(Material.INFESTED_CHISELED_STONE_BRICKS, false);
+                b.setBlockData(BlockType.INFESTED_CHISELED_STONE_BRICKS.createBlockData(), false);
                 yield true;
             }
             case CRACKED_STONE_BRICKS -> {
-                b.setType(Material.INFESTED_CRACKED_STONE_BRICKS, false);
+                b.setBlockData(BlockType.INFESTED_CRACKED_STONE_BRICKS.createBlockData(), false);
                 yield true;
             }
             case MOSSY_STONE_BRICKS -> {
-                b.setType(Material.INFESTED_MOSSY_STONE_BRICKS, false);
+                b.setBlockData(BlockType.INFESTED_MOSSY_STONE_BRICKS.createBlockData(), false);
                 yield true;
             }
             default -> false;
@@ -153,9 +154,9 @@ public class Clutcher extends SednaMob {
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_scales", SkillMats.SILVER.item(ItemType.PHANTOM_MEMBRANE), 2, 1), 1)
-        .add(new ItemRoll(key().value() + "_meal", new ItemBuilder(ItemType.BONE_MEAL).build(), 2, 1), 4)
-        .build(1, 1);
+        .add(new ItemRoll(key().value() + "_scales", SkillMats.SILVER.item(ItemType.PHANTOM_MEMBRANE), 1, 0), 1)
+        .add(new ItemRoll(key().value() + "_meal", new ItemBuilder(ItemType.BONE_MEAL).build(), 1, 0), 4)
+        .add(new NARoll(), 4).build(1, 1);
 
     @Override
     public RollTree loot() {

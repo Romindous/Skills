@@ -21,7 +21,7 @@ public class DebugMythSpawn /*implements InventoryProvider*/ {/*
             final MythicMob mm = MythBoss.mobMgr.getMythicMob(mmob).get();
             
             menuEntry.add( ClickableItem.from(
-                    new ItemBuilder(Material.PIG_SPAWN_EGG)
+                    new ItemBuilder(ItemType.PIG_SPAWN_EGG)
                         .name(mm.getInternalName())
                         .lore("§bMythicMobs")
                         .lore(mm.getDisplayName()==null ? "§8noDisplayName" : mm.getDisplayName().get())
@@ -53,7 +53,7 @@ public class DebugMythSpawn /*implements InventoryProvider*/ {/*
 //Ostrov.log("idx="+idx+" index="+modelNames.indexOf(modelName));
             //current = idx == modelNames.indexOf(modelName); //modelNames.get(idx)!=null && modelNames.get(idx).equals(modelName);
         
-            menuEntry.add(ClickableItem.from(new ItemBuilder( Material.RABBIT_HIDE)
+            menuEntry.add(ClickableItem.from(new ItemBuilder(ItemType.RABBIT_HIDE)
                     .name(modelName)
                     .lore("§dModel")
                     .lore("§7")
@@ -128,18 +128,18 @@ public class DebugMythSpawn /*implements InventoryProvider*/ {/*
         
         for (int i=from; i < to; i++) {
             final ClickableItem menuItem = ci[i];
-            if (menuItem.getItem().getType()==Material.RABBIT_HIDE || menuItem.getItem().getType()==Material.SLIME_BALL) {
+            if (menuItem.getItem().getType()==ItemType.RABBIT_HIDE || menuItem.getItem().getType()==ItemType.SLIME_BALL) {
                 index = modelNames.indexOf(((TextComponent) menuItem.getItem().getItemMeta().displayName()).content());
                 if (index>=0) {
                     if (index==modelIndex) {
-                        menuItem.getItem().setType(Material.SLIME_BALL);
-                    } else if (menuItem.getItem().getType()==Material.SLIME_BALL) {
-                        menuItem.getItem().setType(Material.RABBIT_HIDE);
+                        menuItem.getItem().setType(ItemType.SLIME_BALL);
+                    } else if (menuItem.getItem().getType()==ItemType.SLIME_BALL) {
+                        menuItem.getItem().setType(ItemType.RABBIT_HIDE);
                     }
                 }
             } 
             
-            //menuItem.getItem().setType(Material.STONE);
+            //menuItem.getItem().setType(ItemType.STONE);
             content.add(menuItem);
         }    
             
@@ -169,14 +169,14 @@ public class DebugMythSpawn /*implements InventoryProvider*/ {/*
 
         
         
-        content.set(5, 4, ClickableItem.of(new ItemBuilder(Material.OAK_DOOR).name("назад").build(), e -> {
+        content.set(5, 4, ClickableItem.of(new ItemBuilder(ItemType.OAK_DOOR).name("назад").build(), e -> {
                 PM.getOplayer(p).setup.lastEdit = "Debug";
                 SkillCmd.openDebugMenu(p);
             }
         ));
         
         if (debugMob!=null || modeledEntity!=null) {
-            content.set(5, 6, ClickableItem.of(new ItemBuilder(Material.REDSTONE).name("Убрать моба").build(), e -> {
+            content.set(5, 6, ClickableItem.of(new ItemBuilder(ItemType.REDSTONE).name("Убрать моба").build(), e -> {
                 if (debugMob!=null) {
                     debugMob.remove();
                     debugMob = null;

@@ -1,11 +1,17 @@
 package ru.romindous.skills;
 
-import org.bukkit.*;
+import java.util.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.block.BlockType;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
@@ -22,8 +28,6 @@ import ru.komiss77.utils.inventory.ConfirmationGUI;
 import ru.romindous.skills.enums.TransferType;
 import ru.romindous.skills.listeners.MySqlLst;
 import ru.romindous.skills.transfers.CuBlock;
-
-import java.util.*;
 
 
 
@@ -55,7 +59,7 @@ public class SM {
     static {
         congratulations = new String[]{"поздравляем!", "хорошая игра!", "так держать!", "замечательно!"};
         joinLoc = Bukkit.getWorlds().getFirst().getSpawnLocation().clone().add(0, 1000, 0);
-        iceBlockData = Material.PACKED_ICE.createBlockData();
+        iceBlockData = BlockType.PACKED_ICE.createBlockData();
         projWeapons = new WeakHashMap<>();
     }
 
@@ -112,7 +116,7 @@ public class SM {
         }
         if (nevv) {
             ScreenUtil.sendTitle(p, "§4Выживи", "");
-            p.getInventory().setItem(0, new ItemStack(Material.BREAD, 16));
+            p.getInventory().setItem(0, ItemType.BREAD.createItemStack(16));
             p.setNoDamageTicks(600);
             p.sendMessage(Main.prefix + "Вы неуязвимы след. 30 сек!");
         }

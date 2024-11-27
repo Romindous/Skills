@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import ru.komiss77.ApiOstrov;
 import ru.komiss77.Ostrov;
 import ru.komiss77.Timer;
@@ -41,12 +42,20 @@ public class MySqlLst implements Listener {
     public static final String and = "&";
     public static final String lvl = "#";
     public static final String eq = "=";
+
+    @EventHandler (priority = EventPriority.MONITOR)
+    public void onJoin (final PlayerJoinEvent e) {
+        Ostrov.sync(() -> {
+            final Player pl = e.getPlayer();
+            new LocalDataLoadEvent(pl, PM.getOplayer(pl), pl.getLocation()).callEvent();
+        }, 20);
+    }
     
     @EventHandler (priority = EventPriority.MONITOR)
     public void onDataLoad (final LocalDataLoadEvent e) {
         final Player p = e.getPlayer();
-        final Survivor sv = PM.getOplayer(p, Survivor.class);
-        int fstHp = 1;
+        final Survivor sv = (Survivor) e.getOplayer();
+//        int fstHp = 1;
         
         if (sv.mysqlError) {
             Ostrov.log_err(p.getName()+":LocalDataLoadEvent-hasSqlError!");
@@ -391,7 +400,7 @@ public class MySqlLst implements Listener {
         }*/
 
         sv.recalcStats(p);
-        p.setHealth(fstHp < sv.maxHP ? fstHp : sv.maxHP);
+//        p.setHealth(fstHp < sv.maxHP ? fstHp : sv.maxHP);
         if (!sv.isWorldOpen(SubServer.WASTES)) {
             sv.unlockWorld(SubServer.WASTES);
         }

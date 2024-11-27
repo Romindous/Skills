@@ -11,7 +11,6 @@ import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.event.entity.*;
 import org.bukkit.inventory.EntityEquipment;
@@ -19,7 +18,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.entities.CustomEntity;
-import ru.komiss77.modules.entities.EntityManager;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.world.AreaSpawner;
 import ru.komiss77.modules.world.LocFinder;
@@ -46,15 +44,11 @@ public abstract class SednaMob extends CustomEntity {
     protected final AreaSpawner.SpawnCondition COND_EMPTY = new AreaSpawner.SpawnCondition(0, CreatureSpawnEvent.SpawnReason.CUSTOM);
 
     protected final AreaSpawner.SpawnCondition cond;
-    protected final AreaSpawner spawn;
+    protected AreaSpawner spawn;
     protected SednaMob() {
-        super(false);
+        super();
         cond = new AreaSpawner.SpawnCondition(mobConfig("amount", 1),
             CreatureSpawnEvent.SpawnReason.NATURAL);
-        spawn = new Spawner() {
-            protected boolean extra(final WXYZ loc) {return limit(loc);}
-        };
-        EntityManager.register(this);
         Ostrov.log("Registered mob " + key().value());
     }
 
@@ -81,7 +75,9 @@ public abstract class SednaMob extends CustomEntity {
 
     @Override
     protected AreaSpawner spawner() {
-        return spawn;
+        return spawn == null ? spawn = new Spawner() {
+            protected boolean extra(final WXYZ loc) {return limit(loc);}
+        } : spawn;
     }
 
     @Override
@@ -219,12 +215,11 @@ public abstract class SednaMob extends CustomEntity {
             return LocFinder.DEFAULT_CHECKS;
         }
 
-        @Override
-        public <E extends LivingEntity> SpawnCondition condition(final WXYZ loc, final Class<E> cls) {
-            return LocUtil.getChEnts(loc, radius() + offset(), cls, e -> {
-                final CustomEntity ce = CustomEntity.get(e);
-                return SednaMob.this.equals(ce);}).size() < cond.amt()
-                && Nms.getBiomeKey(loc).equals(biome()) && extra(loc) ? cond : NONE;
+        public final SpawnCondition condition(final WXYZ loc) {
+            if (!Nms.getBiomeKey(loc).equals(biome())) return NONE;
+            return LocUtil.getChEnts(loc, radius(), getEntClass(),
+                e -> SednaMob.this.equals(CustomEntity.get(e))).size() < cond.amt()
+                && extra(loc) ? cond : NONE;
         }
 
         protected abstract boolean extra(final WXYZ loc);

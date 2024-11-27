@@ -1,19 +1,17 @@
 package ru.romindous.skills.mobs.wastes;
 
-import org.bukkit.Material;
+import java.util.Map;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Mob;
 import org.bukkit.entity.Zoglin;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import ru.komiss77.Ostrov;
-import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.items.ItemRoll;
+import ru.komiss77.modules.rolls.NARoll;
+import ru.komiss77.modules.rolls.RollTree;
 import ru.romindous.skills.mobs.SednaMob;
-
-import java.util.Map;
 
 public class Beast extends SednaMob {
 
@@ -41,19 +39,12 @@ public class Beast extends SednaMob {
         return Map.of();
     }
 
-    @Override
-    protected void onDeath(final EntityDeathEvent e) {
-        super.onDeath(e);
-        if (!(e.getEntity() instanceof final Mob mb)) return;
-
-    }
-
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_flesh", new ItemStack(Material.ROTTEN_FLESH), 2, 1, 2), 4)
-        .add(new ItemRoll(key().value() + "_leather", new ItemStack(Material.LEATHER), 1, 1), 1)
-        .add(new ItemRoll(key().value() + "_bone", new ItemStack(Material.BONE), 1, 1), 1)
-        .add(new ItemRoll(key().value() + "_pork", new ItemStack(Material.PORKCHOP), 1, 1, 1), 2)
-        .build(1, 2);
+        .add(new ItemRoll(key().value() + "_flesh", ItemType.ROTTEN_FLESH.createItemStack(), 1, 2), 4)
+        .add(new ItemRoll(key().value() + "_leather", ItemType.LEATHER.createItemStack(), 1, 0), 1)
+        .add(new ItemRoll(key().value() + "_bone", ItemType.BONE.createItemStack(), 1, 1), 2)
+        .add(new ItemRoll(key().value() + "_pork", ItemType.PORKCHOP.createItemStack(), 1, 0), 2)
+        .add(new NARoll(), 4).build(1, 1);
 
     @Override
     public RollTree loot() {

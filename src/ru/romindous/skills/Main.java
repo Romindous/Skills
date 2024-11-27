@@ -8,11 +8,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.block.BlockType;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.komiss77.OConfigManager;
 import ru.komiss77.Ostrov;
@@ -21,7 +24,7 @@ import ru.komiss77.modules.menuItem.MenuItemBuilder;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.FastMath;
-import ru.komiss77.utils.ItemBuilder;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.enums.Role;
@@ -51,6 +54,7 @@ public class Main extends JavaPlugin {
     public static IPetManager petMgr;
     public static final Path configDir = Path.of(Path.of(Bukkit.getPluginsFolder().toURI())
         .toAbsolutePath().getParent().getParent().toString(), "skills");
+    public static final BlockData AIR_DATA = BlockType.AIR.createBlockData();
 
     private static final boolean turnOffAddons = false;
 
@@ -76,11 +80,11 @@ public class Main extends JavaPlugin {
 //            Bukkit.getPluginManager().registerEvents(petMgr, Main.main);
         }
 
-        diary = new MenuItemBuilder("diary", new ItemBuilder(Material.WRITTEN_BOOK)
+        diary = new MenuItemBuilder("diary", new ItemBuilder(ItemType.WRITTEN_BOOK)
             .name("§6Дневник").lore(Arrays.asList(" ", "§7С двойкой домой", "§7не приходить!")).glint(true).build())
             .slot(8).giveOnJoin(false).giveOnRespavn(true).giveOnWorld_change(false)
             .anycase(false).canDrop(false).canMove(true).canPickup(false)
-            .duplicate(false).rightClickCmd("role").leftClickCmd("menu").create();
+            .duplicate(false).rightClickCmd("skill menu").leftClickCmd("menu").create();
 
         mobs = new Mobs();
 

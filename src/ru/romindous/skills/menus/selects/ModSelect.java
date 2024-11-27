@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import ru.komiss77.utils.ItemBuilder;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;

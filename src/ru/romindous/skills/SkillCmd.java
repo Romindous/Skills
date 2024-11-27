@@ -426,7 +426,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                     sv.roleStamp = ApiOstrov.currentTimeSec();
                     sv.role = role;
 //                    QM.tryCompleteQuest(p, Quest.ClassChoose, 1, true);
-                    p.sendMessage(Main.prefix + "Теперь ты - " + role.getName());
+                    p.sendMessage(TCUtil.form(Main.prefix + "Теперь ты - " + role.getName()));
                     ScreenUtil.sendTitle(p, TCUtil.N + "Теперь ты - " + role.getName(), " ");
                     sv.recalcStats(p);
 //                    sv.setBarName("§7Класс: "+role.getName()+"§7, Уровень: "+role.stat.color()+sv.getLevel());

@@ -11,8 +11,8 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
     private static final Recipe[] none = new Recipe[0];
     
     public CraftBookMenu() {
-    	recType = new ItemBuilder(Material.BEACON).name("§bВсе Типы Крафтов").lore("§bЛКМ §7- отсортировать по", "§7другому способу крафта").build();
-    	//world = new ItemBuilder(Material.PEARLESCENT_FROGLIGHT).name("§aВсе Миры").lore("§aЛКМ §7- сменить мир").build();
+    	recType = new ItemBuilder(ItemType.BEACON).name("§bВсе Типы Крафтов").lore("§bЛКМ §7- отсортировать по", "§7другому способу крафта").build();
+    	//world = new ItemBuilder(ItemType.PEARLESCENT_FROGLIGHT).name("§aВсе Миры").lore("§aЛКМ §7- сменить мир").build();
     	page = 0;
 	}
 
@@ -28,32 +28,32 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
     		switch (recType.getType()) {
 			case BEACON:
 			default:
-				recType.setType(Material.CHEST);
+				recType.setType(ItemType.CHEST);
 				im = recType.getItemMeta();
 				im.displayName(Component.text("§dФормированые"));
 				break;
 			case CHEST:
-				recType.setType(Material.ENDER_CHEST);
+				recType.setType(ItemType.ENDER_CHEST);
 				im = recType.getItemMeta();
 				im.displayName(Component.text("§5Безформенные"));
 				break;
 			case ENDER_CHEST:
-				recType.setType(Material.FURNACE);
+				recType.setType(ItemType.FURNACE);
 				im = recType.getItemMeta();
 				im.displayName(Component.text("§6Печевые"));
 				break;
 			case FURNACE:
-				recType.setType(Material.SMITHING_TABLE);
+				recType.setType(ItemType.SMITHING_TABLE);
 				im = recType.getItemMeta();
 				im.displayName(Component.text("§fКующие"));
 				break;
 			case SMITHING_TABLE:
-				recType.setType(Material.STONECUTTER);
+				recType.setType(ItemType.STONECUTTER);
 				im = recType.getItemMeta();
 				im.displayName(Component.text("§7Режущие"));
 				break;
 			case STONECUTTER:
-				recType.setType(Material.BEACON);
+				recType.setType(ItemType.BEACON);
 				im = recType.getItemMeta();
 				im.displayName(Component.text("§bВсе Типы Крафтов"));
 				break;
@@ -70,7 +70,7 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
     	final LinkedList<Recipe> recList = new LinkedList<>();
     	for (final Entry<SubServer, Map<NamespacedKey, Recipe>> en : Crafts.crafts.entrySet()) {
     		if (en.getKey().ordinal() > Main.subServer.ordinal() && !ApiOstrov.isLocalBuilder(p, false)) continue;
-    		if (craftMat == Material.BEACON) {
+    		if (craftMat == ItemType.BEACON) {
             	for (final NamespacedKey key : en.getValue().keySet()) {
             		//p.sendMessage(key.getKey());
             		final Recipe rec = Bukkit.getRecipe(key);
@@ -93,14 +93,14 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
     	final int startRec = page * pgSize;
     	if (recs.length > startRec) {
     		if (page != 0) {
-    			its.set(pgSize + 10, ClickableItem.from(new ItemBuilder(Material.SPRUCE_PRESSURE_PLATE).name("§eКлик §7- пред. страница").build(), e -> {
+    			its.set(pgSize + 10, ClickableItem.from(new ItemBuilder(ItemType.SPRUCE_PRESSURE_PLATE).name("§eКлик §7- пред. страница").build(), e -> {
     				page--;
     				reopen(p, its);
     			}));
     		}
 
         	if (recs.length > startRec + pgSize) {
-    			its.set(pgSize + 16, ClickableItem.from(new ItemBuilder(Material.OAK_PRESSURE_PLATE).name("§eКлик §7- след. страница").build(), e -> {
+    			its.set(pgSize + 16, ClickableItem.from(new ItemBuilder(ItemType.OAK_PRESSURE_PLATE).name("§eКлик §7- след. страница").build(), e -> {
     				page++;
     				reopen(p, its);
     			}));
@@ -108,7 +108,7 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
         			final Recipe rc = recs[startRec + ri];
         			its.set(ri + 9, ClickableItem.from(rc.getResult().asOne(), e -> {
         				p.closeInventory();
-        				p.performCommand((ApiOstrov.isLocalBuilder(p, false) ? "craft edit " : "craft view ") + getKeyForType(rc, Material.BEACON).getKey());
+        				p.performCommand((ApiOstrov.isLocalBuilder(p, false) ? "craft edit " : "craft view ") + getKeyForType(rc, ItemType.BEACON).getKey());
         			}));
         		}
         	} else {
@@ -116,7 +116,7 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
         			final Recipe rc = recs[startRec + ri];
         			its.set(ri + 9, ClickableItem.from(rc.getResult().asOne(), e -> {
         				p.closeInventory();
-        				p.performCommand((ApiOstrov.isLocalBuilder(p, false) ? "craft edit " : "craft view ") + getKeyForType(rc, Material.BEACON).getKey());
+        				p.performCommand((ApiOstrov.isLocalBuilder(p, false) ? "craft edit " : "craft view ") + getKeyForType(rc, ItemType.BEACON).getKey());
         			}));
         		}
 			}
@@ -124,7 +124,7 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
     }
 
 	private static NamespacedKey getKeyForType(final Recipe rp, final Material tp) {
-    	if (tp == Material.BEACON) {
+    	if (tp == ItemType.BEACON) {
     		if (rp instanceof CookingRecipe) {
     			return ((CookingRecipe<?>) rp).getKey();
     		} else if (rp instanceof ShapedRecipe) {
@@ -144,13 +144,13 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
 				default:
 					return null;
 				}
-    		} else if (rp instanceof ShapedRecipe && tp == Material.CHEST) {
+    		} else if (rp instanceof ShapedRecipe && tp == ItemType.CHEST) {
     			return ((ShapedRecipe) rp).getKey();
-    		} else if (rp instanceof ShapelessRecipe && tp == Material.ENDER_CHEST) {
+    		} else if (rp instanceof ShapelessRecipe && tp == ItemType.ENDER_CHEST) {
     			return ((ShapelessRecipe) rp).getKey();
-    		} else if (rp instanceof StonecuttingRecipe && tp == Material.STONECUTTER) {
+    		} else if (rp instanceof StonecuttingRecipe && tp == ItemType.STONECUTTER) {
     			return ((StonecuttingRecipe) rp).getKey();
-    		} else if (rp instanceof SmithingRecipe && tp == Material.SMITHING_TABLE) {
+    		} else if (rp instanceof SmithingRecipe && tp == ItemType.SMITHING_TABLE) {
     			return ((SmithingRecipe) rp).getKey();
     		}
 		}
@@ -159,15 +159,15 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
 
 	private static Material getMatForType(final Recipe rp) {
 		if (rp instanceof CookingRecipe) {
-			return Material.FURNACE;
+			return ItemType.FURNACE;
 		} else if (rp instanceof ShapedRecipe) {
-			return Material.CHEST;
+			return ItemType.CHEST;
 		} else if (rp instanceof ShapelessRecipe) {
-			return Material.ENDER_CHEST;
+			return ItemType.ENDER_CHEST;
 		} else if (rp instanceof StonecuttingRecipe) {
-			return Material.STONECUTTER;
+			return ItemType.STONECUTTER;
 		} else if (rp instanceof SmithingRecipe) {
-			return Material.SMITHING_TABLE;
+			return ItemType.SMITHING_TABLE;
 		}
 		return null;
 	}
@@ -176,9 +176,9 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
     	final ItemStack[] its = new ItemStack[size];
     	for (int i = 0; i < size; i++) {
     		if (i < 9) {
-    			its[i] = new ItemBuilder((i & 1) == 1 ? Material.BROWN_STAINED_GLASS_PANE : Material.YELLOW_STAINED_GLASS_PANE).name("§0.").build();
+    			its[i] = new ItemBuilder((i & 1) == 1 ? ItemType.BROWN_STAINED_GLASS_PANE : ItemType.YELLOW_STAINED_GLASS_PANE).name("§0.").build();
     		} else if (i > size - 10) {
-    			its[i] = new ItemBuilder((i & 1) == 0 ? Material.BROWN_STAINED_GLASS_PANE : Material.YELLOW_STAINED_GLASS_PANE).name("§0.").build();
+    			its[i] = new ItemBuilder((i & 1) == 0 ? ItemType.BROWN_STAINED_GLASS_PANE : ItemType.YELLOW_STAINED_GLASS_PANE).name("§0.").build();
 			}
     	}
 		return its;

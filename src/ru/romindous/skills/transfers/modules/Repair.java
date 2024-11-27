@@ -57,7 +57,7 @@ public class Repair /*extends CuBlock*/ {/*
 	public void remove(final Entity ent) {
 		SM.cublocks.remove(ent.getEntityId());
 		final Location cbl = new Location(ent.getWorld(), loc.x, loc.y, loc.z);
-		cbl.getBlock().setType(Material.AIR);
+		cbl.getBlock().setBlockData(Main.AIR_DATA);
 		ent.getWorld().dropItemNaturally(cbl, cbt.blockItem);
 		if (!ItemUtil.isBlankItem(item, false)) {
     		ent.getWorld().dropItem(cbl.add(0.5d, 0.5d, 0.5d), item);

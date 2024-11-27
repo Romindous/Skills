@@ -8,9 +8,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemRoll;
+import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.utils.ClassUtil;
-import ru.komiss77.utils.ItemBuilder;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.ItemUtil;
 import ru.romindous.skills.mobs.SednaMob;
 
@@ -48,17 +49,16 @@ public class Infected extends SednaMob {
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_flesh", new ItemBuilder(ItemType.ROTTEN_FLESH).build(), 1, 1, 1), 1)
+        .add(new ItemRoll(key().value() + "_flesh", new ItemBuilder(ItemType.ROTTEN_FLESH).build(), 1, 1), 2)
         .add(RollTree.of(key().value() + "_extra")
-            .add(new ItemRoll(key().value() + "_paper", new ItemBuilder(ItemType.PAPER).build(), 2, 1, 1), 4)
-            .add(new ItemRoll(key().value() + "_hide", new ItemBuilder(ItemType.RABBIT_HIDE).build(), 2, 1), 2)
-            .add(new ItemRoll(key().value() + "_leather", new ItemBuilder(ItemType.LEATHER).build(), 4, 1), 1)
-            .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.WHEAT_SEEDS).build(), 2, 1), 1)
-            .add(new ItemRoll(key().value() + "_kelp", new ItemBuilder(ItemType.DRIED_KELP).build(), 1, 1, 2), 3)
-            .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.CHARCOAL).build(), 1, 1), 2)
-            .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.FLINT).build(), 2, 1), 1)
-            .build(1, 1), 1)
-        .build(1, 2);
+            .add(new ItemRoll(key().value() + "_paper", new ItemBuilder(ItemType.PAPER).build(), 1, 1), 2)
+            .add(new ItemRoll(key().value() + "_hide", new ItemBuilder(ItemType.RABBIT_HIDE).build(), 1, 0), 2)
+            .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.WHEAT_SEEDS).build(), 1, 0), 1)
+            .add(new ItemRoll(key().value() + "_kelp", new ItemBuilder(ItemType.DRIED_KELP).build(), 1, 2), 2)
+            .add(new ItemRoll(key().value() + "_coal", new ItemBuilder(ItemType.CHARCOAL).build(), 1, 0), 2)
+            .add(new ItemRoll(key().value() + "_flint", new ItemBuilder(ItemType.FLINT).build(), 1, 0), 1)
+            .build(1, 0), 1)
+        .add(new NARoll(), 1).build(1, 1);
 
     @Override
     public RollTree loot() {

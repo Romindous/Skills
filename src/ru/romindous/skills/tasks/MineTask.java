@@ -19,13 +19,13 @@ public class MineTask /*implements Task*/ {/*
     private static Material[] getMineStack() {
         switch (Main.subServer) {//unsafe
             case INFERNAL:
-                return new Material[]{Material.NETHER_QUARTZ_ORE, Material.NETHER_GOLD_ORE, Material.GLOWSTONE};
+                return new Material[]{ItemType.NETHER_QUARTZ_ORE, ItemType.NETHER_GOLD_ORE, ItemType.GLOWSTONE};
             case LOCUS:
-                return new Material[]{Material.DEEPSLATE_COPPER_ORE, Material.DEEPSLATE_REDSTONE_ORE, Material.DEEPSLATE_GOLD_ORE};
+                return new Material[]{ItemType.DEEPSLATE_COPPER_ORE, ItemType.DEEPSLATE_REDSTONE_ORE, ItemType.DEEPSLATE_GOLD_ORE};
             case TERRA:
-                return new Material[]{Material.IRON_ORE, Material.DIAMOND_ORE, Material.GLOWSTONE};
+                return new Material[]{ItemType.IRON_ORE, ItemType.DIAMOND_ORE, ItemType.GLOWSTONE};
             case WASTES:
-                return new Material[]{Material.COAL_ORE, Material.IRON_ORE, Material.COPPER_ORE};
+                return new Material[]{ItemType.COAL_ORE, ItemType.IRON_ORE, ItemType.COPPER_ORE};
             default:
                 return null;
         }

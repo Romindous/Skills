@@ -7,7 +7,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import ru.komiss77.utils.ItemBuilder;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
@@ -44,12 +44,12 @@ public class SkillMenu implements InventoryProvider {
 
     static {
         arrow = new ItemBuilder(ItemType.IRON_NUGGET).name("<black>.").build();
-        purple = new ItemBuilder(Material.PURPLE_STAINED_GLASS_PANE).name("§0.").build();
-        red = new ItemBuilder(Material.RED_STAINED_GLASS_PANE).name("§0.").build();
-        chain = new ItemBuilder(Material.CHAIN).name("§0.").build();
+        purple = new ItemBuilder(ItemType.PURPLE_STAINED_GLASS_PANE).name("§0.").build();
+        red = new ItemBuilder(ItemType.RED_STAINED_GLASS_PANE).name("§0.").build();
+        chain = new ItemBuilder(ItemType.CHAIN).name("§0.").build();
         empty = new ItemStack[54];
         for (int i = 0; i < 54; i++) {
-            //empty[i] = new ItemBuilder(i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8 ? ((i & 1) == 0 ? Material.PURPLE_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE) : Material.GRAY_STAINED_GLASS_PANE).name("§0.").build();
+            //empty[i] = new ItemBuilder(i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8 ? ((i & 1) == 0 ? ItemType.PURPLE_STAINED_GLASS_PANE : ItemType.RED_STAINED_GLASS_PANE) : ItemType.GRAY_STAINED_GLASS_PANE).name("§0.").build();
             //empty[i] = i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8  ?  ( (i & 1) == 0 ? purple : red) : gray;
             if (i < 9 || i > 44) {
                 empty[i] = (i & 1) == 0 ? purple : red;
@@ -66,14 +66,14 @@ public class SkillMenu implements InventoryProvider {
                 }
             }
         }
-        /*black = new ItemBuilder( Material.BLACK_STAINED_GLASS_PANE).name("§8не изучено").build();
-        gray = new ItemBuilder( Material.GRAY_STAINED_GLASS_PANE).name("§8не изучено").build();
-        know1 = new ItemBuilder( Material.GREEN_STAINED_GLASS_PANE).name("§fУров.1").build();
-        know2 = new ItemBuilder( Material.GREEN_STAINED_GLASS_PANE).name("§fУров.2").build();
-        know3 = new ItemBuilder( Material.GREEN_STAINED_GLASS_PANE).name("§fУров.3").build();
-        know4 = new ItemBuilder( Material.LIME_STAINED_GLASS_PANE).name("§fПолностью изучено!").build();
-        charge1 = new ItemBuilder( Material.BLUE_STAINED_GLASS_PANE).name("§cНабирает силу..").build();
-        charge2 = new ItemBuilder( Material.CYAN_STAINED_GLASS_PANE).name("§cНабирает силу..").build();*/
+        /*black = new ItemBuilder(ItemType.BLACK_STAINED_GLASS_PANE).name("§8не изучено").build();
+        gray = new ItemBuilder(ItemType.GRAY_STAINED_GLASS_PANE).name("§8не изучено").build();
+        know1 = new ItemBuilder(ItemType.GREEN_STAINED_GLASS_PANE).name("§fУров.1").build();
+        know2 = new ItemBuilder(ItemType.GREEN_STAINED_GLASS_PANE).name("§fУров.2").build();
+        know3 = new ItemBuilder(ItemType.GREEN_STAINED_GLASS_PANE).name("§fУров.3").build();
+        know4 = new ItemBuilder(ItemType.LIME_STAINED_GLASS_PANE).name("§fПолностью изучено!").build();
+        charge1 = new ItemBuilder(ItemType.BLUE_STAINED_GLASS_PANE).name("§cНабирает силу..").build();
+        charge2 = new ItemBuilder(ItemType.CYAN_STAINED_GLASS_PANE).name("§cНабирает силу..").build();*/
     }
 
     private static final int NEW_SKILL_LVL = 10;
@@ -101,7 +101,7 @@ public class SkillMenu implements InventoryProvider {
         //content.getInventory().setItem(49, new ItemBuilder(sv.skill.mat).name(sv.skill.color+sv.skill.name()).build());
         its.set(49, ClickableItem.from(
             new ItemBuilder(sv.role.getIcon()).lore("").lore(TCUtil.P + "Клик - Главное меню").build(), e-> {
-                p.performCommand("role");
+                p.performCommand("skill");
             }
         ));
 
@@ -349,7 +349,7 @@ public class SkillMenu implements InventoryProvider {
                     color = "§e§l";
                     break;
             }
-            content.set(ab.slot, ClickableItem.of(new ItemBuilder(abLevel == 0 ? Material.GUNPOWDER : (sv.isOn(ab) ? Material.GLOWSTONE_DUST : Material.REDSTONE))
+            content.set(ab.slot, ClickableItem.of(new ItemBuilder(abLevel == 0 ? ItemType.GUNPOWDER : (sv.isOn(ab) ? ItemType.GLOWSTONE_DUST : ItemType.REDSTONE))
             .name(color+ab.name() + (abLevel == 0 ? "" : " §d" + abLevel))
                     .lore(lore)
                     .build(), e -> {
@@ -376,13 +376,13 @@ public class SkillMenu implements InventoryProvider {
                                 scd = null;
                                 break;
                         }
-                        if (fst != null && fst.getType() == Material.GUNPOWDER) {
-                            fst.setType(Material.CRIMSON_ROOTS);
-                            Ostrov.sync(() -> fst.setType(Material.GUNPOWDER), 4);
+                        if (fst != null && fst.getType() == ItemType.GUNPOWDER) {
+                            fst.setType(ItemType.CRIMSON_ROOTS);
+                            Ostrov.sync(() -> fst.setType(ItemType.GUNPOWDER), 4);
                         }
-                        if (scd != null && scd.getType() == Material.GUNPOWDER) {
-                            scd.setType(Material.CRIMSON_ROOTS);
-                            Ostrov.sync(() -> scd.setType(Material.GUNPOWDER), 4);
+                        if (scd != null && scd.getType() == ItemType.GUNPOWDER) {
+                            scd.setType(ItemType.CRIMSON_ROOTS);
+                            Ostrov.sync(() -> scd.setType(ItemType.GUNPOWDER), 4);
                         }
                         return;
                     }

@@ -15,12 +15,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.Nullable;
 import ru.komiss77.OStrap;
-import ru.komiss77.modules.entities.EntityManager;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.items.ItemRoll;
+import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.world.AreaSpawner;
 import ru.komiss77.modules.world.WXYZ;
-import ru.komiss77.utils.*;
+import ru.komiss77.utils.ClassUtil;
+import ru.komiss77.utils.EntityUtil;
+import ru.komiss77.utils.ItemUtil;
+import ru.komiss77.utils.LocUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
 
@@ -29,17 +33,7 @@ public class Steed extends SednaMob {
     public final Infected RIDER = new Infected();
 
     private static final byte MIN_LIGHT = 4;
-    private final AreaSpawner spawn;
-
-    public Steed() {
-        super();
-        spawn = new Spawner() {
-            protected boolean extra(final WXYZ loc) {
-                return limit(loc) && loc.getBlock().getLightFromSky() > MIN_LIGHT;
-            }
-        };
-        EntityManager.register(this);
-    }
+    private AreaSpawner spawn;
 
     public String biome() {
         return "dry_ocean";
@@ -52,7 +46,11 @@ public class Steed extends SednaMob {
 
     @Override
     protected AreaSpawner spawner() {
-        return spawn;
+        return spawn == null ? spawn = new Spawner() {
+            protected boolean extra(final WXYZ loc) {
+                return limit(loc) && loc.getBlock().getLightFromSky() > MIN_LIGHT;
+            }
+        } : spawn;
     }
 
     @Override
@@ -66,10 +64,10 @@ public class Steed extends SednaMob {
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_flesh", new ItemStack(Material.ROTTEN_FLESH), 1, 2, 2), 4)
-        .add(new ItemRoll(key().value() + "_kelp", new ItemStack(Material.DRIED_KELP), 1, 1, 2), 2)
-        .add(new ItemRoll(key().value() + "_leather", new ItemStack(Material.LEATHER), 2, 1), 1)
-        .build(1, 2);
+        .add(new ItemRoll(key().value() + "_flesh", ItemType.ROTTEN_FLESH.createItemStack(), 2, 2), 6)
+        .add(new ItemRoll(key().value() + "_kelp", ItemType.DRIED_KELP.createItemStack(), 1, 2), 2)
+        .add(new ItemRoll(key().value() + "_leather", ItemType.LEATHER.createItemStack(), 1, 0), 1)
+        .add(new NARoll(), 2).build(1, 1);
 
     @Override
     protected void onAttack(final EntityDamageByEntityEvent e) {
@@ -185,17 +183,16 @@ public class Steed extends SednaMob {
         }
 
         private final RollTree drop = RollTree.of(key().value())
-            .add(new ItemRoll(key().value() + "_flesh", new ItemBuilder(ItemType.ROTTEN_FLESH).build(), 1, 1, 1), 1)
+            .add(new ItemRoll(key().value() + "_flesh", new ItemBuilder(ItemType.ROTTEN_FLESH).build(), 1, 1), 2)
             .add(RollTree.of(key().value() + "_extra")
-                .add(new ItemRoll(key().value() + "_paper", new ItemBuilder(ItemType.PAPER).build(), 2, 1, 1), 4)
-                .add(new ItemRoll(key().value() + "_hide", new ItemBuilder(ItemType.RABBIT_HIDE).build(), 2, 1), 2)
-                .add(new ItemRoll(key().value() + "_leather", new ItemBuilder(ItemType.LEATHER).build(), 4, 1), 1)
-                .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.WHEAT_SEEDS).build(), 2, 1), 1)
-                .add(new ItemRoll(key().value() + "_kelp", new ItemBuilder(ItemType.DRIED_KELP).build(), 1, 1, 2), 3)
-                .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.CHARCOAL).build(), 1, 1), 2)
-                .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.FLINT).build(), 2, 1), 1)
-                .build(1, 1), 1)
-            .build(1, 2);
+                .add(new ItemRoll(key().value() + "_paper", new ItemBuilder(ItemType.PAPER).build(), 1, 1), 2)
+                .add(new ItemRoll(key().value() + "_hide", new ItemBuilder(ItemType.RABBIT_HIDE).build(), 1, 0), 2)
+                .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.WHEAT_SEEDS).build(), 1, 0), 1)
+                .add(new ItemRoll(key().value() + "_kelp", new ItemBuilder(ItemType.DRIED_KELP).build(), 1, 2), 2)
+                .add(new ItemRoll(key().value() + "_coal", new ItemBuilder(ItemType.CHARCOAL).build(), 1, 0), 2)
+                .add(new ItemRoll(key().value() + "_flint", new ItemBuilder(ItemType.FLINT).build(), 1, 0), 1)
+                .build(1, 0), 1)
+            .add(new NARoll(), 1).build(1, 1);
 
         @Override
         public RollTree loot() {

@@ -1,7 +1,6 @@
 package ru.romindous.skills.menus;
 
 import java.util.List;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.Tag;
 import org.bukkit.block.ShulkerBox;
@@ -10,6 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerQuitEvent.QuitReason;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,8 +18,8 @@ import org.bukkit.potion.PotionType;
 import ru.komiss77.ApiOstrov;
 import ru.komiss77.LocalDB;
 import ru.komiss77.Ostrov;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
-import ru.komiss77.utils.ItemBuilder;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
@@ -41,7 +41,7 @@ public class WorldMenu implements InventoryProvider {
 
             if (!sv.isWorldOpen(ss)) {
                 content.set(ss.ordinal() / 3 + ss.ordinal(), ClickableItem.from(
-                    new ItemBuilder(Material.FIREWORK_STAR)
+                    new ItemBuilder(ItemType.FIREWORK_STAR)
                         .name("§7§k"+ss.displayName.substring(2))
                         .lore("§eДля открытия мира")
                         .lore("§eдобудьте или скрафтите ключ!")
@@ -108,21 +108,21 @@ public class WorldMenu implements InventoryProvider {
             switch (it.getType()) {
                 case WATER_BUCKET, AXOLOTL_BUCKET, COD_BUCKET,
                 PUFFERFISH_BUCKET, SALMON_BUCKET, TROPICAL_FISH_BUCKET:
-                	inv.setItem(i, it.withType(Material.BUCKET));
+                	inv.setItem(i, ItemType.BUCKET.createItemStack(it.getAmount()));
                     fnd = true;
                     break;
                 case POTION:
                     if (((PotionMeta) it.getItemMeta()).getBasePotionType() == PotionType.WATER) {
-                        inv.setItem(i, it.withType(Material.GLASS_BOTTLE));
+                        inv.setItem(i, ItemType.GLASS_BOTTLE.createItemStack(it.getAmount()));
                         fnd = true;
                     }
                     break;
                 case WET_SPONGE:
-                    inv.setItem(i, it.withType(Material.SPONGE));
+                    inv.setItem(i, ItemType.SPONGE.createItemStack(it.getAmount()));
                     fnd = true;
                     break;
                 case ICE:
-                    inv.setItem(i, it.withType(Material.GLASS));
+                    inv.setItem(i, ItemType.GLASS.createItemStack(it.getAmount()));
                     fnd = true;
                     break;
                 case BUNDLE:
@@ -135,21 +135,21 @@ public class WorldMenu implements InventoryProvider {
                         switch (st.getType()) {
                         case WATER_BUCKET, AXOLOTL_BUCKET, COD_BUCKET,
                          PUFFERFISH_BUCKET, SALMON_BUCKET, TROPICAL_FISH_BUCKET:
-                            bts.set(i, it.withType(Material.BUCKET));
+                            bts.set(i, ItemType.BUCKET.createItemStack(st.getAmount()));
                             inFnd = true;
                             break;
                         case POTION:
                             if (((PotionMeta) it.getItemMeta()).getBasePotionType() == PotionType.WATER) {
-                                bts.set(i, it.withType(Material.GLASS_BOTTLE));
+                                bts.set(i, ItemType.GLASS_BOTTLE.createItemStack(st.getAmount()));
                                 inFnd = true;
                             }
                             break;
                         case WET_SPONGE:
-                            bts.set(i, it.withType(Material.SPONGE));
+                            bts.set(i, ItemType.SPONGE.createItemStack(st.getAmount()));
                             inFnd = true;
                             break;
                         case ICE:
-                            bts.set(i, it.withType(Material.GLASS));
+                            bts.set(i, ItemType.GLASS.createItemStack(st.getAmount()));
                             inFnd = true;
                             break;
                         default:

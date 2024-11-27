@@ -6,12 +6,12 @@ public class Spread /*extends CuBlock*/ {/*
 	private static final BlockData air, vine, sens, shrk;
 	
 	static {
-		air = Material.AIR.createBlockData();
-		sens = Material.SCULK_SENSOR.createBlockData();
-		final SculkVein sv = (SculkVein) (vine = Material.SCULK_VEIN.createBlockData());
+		air = ItemType.AIR.createBlockData();
+		sens = ItemType.SCULK_SENSOR.createBlockData();
+		final SculkVein sv = (SculkVein) (vine = ItemType.SCULK_VEIN.createBlockData());
 		for (final BlockFace bf : sv.getAllowedFaces()) sv.setFace(bf, false);
 		sv.setFace(BlockFace.DOWN, true);
-		((SculkShrieker) (shrk = Material.SCULK_SHRIEKER.createBlockData())).setCanSummon(true);
+		((SculkShrieker) (shrk = ItemType.SCULK_SHRIEKER.createBlockData())).setCanSummon(true);
 	}
 	
 	public Spread(final Slime cube, final boolean load) {
@@ -55,7 +55,7 @@ public class Spread /*extends CuBlock*/ {/*
 					}
 					final Block b = bl.getBlock();
 					b.breakNaturally(Main.air, true);
-					b.setType(Material.SCULK, false);
+					b.setType(ItemType.SCULK, false);
 					in.playSound(bl, Sound.BLOCK_SCULK_PLACE, 2f, 0.8f);
 					if (VM.getNmsServer().getFastMat(in, lc.x, lc.y + 1, lc.z).isAir()) {
 						in.getBlockAt(lc.x, lc.y + 1, lc.z).setBlockData(bd, false);

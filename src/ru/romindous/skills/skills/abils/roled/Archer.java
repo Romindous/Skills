@@ -86,7 +86,7 @@ public class Archer implements Ability.AbilReg {
             }
             private final double range = value("range", 12d);
             private final int delay = value("delay", 12);
-            private final ItemStack arr = new ItemStack(Material.ARROW);
+            private final ItemStack arr = ItemType.ARROW);
             public boolean cast(final EntityCastEvent ece, final int lvl, final Skill sk, final int next) {
                 final LivingEntity caster = ch.caster();
                 final Location loc = ece.getLocation();

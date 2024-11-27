@@ -2,7 +2,7 @@ package ru.romindous.skills.enums;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import ru.komiss77.utils.ItemBuilder;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.objects.Scroll;
 import ru.romindous.skills.skills.abils.Ability;

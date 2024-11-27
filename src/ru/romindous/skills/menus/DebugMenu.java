@@ -17,32 +17,32 @@ public class DebugMenu /*implements InventoryProvider*/ {/*
     
 
     static {
-        sm = new ItemBuilder(Material.NETHER_STAR)
+        sm = new ItemBuilder(ItemType.NETHER_STAR)
                 .name("§7SM")
                 .lore(smLore)
                 .build();
         
-        land = new ItemBuilder(Material.WARPED_NYLIUM)
+        land = new ItemBuilder(ItemType.WARPED_NYLIUM)
                 .name("§7Land ")
                 .lore(landLore)
                 .build();
         
-        bots = new ItemBuilder(Material.PLAYER_HEAD)
+        bots = new ItemBuilder(ItemType.PLAYER_HEAD)
                 .name("§7Боты")
                 .lore(botsLore)
                 .build();
         
-        boss = new ItemBuilder(Material.DRAGON_HEAD)
+        boss = new ItemBuilder(ItemType.DRAGON_HEAD)
                 .name("§7Боссы " + (Main.bossMgr instanceof Bosses ? "§6(ванилька)" : "§b(мистика)") )
                 .lore(bossLore)
                 .build();
         
-        pets = new ItemBuilder(Material.LEAD)
+        pets = new ItemBuilder(ItemType.LEAD)
                 .name("§7Питомцы " + (Main.petMgr instanceof PetVanilla ? "§6(ванилька)" : "§b(MyPet)") )
                 .lore(petsLore)
                 .build();
         
-        adv = new ItemBuilder(Material.BEACON)
+        adv = new ItemBuilder(ItemType.BEACON)
                 .name("§7Ачивки " + (Main.advMgr instanceof AdvanceVanilla ? "§6(ванилька)" : "§b(CrazyAdv)") )
                 .lore(advLore)
                 .build();
@@ -158,7 +158,7 @@ public class DebugMenu /*implements InventoryProvider*/ {/*
         
         
         
-        content.set(8, ClickableItem.of(new ItemBuilder(Material.OAK_DOOR).name("назад").build(), e -> {
+        content.set(8, ClickableItem.of(new ItemBuilder(ItemType.OAK_DOOR).name("назад").build(), e -> {
                 PM.getOplayer(p).setup.lastEdit = "";
                 p.performCommand("builder");
             }

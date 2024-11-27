@@ -74,7 +74,7 @@ public class CuBlock implements Transfer {
     }
 
     public boolean isBlockOf(final Block b) {
-        return loc.x == b.getX() && loc.y == b.getY() && loc.z == b.getZ() && b.getType() == cbt.mat;
+        return loc.x == b.getX() && loc.y == b.getY() && loc.z == b.getZ() && b.getType().asBlockType().equals(cbt.mat);
     }
 
     public Slime getCube() {

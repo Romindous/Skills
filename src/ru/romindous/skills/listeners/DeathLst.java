@@ -161,7 +161,7 @@ public class DeathLst implements Listener {
 //        final float thresh = SRL_CH_DEL / Math.max(exp, 1);
         for (int d = Ostrov.random.nextInt((int) el.getDrops()) + 1; d != 0; d--) {
             for (final ItemStack it : sm.loot().genRolls(ItemStack.class)) {
-                loc.getWorld().dropItemNaturally(loc, it);
+                loc.getWorld().dropItem(loc, it);
             }
 
 //            if (Main.srnd.nextFloat() > thresh)
@@ -186,7 +186,7 @@ public class DeathLst implements Listener {
         }
 
         final TextColor tc = TCUtil.getTextColor(sc.rarity().color());
-        Nms.colorGlow(loc.getWorld().dropItemNaturally(loc, sc.drop(1)),
+        Nms.colorGlow(loc.getWorld().dropItem(loc, sc.drop(1)),
             NamedTextColor.nearestTo(tc), false);
     }
 

@@ -1,13 +1,14 @@
 package ru.romindous.skills.mobs.wastes;
 
 import java.util.Map;
-import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemRoll;
+import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
@@ -37,9 +38,9 @@ public class Boned extends SednaMob {
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_bone", new ItemStack(Material.BONE), 2, 1), 1)
-        .add(new ItemRoll(key().value() + "_meal", new ItemStack(Material.BONE_MEAL), 1, 1, 1), 2)
-        .build(1, 2);
+        .add(new ItemRoll(key().value() + "_bone", ItemType.BONE.createItemStack(), 1, 0), 1)
+        .add(new ItemRoll(key().value() + "_meal", ItemType.BONE_MEAL.createItemStack(), 0, 2), 2)
+        .add(new NARoll(), 4).build(1, 1);
 
     @Override
     public RollTree loot() {

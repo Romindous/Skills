@@ -13,7 +13,7 @@ public class DebugBotSpawn /*implements InventoryProvider*/ {/*
         for (final BotType bt : BotType.values()) {
 
             content.add( ClickableItem.from(
-                new ItemBuilder(Material.FIREWORK_STAR)
+                new ItemBuilder(ItemType.FIREWORK_STAR)
                     .name(bt.name())
                     .build(), e-> {
                         p.closeInventory();
@@ -27,7 +27,7 @@ public class DebugBotSpawn /*implements InventoryProvider*/ {/*
 
         
         
-        content.set(5, 4, ClickableItem.of(new ItemBuilder(Material.OAK_DOOR).name("назад").build(), e -> {
+        content.set(5, 4, ClickableItem.of(new ItemBuilder(ItemType.OAK_DOOR).name("назад").build(), e -> {
                 PM.getOplayer(p).setup.lastEdit = "Debug";
                 SkillCmd.openDebugMenu(p);
             }
