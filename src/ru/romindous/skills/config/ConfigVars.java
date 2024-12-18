@@ -19,8 +19,10 @@ public class ConfigVars {
     private static void loadKeys(final ConfigurationSection cs) {
         for (final String key : cs.getKeys(false)) {
             final ConfigurationSection child = cs.getConfigurationSection(key);
-//          Ostrov.log("loaded " + cs.getCurrentPath() + "." + key + " is " + cs.getDouble(key));
-            if (child == null) vars.put(cs.getCurrentPath() + "." + key, cs.getDouble(key));
+            if (child == null) {
+//                Bukkit.getConsoleSender().sendMessage("loaded " + cs.getCurrentPath() + "." + key + " is " + cs.getDouble(key));
+                vars.put(cs.getCurrentPath() + "." + key, cs.getDouble(key));
+            }
             else loadKeys(child);
         }
     }
@@ -39,6 +41,7 @@ public class ConfigVars {
 
     public static double get(final String id, final double value) {
         final Double d = vars.get(id);
+//        Bukkit.getConsoleSender().sendMessage("getting " + id + " is " + d + " or " + value);
         if (d == null) {
             vars.put(id, value);
             final OConfig config = Main.configManager.getNewConfig(conDir);

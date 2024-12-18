@@ -1,7 +1,16 @@
 package ru.romindous.skills.objects;
 
+import javax.annotation.Nullable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
+import io.papermc.paper.datacomponent.item.Tool;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.LivingEntity;
@@ -15,20 +24,25 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import ru.komiss77.modules.items.CustomMats;
+import ru.komiss77.OStrap;
+import ru.komiss77.modules.items.ItemBuilder;
+import ru.komiss77.modules.items.ItemGroup;
 import ru.komiss77.modules.rolls.Roll;
 import ru.komiss77.utils.EntityUtil;
-import ru.komiss77.modules.items.ItemBuilder;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.config.ConfigVars;
 
-public class SkillMats {
+public class SkillGroups {
 
     private static final String prefix = "item.";
 
-    public static class CrawlerMat extends CustomMats {
-        private CrawlerMat(final Integer cmd, final ItemStack... its) {
-            super(cmd, its);
+    public static class Crawler extends ItemGroup {
+        private Crawler(final ItemStack... its) {super(its);}
+
+        public void before() {}
+
+        public @Nullable List<Data<?>> data() {
+            return null;
         }
 
         protected void onAttack(final EquipmentSlot[] es, final EntityDamageByEntityEvent e) {}
@@ -39,19 +53,35 @@ public class SkillMats {
         protected void onPlace(final EquipmentSlot[] es, final BlockPlaceEvent e) {}
         protected void onExtra(final EquipmentSlot[] es, final PlayerEvent e) {}
     }
-    private static final int crawler_cmd = 101;
-    public static final CrawlerMat CRAWLER = new CrawlerMat(crawler_cmd,
-        new ItemBuilder(ItemType.MUTTON).name("§fПолзунина").modelData(crawler_cmd).build());
+    public static final Crawler CRAWLER = new Crawler(new ItemBuilder(ItemType.MUTTON).name("§fПолзунина").build());
 
-    private static final int medal_cmd = 110;
-    public static class MedalMat extends CustomMats {
-        private final int chance;
-        private final double thorns;
+    public static class Medaline extends ItemGroup {
+        private int chance;
+        private float gold_speed_mul;
+        private float gold_dur_mul;
+        private double thorns;
 
-        private MedalMat(final Integer cmd, final ItemStack... its) {
-            super(cmd, its);
+        private Medaline(final ItemStack... its) {super(its);}
+
+        public void before() {
             chance = itemConfig(this, "chance", 2);
+            gold_speed_mul = (float) itemConfig(this, "gold_speed_mul", 0.8d);
+            gold_dur_mul = (float) itemConfig(this, "gold_dur_mul", 1.4d);
             thorns = itemConfig(this, "thorn_dmg", 1.2d);
+        }
+
+        public List<Data<?>> data() {
+            return Arrays.asList(
+                new Data<Tool>(DataComponentTypes.TOOL, tl -> {
+                    final Tool.Builder tb = Tool.tool().defaultMiningSpeed(tl
+                        .defaultMiningSpeed()).damagePerBlock(tl.damagePerBlock());
+                    for (final Tool.Rule rl : tl.rules()) {
+                        if (rl.speed() == null) {tb.addRule(rl); continue;}
+                        tb.addRule(Tool.rule(rl.blocks(), rl.speed() * gold_speed_mul, rl.correctForDrops()));
+                    }
+                    return tb.build();
+                }),
+                new Data<Integer>(DataComponentTypes.MAX_DAMAGE, md -> (int) (md * gold_dur_mul)));
         }
 
         protected void onAttack(final EquipmentSlot[] es, final EntityDamageByEntityEvent e) {
@@ -61,18 +91,24 @@ public class SkillMats {
             }
         }
 
+        private static final Set<DamageType> DIRECT = Set.of(DamageType.PLAYER_ATTACK, DamageType.GENERIC, DamageType.STING,
+            DamageType.MOB_ATTACK, DamageType.MOB_ATTACK_NO_AGGRO, DamageType.PLAYER_EXPLOSION, DamageType.EXPLOSION, DamageType.MACE_SMASH);
+
         protected void onDefense(final EquipmentSlot[] es, final EntityDamageEvent e) {
             int i = 0;
             for (final EquipmentSlot s : es) {
                 switch (s) {
-                    case HEAD, CHEST, LEGS, FEET:
+                    case HEAD, CHEST, LEGS, FEET, BODY:
                         if (Roll.roll(chance)) i++;
                     default: break;
                 }
             }
-            if (e.getDamageSource().getCausingEntity() instanceof final LivingEntity le) {
+            if (i == 0) return;
+            final DamageSource ds = e.getDamageSource();
+            if (DIRECT.contains(ds.getDamageType()) && ds.getCausingEntity() instanceof final LivingEntity le) {
                 le.damage(thorns * i, DamageSource.builder(DamageType.THORNS)
-                        .withCausingEntity(e.getEntity()).withDirectEntity(e.getEntity()).build());
+                    .withCausingEntity(e.getEntity()).withDirectEntity(e.getEntity()).build());
+                EntityUtil.effect(le, Sound.ENTITY_ENDER_EYE_DEATH, 1.6f, Particle.ELECTRIC_SPARK);
             }
         }
 
@@ -82,32 +118,66 @@ public class SkillMats {
         protected void onPlace(final EquipmentSlot[] es, final BlockPlaceEvent e) {}
         protected void onExtra(final EquipmentSlot[] es, final PlayerEvent e) {}
     }
-    public static final MedalMat MEDAL = new MedalMat(medal_cmd,
-        new ItemBuilder(ItemType.GOLD_NUGGET).name("§fКусочек медалина").modelData(medal_cmd).build(), 
-        new ItemBuilder(ItemType.GLOWSTONE_DUST).name("§fМедалиновая пыль").modelData(medal_cmd).build(), 
-        new ItemBuilder(ItemType.GOLDEN_SWORD).name("§fМедалиновая меч").modelData(medal_cmd).build(),
-        new ItemBuilder(ItemType.GOLDEN_PICKAXE).name("§fМедалиновая кирка").modelData(medal_cmd).build(),
-        new ItemBuilder(ItemType.GOLDEN_AXE).name("§fМедалиновый топор").modelData(medal_cmd).build(),
-        new ItemBuilder(ItemType.GOLDEN_HOE).name("§fМедалиновый посох").modelData(medal_cmd).build(),
-        new ItemBuilder(ItemType.GOLDEN_SHOVEL).name("§fМедалиновая лопата").modelData(medal_cmd).build(),
-        new ItemBuilder(ItemType.GOLDEN_HELMET).name("§fМедалиновый шлем").modelData(medal_cmd).build(),
-        new ItemBuilder(ItemType.GOLDEN_CHESTPLATE).name("§fМедалиновый нагрудник").modelData(medal_cmd).build(),
-        new ItemBuilder(ItemType.GOLDEN_LEGGINGS).name("§fМедалиновые поножи").modelData(medal_cmd).build(),
-        new ItemBuilder(ItemType.GOLDEN_BOOTS).name("§fМедалиновые ботинки").modelData(medal_cmd).build());
+    public static final Medaline MEDAL = new Medaline(
+        new ItemBuilder(ItemType.GOLD_NUGGET).name("§fКусочек медалина").build(),
+        new ItemBuilder(ItemType.GLOWSTONE_DUST).name("§fМедалиновая пыль").build(),
+        new ItemBuilder(ItemType.GOLDEN_SWORD).name("§fМедалиновый меч").build(),
+        new ItemBuilder(ItemType.GOLDEN_PICKAXE).name("§fМедалиновая кирка").build(),
+        new ItemBuilder(ItemType.GOLDEN_AXE).name("§fМедалиновый топор").build(),
+        new ItemBuilder(ItemType.GOLDEN_HOE).name("§fМедалиновый посох").build(),
+        new ItemBuilder(ItemType.GOLDEN_SHOVEL).name("§fМедалиновая лопата").build(),
+        new ItemBuilder(ItemType.GOLDEN_HELMET).name("§fМедалиновый шлем").build(),
+        new ItemBuilder(ItemType.GOLDEN_CHESTPLATE).name("§fМедалиновый нагрудник").build(),
+        new ItemBuilder(ItemType.GOLDEN_LEGGINGS).name("§fМедалиновые поножи").build(),
+        new ItemBuilder(ItemType.GOLDEN_BOOTS).name("§fМедалиновые ботинки").build());
 
-    private static final int silver_cmd = 120;
-    public static class SilverMat extends CustomMats {
-        private final int chance;
+    public static class Serebrite extends ItemGroup {
+        private int chance;
+        private int arm_tough;
+        private float iron_dur_mul;
+        private float iron_speed_mul;
 
-        private SilverMat(final Integer cmd, final ItemStack... its) {
-            super(cmd, its);
+        private Serebrite(final ItemStack... its) {super(its);}
+
+        public void before() {
             chance = itemConfig(this, "chance", 8);
+            arm_tough = itemConfig(this, "arm_tough", 1);
+            iron_dur_mul = (float) itemConfig(this, "iron_dur_mul", 0.8d);
+            iron_speed_mul = (float) itemConfig(this, "iron_speed_mul", 1.2d);
+        }
+
+        public List<Data<?>> data() {
+            return Arrays.asList(
+                new Data<Tool>(DataComponentTypes.TOOL, tl -> {
+                    final Tool.Builder tb = Tool.tool().defaultMiningSpeed(tl
+                        .defaultMiningSpeed()).damagePerBlock(tl.damagePerBlock());
+                    for (final Tool.Rule rl : tl.rules()) {
+                        if (rl.speed() == null) {tb.addRule(rl); continue;}
+                        tb.addRule(Tool.rule(rl.blocks(), rl.speed() * iron_speed_mul, rl.correctForDrops()));
+                    }
+                    return tb.build();
+                }),
+                new Data<ItemAttributeModifiers>(DataComponentTypes.ATTRIBUTE_MODIFIERS, ats -> {
+                    final ItemAttributeModifiers.Builder tb = ItemAttributeModifiers
+                        .itemAttributes().showInTooltip(ats.showInTooltip());
+                    for (final ItemAttributeModifiers.Entry en : ats.modifiers()) {
+                        tb.addModifier(en.attribute(), en.modifier(), en.getGroup());
+                        if (Attribute.ARMOR.equals(en.attribute())) {
+                            final AttributeModifier am = en.modifier();
+                            tb.addModifier(Attribute.ARMOR_TOUGHNESS, new AttributeModifier(OStrap.key(key()),
+                                arm_tough, AttributeModifier.Operation.ADD_NUMBER, am.getSlotGroup()), en.getGroup());
+                        }
+                    }
+                    return tb.build();
+                }),
+                new Data<Integer>(DataComponentTypes.MAX_DAMAGE, md -> (int) (md * iron_dur_mul)));
         }
 
         protected void onAttack(final EquipmentSlot[] es, final EntityDamageByEntityEvent e) {
             if (has(es, EquipmentSlot.HAND) && Roll.roll(chance)
                 && e.getDamageSource().getCausingEntity() instanceof final LivingEntity le) {
                 final LivingEntity mini = Main.mobs.MINI_SILVERFISH.spawn(e.getEntity().getLocation(), le);
+                EntityUtil.effect(le, Sound.ENTITY_SILVERFISH_AMBIENT, 0.6f, Particle.CAMPFIRE_COSY_SMOKE);
                 mini.setNoDamageTicks(10);
             }
         }
@@ -122,6 +192,7 @@ public class SkillMats {
             }
             if (spawn && e.getEntity() instanceof final LivingEntity le) {
                 final LivingEntity mini = Main.mobs.MINI_SILVERFISH.spawn(le.getLocation(), le);
+                EntityUtil.effect(le, Sound.ENTITY_SILVERFISH_AMBIENT, 0.6f, Particle.CAMPFIRE_COSY_SMOKE);
                 mini.setNoDamageTicks(10);
             }
         }
@@ -131,35 +202,33 @@ public class SkillMats {
         protected void onPlace(final EquipmentSlot[] es, final BlockPlaceEvent e) {}
         protected void onExtra(final EquipmentSlot[] es, final PlayerEvent e) {}
     }
-    public static final SilverMat SILVER = new SilverMat(silver_cmd,
-        new ItemBuilder(ItemType.IRON_NUGGET).name("§fКусочек серебрита").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.IRON_INGOT).name("§fСеребритовый слиток").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.RAW_IRON).name("§fРудный серебрит").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.SUGAR).name("§fСеребритовая пыль").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.IRON_SWORD).name("§fСеребритовая меч").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.IRON_PICKAXE).name("§fСеребритовая кирка").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.IRON_AXE).name("§fСеребритовый топор").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.IRON_PICKAXE).name("§fСеребритовый посох").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.IRON_SHOVEL).name("§fСеребритовая лопата").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.CHAINMAIL_HELMET).name("§fСеребритовый шлем").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.CHAINMAIL_CHESTPLATE).name("§fСеребритовый нагрудник").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.CHAINMAIL_LEGGINGS).name("§fСеребритовые поножи").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.CHAINMAIL_BOOTS).name("§fСеребритовые ботинки").modelData(silver_cmd).glint(true).build(),
-        new ItemBuilder(ItemType.PHANTOM_MEMBRANE).name("§fСеребритовая чешуя").modelData(silver_cmd).glint(true).build());
+    public static final Serebrite SILVER = new Serebrite(
+        new ItemBuilder(ItemType.IRON_NUGGET).name("§fКусочек серебрита").glint(true).build(),
+        new ItemBuilder(ItemType.IRON_INGOT).name("§fСеребритовый слиток").glint(true).build(),
+        new ItemBuilder(ItemType.RAW_IRON).name("§fРудный серебрит").glint(true).build(),
+        new ItemBuilder(ItemType.SUGAR).name("§fСеребритовая пыль").glint(true).build(),
+        new ItemBuilder(ItemType.IRON_SWORD).name("§fСеребритовая меч").glint(true).build(),
+        new ItemBuilder(ItemType.IRON_PICKAXE).name("§fСеребритовая кирка").glint(true).build(),
+        new ItemBuilder(ItemType.IRON_AXE).name("§fСеребритовый топор").glint(true).build(),
+        new ItemBuilder(ItemType.IRON_HOE).name("§fСеребритовый посох").glint(true).build(),
+        new ItemBuilder(ItemType.IRON_SHOVEL).name("§fСеребритовая лопата").glint(true).build(),
+        new ItemBuilder(ItemType.CHAINMAIL_HELMET).name("§fСеребритовый шлем").glint(true).build(),
+        new ItemBuilder(ItemType.CHAINMAIL_CHESTPLATE).name("§fСеребритовый нагрудник").glint(true).build(),
+        new ItemBuilder(ItemType.CHAINMAIL_LEGGINGS).name("§fСеребритовые поножи").glint(true).build(),
+        new ItemBuilder(ItemType.CHAINMAIL_BOOTS).name("§fСеребритовые ботинки").glint(true).build(),
+        new ItemBuilder(ItemType.PHANTOM_MEMBRANE).name("§fСеребритовая чешуя").glint(true).build());
 
 
     public static boolean has(final EquipmentSlot[] ess, final EquipmentSlot e) {
-        for (final EquipmentSlot es : ess) {
-            if (es == e) return true;
-        }
+        for (final EquipmentSlot es : ess) if (es == e) return true;
         return false;
     }
 
-    public static int itemConfig(final CustomMats cm, final String id, final int val) {
+    public static int itemConfig(final ItemGroup cm, final String id, final int val) {
         return ConfigVars.get(prefix + cm.key().value() + "." + id, val);
     }
 
-    public static double itemConfig(final CustomMats cm, final String id, final double val) {
+    public static double itemConfig(final ItemGroup cm, final String id, final double val) {
         return ConfigVars.get(prefix + cm.key().value() + "." + id, val);
     }
 

@@ -1,6 +1,7 @@
 package ru.romindous.skills.objects;
 
 import javax.annotation.Nullable;
+import net.kyori.adventure.key.Key;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
@@ -32,8 +33,8 @@ public interface Scroll {
     }
 
     default ItemStack drop(final int lvl) {
-        return new ItemBuilder(icon()).name(name(lvl)).lore(desc(lvl)).data(data(), id())
-            .data(LVL, lvl).lore(TCUtil.P + "ПКМ " + TCUtil.N + "- присвоить").build();
+        return new ItemBuilder(icon()).name(name(lvl)).lore(desc(lvl)).data(Key.key(data()), id())
+            .data(Key.key(LVL), lvl).lore(TCUtil.P + "ПКМ " + TCUtil.N + "- присвоить").build();
     }
 
     ItemType icon();

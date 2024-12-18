@@ -94,19 +94,6 @@ public class MainMenu implements InventoryProvider {
         }
 
         content.set(13, ability);
-        /*content.set(13, ClickableItem.of(new ItemBuilder(ItemType.FIRE_CORAL)
-                .name("§4<obf>k</obf>§c Древо Навыков §4<obf>k")
-                .lore("§6ЛКМ §7- навыки класса")
-                .build(), e -> {
-                    //p.closeInventory();
-            //if (e.isLeftClick()) {
-                p.performCommand("skill ability");
-            //} else {
-            //    p.performCommand("sedna skill ВСЕ");
-            //}
-        }));   */     
-        
-        
         
         content.set(20, ClickableItem.from(new ItemBuilder(ItemType.TOTEM_OF_UNDYING).name("§6<obf>k</obf>§e Статистика §6<obf>k")
             .lore("")
@@ -123,7 +110,6 @@ public class MainMenu implements InventoryProvider {
         content.set(24, worlds);
         
         content.set(31, Main.petMgr.getMenuItem(p));
-        
 
         //табло
         content.set(38, ClickableItem.from(new ItemBuilder(sv.showScoreBoard ? ItemType.GLOW_ITEM_FRAME : ItemType.ITEM_FRAME).name("§7Отображение Табло")
@@ -164,12 +150,6 @@ public class MainMenu implements InventoryProvider {
                 }
         }));
         
-        
-        
-        
-        
-        
-        
         /*content.set(42, ClickableItem.from(new ItemBuilder(ItemType.WRITABLE_BOOK).name("§c<obf>k</obf>§e Книга Изделий §c<obf>k")
             .lore("")
             .lore("§6ЛКМ §7- посмотреть крафты")
@@ -182,7 +162,6 @@ public class MainMenu implements InventoryProvider {
                     }
                 }
         }));*/
-        
         
         final List<String> lore = new ArrayList<>();
         final int level = sv.getLevel();
@@ -210,9 +189,7 @@ public class MainMenu implements InventoryProvider {
                 .build()
                 )
             );
-            
         } else {
-            
             if (PM.getOplayer(p).hasGroup("legend")) {
                 lore.add("§6ЛКМ §7- сменить без штрафа");
             } else {
@@ -229,16 +206,5 @@ public class MainMenu implements InventoryProvider {
                 )
             );            
         }
-        
-
-
-        
-        
-        
     }
-
-
-
-    
-    
 }

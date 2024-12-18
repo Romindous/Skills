@@ -58,7 +58,8 @@ public class Infected extends SednaMob {
             .add(new ItemRoll(key().value() + "_coal", new ItemBuilder(ItemType.CHARCOAL).build(), 1, 0), 2)
             .add(new ItemRoll(key().value() + "_flint", new ItemBuilder(ItemType.FLINT).build(), 1, 0), 1)
             .build(1, 0), 1)
-        .add(new NARoll(), 1).build(1, 1);
+        .add(new NARoll(), 1)
+        .build(1, 1);
 
     @Override
     public RollTree loot() {

@@ -21,7 +21,7 @@ import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
-import ru.romindous.skills.objects.SkillMats;
+import ru.romindous.skills.objects.SkillGroups;
 
 public class Hiverfish extends SednaMob {
 
@@ -74,7 +74,7 @@ public class Hiverfish extends SednaMob {
 
     private final RollTree drop = RollTree.of(key().value())
         .add(new ItemRoll(key().value() + "_bone", new ItemBuilder(ItemType.BONE).build(), 1, 0), 2)
-        .add(new ItemRoll(key().value() + "_scales", SkillMats.SILVER.item(ItemType.PHANTOM_MEMBRANE), 1, 1), 1)
+        .add(new ItemRoll(key().value() + "_scales", SkillGroups.SILVER.item(ItemType.PHANTOM_MEMBRANE), 1, 1), 1)
         .add(new ItemRoll(key().value() + "_meal", new ItemBuilder(ItemType.BONE_MEAL).build(), 1, 1), 4)
         .add(new NARoll(), 4).build(1, 1);
 

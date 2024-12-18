@@ -168,9 +168,6 @@ public abstract class SednaMob extends CustomEntity {
     protected void onShoot(final ProjectileLaunchEvent e) {}
 
     @Override
-    protected void onPot(final EntityPotionEffectEvent e) {}
-
-    @Override
     protected void onExtra(final EntityEvent e) {}
 
     public int mobConfig(final String id, final int val) {

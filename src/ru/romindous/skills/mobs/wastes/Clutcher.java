@@ -23,7 +23,7 @@ import ru.komiss77.modules.items.ItemRoll;
 import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.romindous.skills.mobs.SednaMob;
-import ru.romindous.skills.objects.SkillMats;
+import ru.romindous.skills.objects.SkillGroups;
 
 public class Clutcher extends SednaMob {
 
@@ -154,7 +154,7 @@ public class Clutcher extends SednaMob {
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_scales", SkillMats.SILVER.item(ItemType.PHANTOM_MEMBRANE), 1, 0), 1)
+        .add(new ItemRoll(key().value() + "_scales", SkillGroups.SILVER.item(ItemType.PHANTOM_MEMBRANE), 1, 0), 1)
         .add(new ItemRoll(key().value() + "_meal", new ItemBuilder(ItemType.BONE_MEAL).build(), 1, 0), 4)
         .add(new NARoll(), 4).build(1, 1);
 

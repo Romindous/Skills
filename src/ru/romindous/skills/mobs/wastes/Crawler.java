@@ -18,7 +18,7 @@ import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.utils.FastMath;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
-import ru.romindous.skills.objects.SkillMats;
+import ru.romindous.skills.objects.SkillGroups;
 
 public class Crawler extends SednaMob {
 
@@ -73,7 +73,7 @@ public class Crawler extends SednaMob {
 
     private final RollTree drop = RollTree.of(key().value())
         .add(new ItemRoll(key().value() + "_string", new ItemBuilder(ItemType.STRING).build(), 0, 2), 4)
-        .add(new ItemRoll(key().value() + "_meat", SkillMats.CRAWLER.item(ItemType.MUTTON), 1, 0), 1)
+        .add(new ItemRoll(key().value() + "_meat", SkillGroups.CRAWLER.item(ItemType.MUTTON), 1, 0), 1)
         .add(new ItemRoll(key().value() + "_eye", new ItemBuilder(ItemType.SPIDER_EYE).build(), 1, 0), 2)
         .add(new NARoll(), 4).build(1, 1);
 
