@@ -11,16 +11,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import ru.komiss77.ApiOstrov;
 import ru.komiss77.Ostrov;
 import ru.komiss77.Timer;
 import ru.komiss77.enums.Data;
 import ru.komiss77.events.FriendTeleportEvent;
 import ru.komiss77.events.LocalDataLoadEvent;
+import ru.komiss77.modules.player.Oplayer;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.modules.world.XYZ;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.MoveUtil;
+import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.ScreenUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.SM;
@@ -47,7 +48,9 @@ public class MySqlLst implements Listener {
     public void onJoin (final PlayerJoinEvent e) {
         Ostrov.sync(() -> {
             final Player pl = e.getPlayer();
-            new LocalDataLoadEvent(pl, PM.getOplayer(pl), pl.getLocation()).callEvent();
+            final Oplayer op = PM.getOplayer(pl);
+            op.firstJoin = true;
+            new LocalDataLoadEvent(pl, op, pl.getLocation()).callEvent();
         }, 20);
     }
     
@@ -112,7 +115,7 @@ public class MySqlLst implements Listener {
                             Ostrov.log_err("decode skill data stats: Stats==null -> "+s);
                             continue;
                         }
-                        final int val = ApiOstrov.getInteger(s.substring(eqn + 1), 0);
+                        final int val = NumUtil.intOf(s.substring(eqn + 1), 0);
                         sv.setStat(st, val);
                     }
                     break;
@@ -128,7 +131,7 @@ public class MySqlLst implements Listener {
                         final Skill fsk;
                         switch (skl.length) {
                             default:
-                                cd = ApiOstrov.getInteger(skl[5], 0);
+                                cd = NumUtil.intOf(skl[5], 0);
                             case 5:
                                 for (final String md : skl[4].split(and)) {
                                     final int eqn = md.indexOf(lvl);
@@ -142,7 +145,7 @@ public class MySqlLst implements Listener {
                                         continue;
                                     }
                                     sels.add(new Selector.SelState(m,
-                                        ApiOstrov.getInteger(md.substring(eqn + 1), 0)));
+                                        NumUtil.intOf(md.substring(eqn + 1), 0)));
                                 }
                             case 4:
                                 for (final String md : skl[3].split(and)) {
@@ -157,7 +160,7 @@ public class MySqlLst implements Listener {
                                         continue;
                                     }
                                     mods.add(new Modifier.ModState(m,
-                                        ApiOstrov.getInteger(md.substring(eqn + 1), 0)));
+                                        NumUtil.intOf(md.substring(eqn + 1), 0)));
                                 }
                             case 3:
                                 for (final String ab : skl[2].split(and)) {
@@ -172,7 +175,7 @@ public class MySqlLst implements Listener {
                                         continue;
                                     }
                                     abils.add(new Ability.AbilState(a,
-                                        ApiOstrov.getInteger(ab.substring(eqn + 1), 0)));
+                                        NumUtil.intOf(ab.substring(eqn + 1), 0)));
                                 }
                             case 2:
                                 trig = Trigger.get(skl[1]);
@@ -195,7 +198,7 @@ public class MySqlLst implements Listener {
                             continue;
                         }
                         sv.abils.add(new Ability.AbilState(a,
-                                ApiOstrov.getInteger(sk.substring(eqn + 1), 0)));*/
+                                NumUtil.intOf(sk.substring(eqn + 1), 0)));*/
                     }
                     break;
                 case "sels":
@@ -206,7 +209,7 @@ public class MySqlLst implements Listener {
                             Ostrov.log_err("decode sels 1st split error -> "+md);
                             continue;
                         }
-                        final int amt = ApiOstrov.getInteger(md.substring(0, eqn1), 0);
+                        final int amt = NumUtil.intOf(md.substring(0, eqn1), 0);
                         if (amt == 0) {
                             Ostrov.log_err("decode sels num is 0 -> "+md);
                             continue;
@@ -223,7 +226,7 @@ public class MySqlLst implements Listener {
                             continue;
                         }
                         sv.sels.put(new Selector.SelState(s,
-                            ApiOstrov.getInteger(md.substring(eqn2 + 1), 0)), amt);
+                            NumUtil.intOf(md.substring(eqn2 + 1), 0)), amt);
                     }
                     break;
                 case "abils":
@@ -234,7 +237,7 @@ public class MySqlLst implements Listener {
                             Ostrov.log_err("decode abils 1st split error -> "+ab);
                             continue;
                         }
-                        final int amt = ApiOstrov.getInteger(ab.substring(0, eqn1), 0);
+                        final int amt = NumUtil.intOf(ab.substring(0, eqn1), 0);
                         if (amt == 0) {
                             Ostrov.log_err("decode abils num is 0 -> "+ab);
                             continue;
@@ -251,7 +254,7 @@ public class MySqlLst implements Listener {
                             continue;
                         }
                         sv.abils.put(new Ability.AbilState(a,
-                            ApiOstrov.getInteger(ab.substring(eqn2 + 1), 0)), amt);
+                            NumUtil.intOf(ab.substring(eqn2 + 1), 0)), amt);
                     }
                     break;
                 case "mods":
@@ -262,7 +265,7 @@ public class MySqlLst implements Listener {
                             Ostrov.log_err("decode mods 1st split error -> "+md);
                             continue;
                         }
-                        final int amt = ApiOstrov.getInteger(md.substring(0, eqn1), 0);
+                        final int amt = NumUtil.intOf(md.substring(0, eqn1), 0);
                         if (amt == 0) {
                             Ostrov.log_err("decode mods num is 0 -> "+md);
                             continue;
@@ -279,7 +282,7 @@ public class MySqlLst implements Listener {
                             continue;
                         }
                         sv.mods.put(new Modifier.ModState(m,
-                            ApiOstrov.getInteger(md.substring(eqn2 + 1), 0)), amt);
+                            NumUtil.intOf(md.substring(eqn2 + 1), 0)), amt);
                     }
                     break;
                 case "data":
@@ -292,25 +295,25 @@ public class MySqlLst implements Listener {
 
                         switch (dt.substring(0, eqn)) {
                             case "exp":
-                                sv.setXp(p, ApiOstrov.getInteger(dt.substring(eqn + 1), 0));
+                                sv.setXp(p, NumUtil.intOf(dt.substring(eqn + 1), 0));
                                 break;
                             case "mana":
-                                sv.setMana(p, ApiOstrov.getInteger(dt.substring(eqn + 1), 0));
+                                sv.setMana(p, NumUtil.intOf(dt.substring(eqn + 1), 0));
                                 break;
                             case "mobKills":
-                                sv.mobKills = ApiOstrov.getInteger(dt.substring(eqn + 1), 0);
+                                sv.mobKills = NumUtil.intOf(dt.substring(eqn + 1), 0);
                                 break;
                             case "deaths":
-                                sv.deaths = ApiOstrov.getInteger(dt.substring(eqn + 1), 0);
+                                sv.deaths = NumUtil.intOf(dt.substring(eqn + 1), 0);
                                 break;
                             case "statPoints":
-                                sv.statsPoints = ApiOstrov.getInteger(dt.substring(eqn + 1), 0);
+                                sv.statsPoints = NumUtil.intOf(dt.substring(eqn + 1), 0);
                                 break;
                             case "worldOpen":
-                                sv.worldOpen = ApiOstrov.getInteger(dt.substring(eqn + 1), 0);
+                                sv.worldOpen = NumUtil.intOf(dt.substring(eqn + 1), 0);
                                 break;
                             case "roleStamp":
-                                sv.roleStamp = ApiOstrov.getInteger(dt.substring(eqn + 1), 0);
+                                sv.roleStamp = NumUtil.intOf(dt.substring(eqn + 1), 0);
                                 break;
                             case "board":
                                 sv.showScoreBoard = Boolean.parseBoolean(dt.substring(eqn + 1));

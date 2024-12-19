@@ -7,6 +7,7 @@ import java.util.Set;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemAttributeModifiers;
 import io.papermc.paper.datacomponent.item.Tool;
+import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
@@ -86,13 +87,14 @@ public class SkillGroups {
 
         protected void onAttack(final EquipmentSlot[] es, final EntityDamageByEntityEvent e) {
             if (has(es, EquipmentSlot.HAND) && Roll.roll(chance)) {
+                Bukkit.getConsoleSender().sendMessage("d-" + e.getDamage() + " - " + thorns);
                 e.setDamage(e.getDamage() + thorns);
                 EntityUtil.effect(e.getEntity(), Sound.ENTITY_ENDER_EYE_DEATH, 1.6f, Particle.ELECTRIC_SPARK);
             }
         }
 
-        private static final Set<DamageType> DIRECT = Set.of(DamageType.PLAYER_ATTACK, DamageType.GENERIC, DamageType.STING,
-            DamageType.MOB_ATTACK, DamageType.MOB_ATTACK_NO_AGGRO, DamageType.PLAYER_EXPLOSION, DamageType.EXPLOSION, DamageType.MACE_SMASH);
+        private static final Set<DamageType> DIRECT = Set.of(DamageType.PLAYER_ATTACK, DamageType.STING,
+            DamageType.MOB_ATTACK, DamageType.MOB_ATTACK_NO_AGGRO, DamageType.MACE_SMASH);
 
         protected void onDefense(final EquipmentSlot[] es, final EntityDamageEvent e) {
             int i = 0;
@@ -103,6 +105,7 @@ public class SkillGroups {
                     default: break;
                 }
             }
+            Bukkit.getConsoleSender().sendMessage("i-" + i);
             if (i == 0) return;
             final DamageSource ds = e.getDamageSource();
             if (DIRECT.contains(ds.getDamageType()) && ds.getCausingEntity() instanceof final LivingEntity le) {

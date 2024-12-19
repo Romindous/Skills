@@ -10,10 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import ru.komiss77.ApiOstrov;
 import ru.komiss77.modules.player.PM;
-import ru.komiss77.utils.EntityUtil;
-import ru.komiss77.utils.ScreenUtil;
-import ru.komiss77.utils.TCUtil;
-import ru.komiss77.utils.TimeUtil;
+import ru.komiss77.utils.*;
 import ru.komiss77.utils.inventory.ConfirmationGUI;
 import ru.komiss77.utils.inventory.SmartInventory;
 import ru.romindous.skills.enums.Role;
@@ -207,7 +204,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                     cs.sendMessage("§cОшибка загрузки данных игрока "+arg[3]+" : loadError");
                     return true;
                 }
-                final int ammount = ApiOstrov.getInteger(arg[2], 1);
+                final int ammount = NumUtil.intOf(arg[2], 1);
                 if (ammount<1 || ammount>10000) {
                     cs.sendMessage("§cammount от 1 до 10000");
                     return true;
@@ -270,7 +267,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                     cs.sendMessage("§cНет свитка с названием " + arg[2]);
                     return true;
                 }
-                pl.getWorld().dropItem(EntityUtil.center(pl), sc.drop(ApiOstrov.getInteger(arg[3], 1)));
+                pl.getWorld().dropItem(EntityUtil.center(pl), sc.drop(NumUtil.intOf(arg[3], 1)));
                 cs.sendMessage("§aВыдан свиток §b"+sc.id()+" §aк §b"+pl.getName());
                 return true;
             }

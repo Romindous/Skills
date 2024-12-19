@@ -117,8 +117,8 @@ public class SM {
         if (nevv) {
             ScreenUtil.sendTitle(p, "§4Выживи", "");
             p.getInventory().setItem(0, ItemType.BREAD.createItemStack(16));
-            p.setNoDamageTicks(600);
-            p.sendMessage(Main.prefix + "Вы неуязвимы след. 30 сек!");
+            p.setNoDamageTicks(100);
+            p.sendMessage(Main.prefix + "Вы неуязвимы след. 5 сек!");
         }
         p.teleport(joinLoc); //тп в небо
         p.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 100, 1));

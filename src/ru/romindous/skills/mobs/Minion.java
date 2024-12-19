@@ -28,7 +28,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.modules.world.AreaSpawner;
-import ru.komiss77.modules.world.WXYZ;
 import ru.komiss77.utils.LocUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.Survivor;
@@ -42,6 +41,13 @@ public abstract class Minion extends SednaMob {
 
     private static final String prefix = "mob.mini.";
 
+    protected final AreaSpawner.SpawnCondition cond_mini;
+    protected Minion() {
+        super();
+        cond_mini = new AreaSpawner.SpawnCondition(mobConfig("amount", 1),
+            CreatureSpawnEvent.SpawnReason.NATURAL);
+    }
+
     protected String prefix() {
         return prefix;
     }
@@ -53,7 +59,7 @@ public abstract class Minion extends SednaMob {
 
     @Override
     protected AreaSpawner.SpawnCondition condition() {
-        return COND_EMPTY;
+        return cond_mini;
     }
 
     @Override
@@ -146,8 +152,7 @@ public abstract class Minion extends SednaMob {
     }
 
     public LivingEntity spawn(final Location loc, final LivingEntity owner) {
-        final AreaSpawner.SpawnCondition cnd = spawner().condition(new WXYZ(loc));
-        return loc.getWorld().spawn(loc, getEntClass(), cnd.reason(), false, e -> apply(e, owner));
+        return loc.getWorld().spawn(loc, getEntClass(), CreatureSpawnEvent.SpawnReason.SPELL, false, e -> apply(e, owner));
     }
 
     public void apply(final Entity ent, final LivingEntity owner) {
