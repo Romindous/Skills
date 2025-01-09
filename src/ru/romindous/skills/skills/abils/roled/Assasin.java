@@ -27,7 +27,7 @@ public class Assasin implements Ability.AbilReg {
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod EFFECT = new ChasMod(this, "effect", Chastic.EFFECT);
             final ChasMod[] stats = new ChasMod[] {TIME, EFFECT};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -42,7 +42,7 @@ public class Assasin implements Ability.AbilReg {
             public String id() {
                 return "spurt";
             }
-            public String disName() {
+            public String name() {
                 return "Спурт";
             }
             private final String[] desc = new String[] {
@@ -153,7 +153,7 @@ public class Assasin implements Ability.AbilReg {
         new Ability() {//Проворство
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {TIME};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             private final int amp = value("amp", 1);
@@ -173,7 +173,7 @@ public class Assasin implements Ability.AbilReg {
             public String id() {
                 return "evasion";
             }
-            public String disName() {
+            public String name() {
                 return "Проворство";
             }
             private final String[] desc = new String[] {
@@ -196,7 +196,7 @@ public class Assasin implements Ability.AbilReg {
             final ChasMod DIST = new ChasMod(this, "dist", Chastic.DISTANCE);
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {DIST, TIME};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             private final int amp = value("amp", 1);
@@ -216,7 +216,7 @@ public class Assasin implements Ability.AbilReg {
             public String id() {
                 return "smoke";
             }
-            public String disName() {
+            public String name() {
                 return "Дымовуха";
             }
             private final String[] desc = new String[] {
@@ -239,7 +239,7 @@ public class Assasin implements Ability.AbilReg {
         new Ability() {//Занавес
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {TIME};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             private final int amp = value("amp", 1);
@@ -255,7 +255,7 @@ public class Assasin implements Ability.AbilReg {
             public String id() {
                 return "hide";
             }
-            public String disName() {
+            public String name() {
                 return "Занавес";
             }
             private final String[] desc = new String[] {
@@ -278,7 +278,7 @@ public class Assasin implements Ability.AbilReg {
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             final ChasMod[] stats = new ChasMod[] {TIME};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -299,7 +299,7 @@ public class Assasin implements Ability.AbilReg {
             public String id() {
                 return "slice";
             }
-            public String disName() {
+            public String name() {
                 return "Порез";
             }
             private final String[] desc = new String[] {

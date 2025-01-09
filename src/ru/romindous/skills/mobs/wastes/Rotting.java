@@ -18,7 +18,7 @@ import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.ItemUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
-import ru.romindous.skills.objects.SkillGroups;
+import ru.romindous.skills.items.SkillGroups;
 
 public class Rotting extends SednaMob {
 
@@ -59,6 +59,7 @@ public class Rotting extends SednaMob {
         if (!(e.getEntity() instanceof final Mob mb)) return;
         final EntityEquipment oeq = mb.getEquipment();
         final LivingEntity bn = Main.mobs.BONED.spawn(mb.getLocation());
+        if (bn instanceof final Mob bm) bm.setTarget(mb.getTarget());
         final EntityEquipment neq = bn.getEquipment();
         for (final EquipmentSlot es : EquipmentSlot.values()) {
             neq.setItem(es, oeq.getItem(es), true);

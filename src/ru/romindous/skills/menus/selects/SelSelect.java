@@ -1,6 +1,5 @@
 package ru.romindous.skills.menus.selects;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -42,7 +41,7 @@ public class SelSelect extends SvSelect {
 
     private final int abSlot;
 
-    public SelSelect(final Survivor sv, final int skIx, final @Nullable Skill sk, final int abSlot) {
+    public SelSelect(final Survivor sv, final int skIx, final Skill sk, final int abSlot) {
         super(sv, skIx, sk);
         this.abSlot = abSlot;
     }
@@ -56,16 +55,12 @@ public class SelSelect extends SvSelect {
         //content.getInventory().setItem(49, new ItemBuilder(sv.skill.mat).name(sv.skill.color+sv.skill.name()).build());
         int slot = 0;
         for (final Map.Entry<Selector.SelState, Integer> en : sv.sels.entrySet()) {
-            switch (slot / 9) {
-                case 0, 8:
-                    slot++;
-                    continue;
-            }
+            while (switch (slot % 9) {case 0, 8 -> true; default -> false;}) slot++;
             final Selector.SelState sl = en.getKey();
             if (!sv.canUse(sl.sel()) || sl.sel().equals(Selector.CASTER)) continue;
             if (Selector.SAME.equals(sl.sel())) {
                 its.set(slot, ClickableItem.from(new ItemBuilder(sl.sel().display(sl.lvl()))
-                    .amount(en.getValue()).lore("").lore(TCUtil.P + "Клик - Выбрать").build(), e -> {
+                    .amount(en.getValue()).lore("<dark_gray>(клик - выбор)").build(), e -> {
                         if (sk == null) {
                             openLast(p);
                             return;
@@ -77,8 +72,8 @@ public class SelSelect extends SvSelect {
                 ));
                 continue;
             }
-            its.set(slot, ClickableItem.from(new ItemBuilder(sl.sel().display(sl.lvl())).lore("")
-                .lore(TCUtil.P + "Клик - Выбрать").lore("<red>Выброс" + TCUtil.P + " - Выдать предметом").build(), e -> {
+            its.set(slot, ClickableItem.from(new ItemBuilder(sl.sel().display(sl.lvl())).lore("<dark_gray>(клик - выбор)")
+                .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
                     switch (e.getClick()) {
                         case DROP, CONTROL_DROP:
                             if (sv.change(sl, -1) < 0) return;
@@ -99,11 +94,8 @@ public class SelSelect extends SvSelect {
             slot++;
         }
 
-        its.set(17, ClickableItem.from(new ItemBuilder(sv.role.getIcon())
-                .name("<red>Отмена Выбора").build(), e -> {
-                openLast(p);
-            }
-        ));
+        its.set(49, ClickableItem.from(new ItemBuilder(ItemType.DAYLIGHT_DETECTOR)
+            .name(TCUtil.sided("<red>Отмена")).build(), e -> openLast(p)));
     }
 
 }

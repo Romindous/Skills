@@ -24,7 +24,7 @@ public class DebugMythSpawn /*implements InventoryProvider*/ {/*
                     new ItemBuilder(ItemType.PIG_SPAWN_EGG)
                         .name(mm.getInternalName())
                         .lore("§bMythicMobs")
-                        .lore(mm.getDisplayName()==null ? "§8noDisplayName" : mm.getDisplayName().get())
+                        .lore(mm.getdisName()==null ? "§8nodisName" : mm.getdisName().get())
                         .lore(mm.getHealth()==null ? "§8noHealth" :"§7health="+mm.getHealth().get())
                         .lore(mm.getDamage()==null ? "§8noDamage" :"§7damage="+mm.getDamage().get())
                         .lore("§7")
@@ -129,7 +129,7 @@ public class DebugMythSpawn /*implements InventoryProvider*/ {/*
         for (int i=from; i < to; i++) {
             final ClickableItem menuItem = ci[i];
             if (menuItem.getItem().getType()==ItemType.RABBIT_HIDE || menuItem.getItem().getType()==ItemType.SLIME_BALL) {
-                index = modelNames.indexOf(((TextComponent) menuItem.getItem().getItemMeta().displayName()).content());
+                index = modelNames.indexOf(((TextComponent) menuItem.getItem().getItemMeta().disName()).content());
                 if (index>=0) {
                     if (index==modelIndex) {
                         menuItem.getItem().setType(ItemType.SLIME_BALL);

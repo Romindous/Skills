@@ -22,7 +22,7 @@ public enum SubServer {
 	public static int size = SubServer.values().length;
 	
     //для кодироки worldOpen
-    public final String displayName;
+    public final String disName;
     public final String bGrndTxtr;
     public final ItemType displayMat;
     public final EntityType mobType;
@@ -30,7 +30,7 @@ public enum SubServer {
 	public final EntityType taskNPC;
 
     SubServer(final String dName, final String bGrndTxtr, final ItemType displayMat, final EntityType mobType, final float bfr, final EntityType taskNPC) {
-        this.displayName = dName;
+        this.disName = dName;
         this.bGrndTxtr = bGrndTxtr;
         this.displayMat = displayMat;
         this.mobType = mobType;

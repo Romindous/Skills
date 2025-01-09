@@ -11,9 +11,9 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import ru.komiss77.ApiOstrov;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.ScreenUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.listeners.ShotLst;
@@ -56,8 +56,8 @@ public class MainTask implements Runnable {
     							pl.playSound(pl.getLocation(), Sound.ENTITY_GLOW_SQUID_SQUIRT, 1f, 0.6f);
     							final Entity[] ents = new Entity[16];
     							for (int i = ents.length - 1; i >= 0; i--) {
-    								final Location nr = new Location(w, loc.getX() + ApiOstrov.rndSignNum(4, 4),
-										loc.getY(), loc.getZ() + ApiOstrov.rndSignNum(4, 4));
+    								final Location nr = new Location(w, loc.getX() + NumUtil.rndSignNum(4, 4),
+										loc.getY(), loc.getZ() + NumUtil.rndSignNum(4, 4));
     								nr.setY(w.getHighestBlockYAt(nr.getBlockX(), nr.getBlockZ()) + 1);
     								w.spawnParticle(Particle.SQUID_INK, nr, 20, 0.4d, 1d, 0.4d, 0d, null, false);
     								final Entity e = w.spawnEntity(nr, Main.subServer.mobType, false);
@@ -182,6 +182,7 @@ public class MainTask implements Runnable {
 		while (nit.hasNext()) {
 			final Ability.InterNext in = nit.next();
 			if (in == null || in.time() + Ability.stepCd < tick) continue;
+			in.ch().target().setNoDamageTicks(0);
 			in.run(); nit.remove();
 		}
 
@@ -193,39 +194,25 @@ public class MainTask implements Runnable {
 		}
 
         for (final Player p : Bukkit.getOnlinePlayers()) {
-
             final Survivor sv = PM.getOplayer(p, Survivor.class);
-            if (sv == null) {
-                continue;
-            }
-
+            if (sv == null) continue;
             //каждую секунду с рабросом по тикам для игроков
-            if (sectm == tick) { //p.getTicksLived() не подходит, выхватывает числа не по порядку
-
-				Bleeding.bleeds.values().removeIf(Bleeding::endTick);
-                //задания
-                if (sv.miniQuestTask != null && sv.miniQuestTask.secondTick()) {
-                    sv.miniQuestTask=null;
-                }
-
-//                sv.transferTick(p.getWorld());
-
-                if (sv.role != null) {
-
-                    /*if (sv.regenMana && sv.mana.intValue() < sv.manaMax) {
-                        sv.mana = Math.min(sv.mana + 1 + (int) LocUtil.sqrtTo200(sv.getStat(Stats.Интеллект)), sv.manaMax);
-                    }*/
-
-                    for (final Skill sk : sv.skills) {
-                        sk.updateKd(p);
-                    }
-                    
-                    sv.updateBar(p);
-
-                }
-                // --- конец блока, где скилл!=null ---
-
+            if (sectm != tick) continue;
+            Bleeding.bleeds.values().removeIf(Bleeding::endTick);
+            //задания
+            if (sv.miniQuestTask != null && sv.miniQuestTask.secondTick()) {
+                sv.miniQuestTask=null;
             }
+//                sv.transferTick(p.getWorld());
+            if (sv.role == null) continue;
+            for (final Skill sk : sv.skills) {
+                sk.updateKd(p);
+            }
+			sv.updateBoard(p, SM.Info.HEALTH);
+			if (sv.acBarPause > 0) sv.acBarPause--;
+            else sv.updateBar(p);
+            // --- конец блока, где скилл!=null ---
+
             // --- конец блока каждую секунду игрока ---
         }
         // --- конец блока каждый тик игрока ---

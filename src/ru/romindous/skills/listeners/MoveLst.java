@@ -1,18 +1,16 @@
 package ru.romindous.skills.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
-import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockType;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.player.PlayerInputEvent;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
 import ru.romindous.skills.Main;
@@ -42,29 +40,22 @@ public class MoveLst implements Listener {
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onFly(final PlayerToggleFlightEvent e) {
+    public void onJump(final PlayerJumpEvent e) {
         final Player p = e.getPlayer();
-        if (p.getGameMode() == GameMode.CREATIVE) return;
-        e.setCancelled(true);
-        p.setFlying(false);
-        p.setAllowFlight(false);
+        if (!p.isSneaking()) return;
+        final Survivor sv = PM.getOplayer(p, Survivor.class);
+        if (sv == null) return;
+        sv.trigger(Trigger.SHIFT_JUMP, e, p);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onInput(final PlayerInputEvent e) {
+        if (!e.getInput().isJump()) return;
+        final Player p = e.getPlayer();
+        if (p.isInsideVehicle() || p.getVelocity().getY() <= 0d) return;
         final Survivor sv = PM.getOplayer(p, Survivor.class);
         if (sv == null) return;
         sv.trigger(Trigger.DOUBLE_JUMP, e, p);
     }
-
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onJump(final PlayerJumpEvent e) {
-        final Player p = e.getPlayer();
-        final Survivor sv = PM.getOplayer(p, Survivor.class);
-        if (sv == null) return;
-        p.setAllowFlight(true);
-        if (p.isSneaking()) {
-            sv.trigger(Trigger.SHIFT_JUMP, e, p);
-        }
-//        p.setFallDistance(SM.DJ_FALL_DST);
-//        p.setFlyingFallDamage(TriState.TRUE);
-    }
-
 
 }

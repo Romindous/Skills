@@ -214,7 +214,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                         srv.addXp(pl, ammount);
                         break;
                     case "souls":
-                        srv.addMana(pl, ammount);
+                        srv.chgMana(pl, ammount);
                         break;
                     case "stat":
                         srv.statsPoints +=ammount;
@@ -267,7 +267,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                     cs.sendMessage("§cНет свитка с названием " + arg[2]);
                     return true;
                 }
-                pl.getWorld().dropItem(EntityUtil.center(pl), sc.drop(NumUtil.intOf(arg[3], 1)));
+                pl.getWorld().dropItem(EntityUtil.center(pl), sc.drop(NumUtil.intOf(arg[3], 1) - 1));
                 cs.sendMessage("§aВыдан свиток §b"+sc.id()+" §aк §b"+pl.getName());
                 return true;
             }
@@ -383,7 +383,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                         .id("World " + p.getName())
                         .provider(new WorldMenu())
                         .size(1, 9)
-                        .title("          §6§lВыберите Мир")
+                        .title("           §6§lВыбери Мир")
                         .build()
                         .open(p);
                 }
@@ -421,10 +421,12 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                     }
 
                     sv.roleStamp = ApiOstrov.currentTimeSec();
+                    sv.showScoreBoard = true;
+                    sv.showActionBar = true;
                     sv.role = role;
 //                    QM.tryCompleteQuest(p, Quest.ClassChoose, 1, true);
-                    p.sendMessage(TCUtil.form(Main.prefix + "Теперь ты - " + role.getName()));
-                    ScreenUtil.sendTitle(p, TCUtil.N + "Теперь ты - " + role.getName(), " ");
+                    p.sendMessage(TCUtil.form(Main.prefix + "Теперь ты - " + role.disName()));
+                    ScreenUtil.sendTitle(p, TCUtil.N + "Теперь ты - " + role.disName(), " ");
                     sv.recalcStats(p);
 //                    sv.setBarName("§7Класс: "+role.getName()+"§7, Уровень: "+role.stat.color()+sv.getLevel());
 //                    sv.setBarProgress(sv.nextLevelScale());
@@ -442,10 +444,10 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 SmartInventory.builder()
-                    .type(InventoryType.HOPPER)
+                    .type(InventoryType.DISPENSER)
                     .id("Stats "+p.getName())
                     .provider(new StatsMenu())
-                    .title("§3§l    Прокачка Статистики")
+                    .title("§3§l   Прокачка Статистики")
                     .build().open(p);
                 return true;
             }

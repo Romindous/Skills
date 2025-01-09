@@ -23,7 +23,6 @@ import ru.komiss77.commands.TprCmd;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.modules.world.XYZ;
 import ru.komiss77.utils.ScreenUtil;
-import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ConfirmationGUI;
 import ru.romindous.skills.enums.TransferType;
 import ru.romindous.skills.listeners.MySqlLst;
@@ -42,11 +41,12 @@ public class SM {
     public static final int MAX_ABILITY_LEVEL = 4;
     public static final int HP_PER_HEART = 4;
 //    public static final float DJ_FALL_DST = 10000f;
-    public static final String HEART_MAX = "§2❤ " + TCUtil.N;
-    public static final String HEART_FULL = "§a❤ " + TCUtil.N;
-    public static final String HEART_HALF = "§e❤ " + TCUtil.N;
-    public static final String HEART_LESS = "§6❤ " + TCUtil.N;
-    public static final String HEART_LOW = "§c❤ " + TCUtil.N;
+    public static final String HEART_MAX = "§2❤ ";
+    public static final String HEART_FULL = "§a❤ ";
+    public static final String HEART_HALF = "§e❤ ";
+    public static final String HEART_LESS = "§6❤ ";
+    public static final String HEART_LOW = "§c❤ ";
+    public static final String HEART_CLR = "<red>";
     private static final Location joinLoc;
     public static final BlockData iceBlockData;
     public static final WeakHashMap<Integer, ItemStack> projWeapons;
@@ -118,7 +118,7 @@ public class SM {
             ScreenUtil.sendTitle(p, "§4Выживи", "");
             p.getInventory().setItem(0, ItemType.BREAD.createItemStack(16));
             p.setNoDamageTicks(100);
-            p.sendMessage(Main.prefix + "Вы неуязвимы след. 5 сек!");
+//            p.sendMessage(Main.prefix + "У тебя неуязвимость на след. 5 сек!");
         }
         p.teleport(joinLoc); //тп в небо
         p.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 100, 1));
@@ -154,14 +154,12 @@ public class SM {
         Ostrov.async( ()-> LocalDB.executePstAsync(Bukkit.getConsoleSender(), "DELETE FROM `playerData` WHERE `name` = '"+name+"';"), 20);
     }
 
-
-    
-    
-    
-    public enum infoType {
-        ALL, LEVEL, HEALTH, MANA,
+    public enum Info {
+        ALL,
+        LEVEL,
+        HEALTH,
+        MANA,
     }
-    
     
     public static List<CuBlock> getTypeTransfers(final TransferType type) {
         final List<CuBlock> trns = new ArrayList<>();

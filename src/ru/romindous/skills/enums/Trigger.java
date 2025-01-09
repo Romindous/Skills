@@ -1,19 +1,24 @@
 package ru.romindous.skills.enums;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
+import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
-import ru.romindous.skills.config.ConfigVars;
+import ru.romindous.skills.skills.ChasMod;
+import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.sels.Selector;
 
 public enum Trigger {//триггер
 
     KILL_ENTITY("Убийство Сущности", null, ItemType.ROTTEN_FLESH, "Срабатывает при убийстве", "любого моба игроком"), //PlayerKillEntityEvent
-    ATTACK_ENTITY("Нанесение Урона", null, ItemType.IRON_SWORD, "Срабатывает при нанесении", "физического моба пользователем"), //EntityDamageByEntityEvent
+    ATTACK_ENTITY("Нанесение Урона", null, ItemType.IRON_SWORD, "Срабатывает при нанесении", "физического урона пользователем"), //EntityDamageByEntityEvent
     PROJ_LAUNCH("Запуск Снаряда", null, ItemType.FIRE_CHARGE, "Срабатывает при запуске", "любого снаряда пользователем"), //ProjectileLaunchEvent
-    RANGED_HIT("Попадание на Дистанции", null, ItemType.APPLE, "Срабатывает при попадании", "снарядом любого моба игроком"), //ProjectileHitEvent
+    RANGED_HIT("Попадание с Дистанции", null, ItemType.APPLE, "Срабатывает при попадании", "снарядом любого моба игроком"), //ProjectileHitEvent
     SHIFT_RIGHT("Шифт с ПКМ", null, ItemType.CHEST_MINECART, "Срабатывает при нажатии", "ПКМ в крадущемся виде"), //PlayerInteractEvent
     SHIFT_LEFT("Шифт с ЛКМ", null, ItemType.TNT_MINECART, "Срабатывает при нажатии", "ЛКМ в крадущемся виде"), //PlayerInteractEvent
     SHIFT_JUMP("Шифт с Прыжком", null, ItemType.BIG_DRIPLEAF, "Срабатывает при прыжке", "пользователя в крадущемся виде"), //PlayerJumpEvent -
@@ -50,17 +55,21 @@ public enum Trigger {//триггер
         return sel;
     }
 
-    public String getName() {
+    public String disName() {
         return color + name;
     }
 
-    public ItemStack getIcon() {
-        return new ItemBuilder(icon).name(getName()).lore(desc).build();
+    public ItemStack icon() {
+        return new ItemBuilder(icon).name(TCUtil.sided(disName(), "🟃")).lore(desc).build();
     }
 
-    private double value(final String val, final double def) {
-        return ConfigVars.get(prefix + name() + "." + val, def);
+    public List<String> context() {
+        return Arrays.asList(desc);
     }
+
+    /*private double value(final String val, final double def) {
+        return ConfigVars.get(prefix + name() + "." + val, def);
+    }*/
 
     public static Trigger get(final String st) {
         if (st == null || st.isEmpty()) return UNKNOWN;

@@ -3,7 +3,6 @@ package ru.romindous.skills.listeners;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -22,7 +21,6 @@ import ru.komiss77.modules.world.XYZ;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.MoveUtil;
 import ru.komiss77.utils.NumUtil;
-import ru.komiss77.utils.ScreenUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.SM;
 import ru.romindous.skills.Survivor;
@@ -63,9 +61,9 @@ public class MySqlLst implements Listener {
         if (sv.mysqlError) {
             Ostrov.log_err(p.getName()+":LocalDataLoadEvent-hasSqlError!");
             p.sendMessage("§cОшибка загрузки скилл, при выходе данные не будут сохраняться!");
-            sv.setBarName("§8Ошибка загрузки");
-            sv.setBarProgress(0);
-            sv.setBarColor(Color.RED);
+            sv.barName("§8Ошибка загрузки");
+            sv.barProgress(0);
+            sv.barColor(Color.RED);
             sv.showBossBar(p, 20);
             return;
         }
@@ -181,8 +179,8 @@ public class MySqlLst implements Listener {
                                 trig = Trigger.get(skl[1]);
                             case 1:
                                 fsk = new Skill(skl[0], trig, sels.toArray(new Selector.SelState[0]),
-                                    abils.toArray(new Ability.AbilState[0]), mods.toArray(new Modifier.ModState[0]), sv.mana);
-                                fsk.setCoolDown(cd);
+                                    abils.toArray(new Ability.AbilState[0]), mods.toArray(new Modifier.ModState[0]));
+                                fsk.setCD(cd);
                                 sv.skills.add(fsk);
                                 break;
                             case 0:
@@ -424,13 +422,16 @@ public class MySqlLst implements Listener {
             p.setPlayerTime(6000l, true);
         }
 
-        sv.setData(Data.FRIEND_JUMP_INFO, "Для ТП на седну нужно быть в мире "+Main.subServer.displayName);
+        sv.setData(Data.FRIEND_JUMP_INFO, "Для ТП нужно быть в мире " + Main.subServer.disName);
         
     }
     
     private void hasNoSkill(final Player p, final Survivor sv) {
-        ScreenUtil.sendBossbar(p, "", 4, Color.WHITE, BossBar.Overlay.NOTCHED_12);
-        sv.showActionBar = true; //у новичков вкл. по умолчанию
+//        ScreenUtil.sendBossbar(p, "", 4, Color.WHITE, BossBar.Overlay.NOTCHED_12);
+//        sv.showActionBar = true; //у новичков вкл. по умолчанию
+//        sv.showScoreBoard = true;
+        sv.setData(Data.FRIEND_JUMP_INFO, "Для ТП нужно быть в мире " + Main.subServer.disName);
+        sv.unlockWorld(SubServer.WASTES);
         sv.recalcStats(p);
     }
 

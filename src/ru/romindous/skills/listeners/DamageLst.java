@@ -16,10 +16,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
-import ru.komiss77.modules.world.WXYZ;
-import ru.komiss77.utils.LocUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.Survivor;
 import ru.romindous.skills.config.ConfigVars;
@@ -29,13 +26,13 @@ import ru.romindous.skills.mobs.Minion;
 import ru.romindous.skills.mobs.SednaMob;
 
 
-public class EntityDamageLst implements Listener {
+public class DamageLst implements Listener {
 
-    private static final Set<DamageType> DIRECT = Set.of(DamageType.PLAYER_ATTACK, DamageType.GENERIC, DamageType.STING,
+    public static final Set<DamageType> DIRECT = Set.of(DamageType.PLAYER_ATTACK, DamageType.GENERIC, DamageType.STING,
         DamageType.MOB_ATTACK, DamageType.MOB_ATTACK_NO_AGGRO, DamageType.PLAYER_EXPLOSION, DamageType.EXPLOSION, DamageType.MACE_SMASH);
-    private static final Set<DamageType> RANGED = Set.of(DamageType.ARROW, DamageType.FIREWORKS, DamageType.TRIDENT,
+    public static final Set<DamageType> RANGED = Set.of(DamageType.ARROW, DamageType.FIREWORKS, DamageType.TRIDENT,
         DamageType.SPIT, DamageType.WITHER_SKULL, DamageType.UNATTRIBUTED_FIREBALL, DamageType.MOB_PROJECTILE);
-    private static final Set<DamageType> MAGIC = Set.of(DamageType.MAGIC, DamageType.INDIRECT_MAGIC);
+    public static final Set<DamageType> MAGIC = Set.of(DamageType.MAGIC, DamageType.INDIRECT_MAGIC);
 
     @SuppressWarnings("deprecation")
     private static final EnumMap<EntityDamageEvent.DamageModifier, Function<@Nullable Object, Double>> MOD_FUN =
@@ -54,11 +51,9 @@ public class EntityDamageLst implements Listener {
 
     public static void onCustomAttack(final EntityDamageByEntityEvent e, final SednaMob sm) {
         if (!(e.getDamageSource().getCausingEntity() instanceof final Mob dmgr)
-            || !(e.getEntity() instanceof final LivingEntity le)) return;
-        if (!(sm instanceof Minion)) {
-            Minion.setAgroOf(dmgr, le);
-        }
-        Minion.setAgroOf(le, dmgr);
+            || !(e.getEntity() instanceof final LivingEntity tgt)) return;
+        if (!(sm instanceof Minion)) Minion.setAgroOf(dmgr, tgt);
+        Minion.setAgroOf(tgt, dmgr);
 
         double dmg = e.getDamage();
         if (e.getDamageSource().getDirectEntity() instanceof Projectile) {
@@ -66,27 +61,22 @@ public class EntityDamageLst implements Listener {
         }
         if (dmg < 1d) return;
 
-        if (le instanceof Player) {
-            for (final Mob mn : LocUtil.getChEnts(new WXYZ(dmgr.getLocation()), Minion.SPOT_DST, Mob.class,
-                mb -> Minion.isOwner(mb, le) && (mb.getTarget() == null || Ostrov.random.nextBoolean())))
-                mn.setTarget(dmgr);
-            final Survivor sv = PM.getOplayer(le.getUniqueId(), Survivor.class);
+        if (tgt instanceof Player) {
+            final Survivor sv = PM.getOplayer(tgt.getUniqueId(), Survivor.class);
             if (sv == null) return;
             e.setDamage(Stat.defense(e.getDamage(), sv.getStat(Stat.PASSIVE)));
         }
     }
 
     public static void onCustomDefense(final EntityDamageEvent e, final SednaMob sm) {
-        if (!(e.getEntity() instanceof final Mob ent)) return;
+        if (!(e.getEntity() instanceof final Mob tgt)) return;
 
         final DamageSource ds = e.getDamageSource();
-        if (ds.getCausingEntity() instanceof final LivingEntity le) {
-            if (!(sm instanceof Minion)) {
-                Minion.setAgroOf(le, ent);
-            }
-            Minion.setAgroOf(ent, le);
+        if (ds.getCausingEntity() instanceof final LivingEntity dmgr) {
+            if (!(sm instanceof Minion)) Minion.setAgroOf(tgt, dmgr);
+            Minion.setAgroOf(dmgr, tgt);
 
-            if (le instanceof final Player p) {
+            if (dmgr instanceof final Player p) {
                 final Survivor sv = PM.getOplayer(p, Survivor.class);
                 if (sv == null) return;
 

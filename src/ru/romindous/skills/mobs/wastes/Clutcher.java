@@ -23,7 +23,7 @@ import ru.komiss77.modules.items.ItemRoll;
 import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.romindous.skills.mobs.SednaMob;
-import ru.romindous.skills.objects.SkillGroups;
+import ru.romindous.skills.items.SkillGroups;
 
 public class Clutcher extends SednaMob {
 
@@ -47,8 +47,8 @@ public class Clutcher extends SednaMob {
     public Goal<Mob> goal(final Mob mb) {
         return new Goal<>() {
 
-            private static final double JUMP_DST_SQ = 8d;
-            private static final double CLUTCH_DST_SQ = 2d;
+            private static final double JUMP_DST_SQ = 12d;
+            private static final double CLUTCH_DST_SQ = 2.4d;
 
             private final GoalKey<Mob> key = GoalKey.of(Mob.class, Clutcher.this.getKey());
             private static final EnumSet<GoalType> types = EnumSet.noneOf(GoalType.class);
@@ -65,7 +65,10 @@ public class Clutcher extends SednaMob {
                 if (!mb.isValid()) return;
 
                 final LivingEntity tgt = mb.getTarget();
-                if (tgt == null || !tgt.isValid()) return;
+                if (tgt == null || !tgt.isValid()) {
+                    if (!mb.hasGravity()) mb.setGravity(true);
+                    return;
+                }
                 final Location tlc = tgt.getEyeLocation();
                 final Location mlc = mb.getEyeLocation();
                 final double dst = tlc.distanceSquared(mlc);
@@ -75,15 +78,13 @@ public class Clutcher extends SednaMob {
                             mb.setGravity(false);
                         return;
                     }
-                    mb.teleportAsync(tgt.getLocation().add(0d, tgt.getHeight() * 0.1d * (tgt.getEntityId() & 7), 0d));
-//                    if ((tick++ & 7) != 0) return;
-//                    mb.attack(tgt);
+                    mb.teleport(tgt.getLocation().add(0d, tgt.getHeight() * 0.1d * (mb.getEntityId() & 7), 0d));
                     return;
                 }
 
                 if (!mb.hasGravity()) mb.setGravity(true);
-                if ((tick++ & 15) == 0 && dst < JUMP_DST_SQ && mb.isOnGround()) {
-                    mb.setVelocity(tlc.subtract(mlc).toVector().normalize().multiply(0.4d));
+                if ((tick++ & 1) == 0 && dst < JUMP_DST_SQ && mb.isOnGround()) {
+                    mb.setVelocity(tlc.subtract(mlc).toVector().normalize().multiply(0.6d));
                 }
             }
 
@@ -156,7 +157,7 @@ public class Clutcher extends SednaMob {
     private final RollTree drop = RollTree.of(key().value())
         .add(new ItemRoll(key().value() + "_scales", SkillGroups.SILVER.item(ItemType.PHANTOM_MEMBRANE), 1, 0), 1)
         .add(new ItemRoll(key().value() + "_meal", new ItemBuilder(ItemType.BONE_MEAL).build(), 1, 0), 4)
-        .add(new NARoll(), 4).build(1, 1);
+        .add(new NARoll(), 4).build(1, 0);
 
     @Override
     public RollTree loot() {

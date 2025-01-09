@@ -28,8 +28,11 @@ import ru.komiss77.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.utils.ItemUtil;
+import ru.komiss77.utils.TCUtil;
 import ru.komiss77.version.Nms;
+import ru.romindous.skills.Main;
 import ru.romindous.skills.Survivor;
+import ru.romindous.skills.enums.Role;
 import ru.romindous.skills.enums.Stat;
 import ru.romindous.skills.enums.Trigger;
 import ru.romindous.skills.objects.ItemTags;
@@ -173,21 +176,39 @@ public class InteractLst implements Listener {
         if (lvl == null) return;
         final Selector sl = Selector.VALUES.get(pdc.get(OStrap.key(Selector.data), PersistentDataType.STRING));
         if (sl != null) {
-            sv.change(new Selector.SelState(sl, lvl), 1);
+            final Role rl = sl.role();
+            if (rl != null && rl != sv.role) {
+                p.sendMessage(TCUtil.form(Main.prefix + sl.rarity().color() + sl.name()
+                    + " <red>можно присвоить только роли " + rl.disName()));
+                return;
+            }
+            sv.giveScroll(p, sl, lvl);
             hand.setAmount(hand.getAmount() - 1);
             p.getInventory().setItem(slot, hand);
             return;
         }
         final Ability ab = Ability.VALUES.get(pdc.get(OStrap.key(Ability.data), PersistentDataType.STRING));
         if (ab != null) {
-            sv.change(new Ability.AbilState(ab, lvl), 1);
+            final Role rl = ab.role();
+            if (rl != null && rl != sv.role) {
+                p.sendMessage(TCUtil.form(Main.prefix + ab.rarity().color() + ab.name()
+                    + " <red>можно присвоить только роли " + rl.disName()));
+                return;
+            }
+            sv.giveScroll(p, ab, lvl);
             hand.setAmount(hand.getAmount() - 1);
             p.getInventory().setItem(slot, hand);
             return;
         }
         final Modifier md = Modifier.VALUES.get(pdc.get(OStrap.key(Modifier.data), PersistentDataType.STRING));
         if (md != null) {
-            sv.change(new Modifier.ModState(md, lvl), 1);
+            final Role rl = md.role();
+            if (rl != null && rl != sv.role) {
+                p.sendMessage(TCUtil.form(Main.prefix + md.rarity().color() + md.name()
+                    + " <red>можно присвоить только роли " + rl.disName()));
+                return;
+            }
+            sv.giveScroll(p, md, lvl);
             hand.setAmount(hand.getAmount() - 1);
             p.getInventory().setItem(slot, hand);
         }
@@ -230,7 +251,7 @@ public class InteractLst implements Listener {
                     case SPARK:
                         if (!sv.isWorldOpen(SubServer.KRIOLITE)) {
                             sv.unlockWorld(SubServer.KRIOLITE);
-                            p.sendMessage(Main.prefix + "Вы открыли мир " + SubServer.KRIOLITE.displayName);
+                            p.sendMessage(Main.prefix + "Вы открыли мир " + SubServer.KRIOLITE.disName);
                             p.playEffect(EntityEffect.BREAK_EQUIPMENT_MAIN_HAND);
                             p.getInventory().setItemInMainHand(Main.air);
                         }
@@ -238,7 +259,7 @@ public class InteractLst implements Listener {
                     case UNDEAD:
                         if (!sv.isWorldOpen(SubServer.LOCUS)) {
                             sv.unlockWorld(SubServer.LOCUS);
-                            p.sendMessage(Main.prefix + "Вы открыли мир " + SubServer.LOCUS.displayName);
+                            p.sendMessage(Main.prefix + "Вы открыли мир " + SubServer.LOCUS.disName);
                             p.playEffect(EntityEffect.BREAK_EQUIPMENT_MAIN_HAND);
                             p.getInventory().setItemInMainHand(Main.air);
                         }
@@ -246,7 +267,7 @@ public class InteractLst implements Listener {
                     case ACID:
                         if (!sv.isWorldOpen(SubServer.INFERNAL)) {
                             sv.unlockWorld(SubServer.INFERNAL);
-                            p.sendMessage(Main.prefix + "Вы открыли мир " + SubServer.INFERNAL.displayName);
+                            p.sendMessage(Main.prefix + "Вы открыли мир " + SubServer.INFERNAL.disName);
                             p.playEffect(EntityEffect.BREAK_EQUIPMENT_MAIN_HAND);
                             p.getInventory().setItemInMainHand(Main.air);
                         }

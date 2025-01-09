@@ -1,6 +1,7 @@
 package ru.romindous.skills.listeners;
 
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -86,22 +87,25 @@ public class ShotLst implements Listener {
     //урон от снарядов модифицируется в EntityDamageByEntityEvent
     public void onProjectileHit(final ProjectileHitEvent e) {
         final Projectile prj = e.getEntity();
-        final ProjectileSource projectileSource = prj.getShooter();
-        
-        if (projectileSource instanceof final LivingEntity shoter) { //стреляющий живчик
+        if (prj.getShooter() instanceof final LivingEntity shoter) { //стреляющий живчик
 
             if (e.getHitEntity() instanceof final LivingEntity target) { //попадание было в живчика
                 target.setNoDamageTicks(0);
-                
-                if (shoter instanceof final Player pl) { //дальняя атака игрока
-                    final Survivor sv = PM.getOplayer(pl, Survivor.class);
-                    if (sv == null) return;
 
-                    sv.trigger(Trigger.RANGED_HIT, e, pl);
-                } else if (shoter instanceof Mob) {  //дальняя атака энтити
-                    final Vector vec = prj.getVelocity();
-                	vec.multiply(shoter.getAttribute(Attribute.ATTACK_DAMAGE).getBaseValue() * 0.1d + 1d);
-                    prj.setVelocity(vec);
+                switch (shoter) {
+                    case final Player pl -> {
+                        final Survivor sv = PM.getOplayer(pl, Survivor.class);
+                        if (sv == null) return;
+                        sv.trigger(Trigger.RANGED_HIT, e, pl);
+                    }
+                    case final Mob mb -> {
+                        final Vector vec = prj.getVelocity();
+                        final AttributeInstance dmg = mb.getAttribute(Attribute.ATTACK_DAMAGE);
+                        if (dmg == null) return;
+                        vec.multiply(dmg.getBaseValue() * 0.1d + 1d);
+                        prj.setVelocity(vec);
+                    }
+                    default -> {}
                 }
                 return;
             }

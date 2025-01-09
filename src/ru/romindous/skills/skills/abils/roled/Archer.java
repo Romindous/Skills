@@ -30,7 +30,7 @@ public class Archer implements Ability.AbilReg {
         new Ability() {//Флэшка
             final ChasMod POWER = new ChasMod(this, "power", Chastic.EFFECT);
             final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return new ChasMod[] {POWER};
             }
             private final double delPow = value("delPow", 20d);
@@ -57,7 +57,7 @@ public class Archer implements Ability.AbilReg {
             public String id() {
                 return "flash";
             }
-            public String disName() {
+            public String name() {
                 return "Флэшка";
             }
             private final String[] desc = new String[] {
@@ -167,7 +167,7 @@ public class Archer implements Ability.AbilReg {
 
         new Ability() {//Спектраль
             final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return new ChasMod[] {SPEED};
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -188,7 +188,7 @@ public class Archer implements Ability.AbilReg {
             public String id() {
                 return "spectral";
             }
-            public String disName() {
+            public String name() {
                 return "Спектраль";
             }
             private final String[] desc = new String[] {
@@ -210,7 +210,7 @@ public class Archer implements Ability.AbilReg {
         new Ability() {//Рикошет
             final ChasMod DIST = new ChasMod(this, "dist", Chastic.DISTANCE);
             final ChasMod RATIO = new ChasMod(this, "ratio", Chastic.VELOCITY);
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return new ChasMod[] {DIST, RATIO};
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -241,7 +241,7 @@ public class Archer implements Ability.AbilReg {
             public String id() {
                 return "ricochet";
             }
-            public String disName() {
+            public String name() {
                 return "Рикошет";
             }
             private final String[] desc = new String[] {
@@ -262,7 +262,7 @@ public class Archer implements Ability.AbilReg {
 
         new Ability() {//Жаунт
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return new ChasMod[] {DAMAGE};
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -284,7 +284,7 @@ public class Archer implements Ability.AbilReg {
             public String id() {
                 return "jounte";
             }
-            public String disName() {
+            public String name() {
                 return "Жонт";
             }
             private final String[] desc = new String[] {
@@ -305,7 +305,7 @@ public class Archer implements Ability.AbilReg {
 
         new Ability() {//Дострел
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return new ChasMod[] {DAMAGE};
             }
             private final double height = value("height", 12d);
@@ -329,7 +329,7 @@ public class Archer implements Ability.AbilReg {
             public String id() {
                 return "refire";
             }
-            public String disName() {
+            public String name() {
                 return "Дострел";
             }
             private final String[] desc = new String[] {

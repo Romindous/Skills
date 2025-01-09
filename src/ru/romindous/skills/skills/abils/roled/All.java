@@ -1,15 +1,10 @@
 package ru.romindous.skills.skills.abils.roled;
 
+import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.SkeletonHorse;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.TCUtil;
@@ -27,17 +22,18 @@ public class All implements Ability.AbilReg {
 
         new Ability() {//Рывок
             final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return new ChasMod[] {SPEED};
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final Vector vc = caster.getVelocity();
                 final Chain chn = ch.event(ch.on(this));
-                caster.setVelocity(vc.setY(0d).normalize().setY(defDY)
-                    .multiply(SPEED.modify(chn, lvl)));
+                final Vector vc = caster.getVelocity().add(caster.getEyeLocation().getDirection().multiply(0.2d)).setY(0d);
+                if (vc.lengthSquared() < 0.01d) return false;
+                final Vector vel = vc.normalize().setY(defDY).multiply(SPEED.modify(chn, lvl));
+                caster.setVelocity(vel);
 
-                //TODO effect
+                EntityUtil.moveffect(caster, Sound.BLOCK_VINE_STEP, 0.8f, Color.WHITE);
 
                 next(chn);
                 return true;
@@ -45,7 +41,7 @@ public class All implements Ability.AbilReg {
             public String id() {
                 return "dash";
             }
-            public String disName() {
+            public String name() {
                 return "Рывок";
             }
             private final String[] desc = new String[] {
@@ -66,7 +62,7 @@ public class All implements Ability.AbilReg {
 
         new Ability() {//Удар
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return new ChasMod[] {DAMAGE};
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -76,7 +72,7 @@ public class All implements Ability.AbilReg {
                 final Chain chn = ch.event(fe);
                 fe.setDamage(DAMAGE.modify(chn, lvl));
 
-                //TODO effect
+                EntityUtil.effect(tgt, Sound.ITEM_DYE_USE, 1f, Particle.ENCHANTED_HIT);
 
                 next(chn, () -> {
                     tgt.damage(fe.getDamage(), fe.getDamageSource());
@@ -87,7 +83,7 @@ public class All implements Ability.AbilReg {
             public String id() {
                 return "slash";
             }
-            public String disName() {
+            public String name() {
                 return "Разрез";
             }
             private final String[] desc = new String[] {
@@ -100,28 +96,24 @@ public class All implements Ability.AbilReg {
                 return Rarity.COMMON;
             }
             public InvCondition equip() {
-                return InvCondition.SWORD;
+                return InvCondition.MELEE;
             }
             public boolean selfCast() {return false;}
             public Role role() {return null;}
         };
 
         new Ability() {//Толчек
-            final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
-            protected ChasMod[] stats() {
-                return new ChasMod[] {DAMAGE};
+            public ChasMod[] stats() {
+                return new ChasMod[] {};
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
-                final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl));
+                final Chain chn = ch.event(makeDamageEvent(caster, tgt));
 
-                //TODO effect
+                EntityUtil.effect(tgt, Sound.ENTITY_PLAYER_ATTACK_STRONG, 0.6f, Particle.DUST_PLUME);
 
                 next(chn, () -> {
-                    tgt.damage(fe.getDamage(), fe.getDamageSource());
                     defKBLe(caster, tgt, true);
                 });
                 return true;
@@ -129,12 +121,12 @@ public class All implements Ability.AbilReg {
             public String id() {
                 return "punch";
             }
-            public String disName() {
+            public String name() {
                 return "Толчек";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Толкает ближайшую сущность, нанося " + DAMAGE.id + " ед.",
-                TCUtil.N + "урона и отталкивая ее назад"};
+                TCUtil.N + "Толкает ближайшую сущность,",
+                TCUtil.N + "откидывая ее назад"};
             public String[] descs() {
                 return desc;
             }
@@ -145,6 +137,45 @@ public class All implements Ability.AbilReg {
                 return InvCondition.FIST;
             }
             public boolean selfCast() {return false;}
+            public Role role() {return null;}
+        };
+
+        /*new Ability() {//Отдача
+            final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
+            final ChasMod[] stats = new ChasMod[] {SPEED};
+            protected ChasMod[] stats() {
+                return stats;
+            }
+            public boolean cast(final Chain ch, final int lvl) {
+                if (!(ch.event() instanceof final ProjectileLaunchEvent ee)) return false;
+                final LivingEntity caster = ch.caster();
+                final Chain chn = ch.event(ch.on(this));
+                final Vector vc = ee.getEntity().getVelocity().multiply(-1d * SPEED.modify(chn, lvl));
+                caster.setVelocity(caster.getVelocity().add(vc.setY(vc.getY() + defDY)));
+                EntityUtil.effect(caster, Sound.ENTITY_BREEZE_SHOOT, 0.8f, Particle.SMALL_GUST);
+
+                next(chn);
+                return true;
+            }
+            public String id() {
+                return "recoil";
+            }
+            public String disName() {
+                return "Отдача";
+            }
+            private final String[] desc = new String[] {
+                TCUtil.N + "Отбрасывает пользователя при " + CLR + "выстреле, " + TCUtil.N + "со",
+                TCUtil.N + "скоростью равной " + SPEED.id + "x " + TCUtil.N + "скорости снаряда."};
+            public String[] descs() {
+                return desc;
+            }
+            public Rarity rarity() {
+                return Rarity.COMMON;
+            }
+            public InvCondition equip() {
+                return InvCondition.BOW;
+            }
+            public boolean selfCast() {return true;}
             public Role role() {return null;}
         };
 
@@ -170,7 +201,7 @@ public class All implements Ability.AbilReg {
                     pl.setFoodLevel(Math.max((int) (tm / del) + pl.getFoodLevel(), 20));
                 }
 
-                //TODO effect
+                EntityUtil.effect(tgt, Sound.ENTITY_GENERIC_EAT, 0.8f, Particle.EGG_CRACK);
 
                 next(chn);
                 return true;
@@ -182,14 +213,14 @@ public class All implements Ability.AbilReg {
                 return "Поедание";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Позволяет заживо поедать " + CLR + " сущность",
+                TCUtil.N + "Позволяет заживо поедать " + CLR + "сущность",
                 TCUtil.N + "имеющую " + CLR + "плоть" + TCUtil.N + ", получая регенерацию",
                 TCUtil.N + "и голод на " + TIME.id + " сек." + TCUtil.N + ", при ударе"};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
-                return Rarity.COMMON;
+                return Rarity.UNCOM;
             }
             public InvCondition equip() {
                 return InvCondition.FIST;
@@ -197,55 +228,6 @@ public class All implements Ability.AbilReg {
             public boolean selfCast() {return false;}
             public Role role() {return null;}
         };
-
-        /*new Ability() {//Побочность
-            final ChasMod DIST = new ChasMod(this, "dist", Chastic.DISTANCE);
-            final ChasMod RATIO = new ChasMod(this, "ratio", Chastic.DAMAGE_DEALT);
-            final ChasMod[] stats = new ChasMod[] {DIST, RATIO};
-            protected ChasMod[] stats() {
-                return stats;
-            }
-            public boolean cast(final Chain ch, final LivingEntity target, final int lvl) {
-                if (!(ch.event() instanceof final EntityDamageByEntityEvent ee)
-                    || !(ee.getEntity() instanceof final LivingEntity target)) return false;
-                final LivingEntity caster = ch.caster();
-                final LivingEntity close = LocUtil.getClsChEnt(target.getLocation(),
-                    DIST.modify(ch, lvl), LivingEntity.class, ent -> {
-                        final int nid = ent.getEntityId();
-                        return Main.canAttack(caster, ent, false) && nid != target.getEntityId();
-                    });
-                if (close == null) return false;
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, target);
-                fe.setDamage(fe.getDamage() * RATIO.modify(chn, lvl));
-                target.damage(fe.getDamage(), fe.getDamageSource());
-
-                defKBLe(caster, close, true);
-                new ParticleBuilder(Particle.SWEEP_ATTACK).location(caster.getEyeLocation()
-                    .add(close.getEyeLocation()).multiply(0.5d)).count(1).extra(0d).allPlayers().spawn();
-
-                Ostrov.sync(() -> sk.step(finish(), fe, next), stepCd);
-                return true;
-            }
-            public String id() {
-                return "collate";
-            }
-            public String disName() {
-                return "Побочность";
-            }
-            private final String[] desc = new String[] {
-                TCUtil.N + "Ударяет сущность, рядом с целью на " + DIST.id + " бл.",
-                TCUtil.N + "нанося урон равный " + RATIO.id + "x " + TCUtil.N + "оригинала"};
-            public String[] descs() {
-                return desc;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public InvCondition equip() {
-                return InvCondition.SWORD_BOTH;
-            }
-            public Role role() {return null;}
-        };*/
 
         new Ability() {//Смягчение
             final ChasMod HEALTH = new ChasMod(this, "health", Chastic.REGENERATION);
@@ -274,13 +256,13 @@ public class All implements Ability.AbilReg {
                 return "Смягчение";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Смягчает полученный урон на " + DAMAGE.id + " ед." + TCUtil.N + "если он",
+                TCUtil.N + "Смягчает полученный урон на " + DAMAGE.id + " ед." + TCUtil.N + " если он",
                 TCUtil.N + "равен или более " + HEALTH.id + "x " + TCUtil.N + "здоровья пользователя"};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
-                return Rarity.COMMON;
+                return Rarity.UNCOM;
             }
             public InvCondition equip() {
                 return InvCondition.FIST_OFF;
@@ -319,52 +301,13 @@ public class All implements Ability.AbilReg {
                 return desc;
             }
             public Rarity rarity() {
-                return Rarity.COMMON;
+                return Rarity.UNCOM;
             }
             public InvCondition equip() {
                 return InvCondition.STAFF_ANY;
             }
             public boolean selfCast() {return false;}
             public Role role() {return null;}
-        };
-
-        new Ability() {//Отдача
-            final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
-            final ChasMod[] stats = new ChasMod[] {SPEED};
-            protected ChasMod[] stats() {
-                return stats;
-            }
-            public boolean cast(final Chain ch, final int lvl) {
-                if (!(ch.event() instanceof final ProjectileLaunchEvent ee)) return false;
-                final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
-                final Vector vc = ee.getEntity().getVelocity().multiply(-1d * SPEED.modify(chn, lvl));
-                caster.setVelocity(caster.getVelocity().add(vc.setY(vc.getY() + defDY)));
-                EntityUtil.effect(caster, Sound.ENTITY_BREEZE_SHOOT, 0.8f, Particle.SMALL_GUST);
-
-                next(chn);
-                return true;
-            }
-            public String id() {
-                return "recoil";
-            }
-            public String disName() {
-                return "Отдача";
-            }
-            private final String[] desc = new String[] {
-                TCUtil.N + "Отбрасывает пользователя при " + CLR + "выстреле, " + TCUtil.N + "со",
-                TCUtil.N + "скоростью равной " + SPEED.id + "x " + TCUtil.N + "скорости снаряда."};
-            public String[] descs() {
-                return desc;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public InvCondition equip() {
-                return InvCondition.BOW;
-            }
-            public boolean selfCast() {return true;}
-            public Role role() {return null;}
-        };
+        };*/
     }
 }

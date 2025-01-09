@@ -1,6 +1,8 @@
 package ru.romindous.skills.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerSetSpawnEvent;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.FoodProperties;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
@@ -16,11 +18,12 @@ import org.bukkit.inventory.ItemStack;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.utils.ItemUtil;
+import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.SM;
 import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.SubServer;
 import ru.romindous.skills.enums.Stat;
+import ru.romindous.skills.enums.SubServer;
 
 
 
@@ -72,9 +75,9 @@ public class RehabLst implements Listener {
         if (Math.abs(deathLoc.getBlockX() - rspLoc.getBlockX()) < 2
             && Math.abs(deathLoc.getBlockY() - rspLoc.getBlockY()) < 2
             && Math.abs(deathLoc.getBlockZ() - rspLoc.getBlockZ()) < 2) {
-            p.sendMessage(Main.prefix + "Похоже что ты " + Main.P + "застрял " + Main.N + "возле своей " + Main.P + "кровати " + Main.N + "("
+            p.sendMessage(TCUtil.form(Main.prefix + "Похоже что ты " + Main.P + "застрял " + Main.N + "возле своей " + Main.P + "кровати " + Main.N + "("
                 + Main.P + rspLoc.getBlockX() + Main.N + ", " + Main.P + rspLoc.getBlockY() + Main.N + ", " + Main.P + rspLoc.getBlockZ()
-                + Main.N + ")!\n" + Main.N + "Перемещаем тебя в более " + Main.P + "безопасное " + Main.N + "место...");
+                + Main.N + ")!\n" + Main.N + "Перемещаем тебя в более " + Main.P + "безопасное " + Main.N + "место..."));
             SM.setSpawn(p, null);
 //            PM.getOplayer(p).world_positions.replace(p.getWorld().getName(), null);
             SM.randomJoin(p, Main.subServer == SubServer.WASTES);
@@ -107,10 +110,14 @@ public class RehabLst implements Listener {
         if (ItemUtil.isBlank(it, false)) return;
         final Survivor sv = PM.getOplayer(pl, Survivor.class);
         if (sv == null) return;
-        final int food = Math.max((int) Stat.food(e.getFoodLevel() - pl.getFoodLevel(), sv.getStat(Stat.METABOLISM)), 20);
+        final FoodProperties fp = it.getData(DataComponentTypes.FOOD);
+        if (fp == null) return;
+        final int food = Math.min(pl.getFoodLevel() + (int) Stat
+            .food(fp.nutrition(), sv.getStat(Stat.METABOLISM)), 20);
         e.setFoodLevel(food);
-        final float sat = it.getItemMeta().getFood().getSaturation();
-        pl.setSaturation(Math.max((float) Stat.food(sat, sv.getStat(Stat.METABOLISM)) - sat + pl.getSaturation(), food));
+        pl.setSaturation(Math.min((float) Stat
+            .food(fp.saturation(), sv.getStat(Stat.METABOLISM))
+            - fp.saturation() + pl.getSaturation(), food));
     }
     
     @EventHandler (priority = EventPriority.LOWEST, ignoreCancelled = true)

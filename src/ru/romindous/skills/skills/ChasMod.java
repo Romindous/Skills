@@ -17,8 +17,12 @@ public class ChasMod {
         this.scale = ability.value(id + "_scale", 0d);
     }
 
+    public double modify(final Skill sk, final int lvl) {
+        return sk.modifyAll(chs, calc(lvl));
+    }
+
     public double modify(final Chain ch, final int lvl) {
-        return ch.sk().modifyAll(chs, calc(lvl), ch.event());
+        return ch.sk().modifyAll(chs, calc(lvl), ch);
     }
 
     public double calc(final int lvl) {

@@ -1,6 +1,6 @@
 package ru.romindous.skills.menus;
 
-import org.bukkit.Material;
+import java.util.*;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -10,16 +10,15 @@ import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
-import ru.komiss77.utils.inventory.ClickableItem;
-import ru.komiss77.utils.inventory.InventoryContent;
-import ru.komiss77.utils.inventory.InventoryProvider;
-import ru.komiss77.utils.inventory.SmartInventory;
+import ru.komiss77.utils.inventory.*;
 import ru.romindous.skills.Survivor;
+import ru.romindous.skills.enums.Chastic;
 import ru.romindous.skills.enums.Trigger;
 import ru.romindous.skills.menus.selects.AbilSelect;
 import ru.romindous.skills.menus.selects.ModSelect;
 import ru.romindous.skills.menus.selects.SelSelect;
 import ru.romindous.skills.menus.selects.TrigSelect;
+import ru.romindous.skills.skills.ChasMod;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
@@ -32,7 +31,8 @@ public class SkillMenu implements InventoryProvider {
     private static final ItemStack purple; //окантовка
     private static final ItemStack red; //окантовка
     private static final ItemStack chain; //не изучено 1,2,3
-    private static final ItemStack arrow;
+    private static final ItemStack candle;
+    private static final ItemStack light;
     /*private static final ItemStack black; //не изучено 1,2,3
     private static final ItemStack gray; //не изучено 4
     private static final ItemStack know1;  //изучено 1
@@ -43,37 +43,18 @@ public class SkillMenu implements InventoryProvider {
     private static final ItemStack charge2;  //перезарядка 4*/
 
     static {
-        arrow = new ItemBuilder(ItemType.IRON_NUGGET).name("<black>.").build();
         purple = new ItemBuilder(ItemType.PURPLE_STAINED_GLASS_PANE).name("§0.").build();
         red = new ItemBuilder(ItemType.RED_STAINED_GLASS_PANE).name("§0.").build();
+        candle = new ItemBuilder(ItemType.RED_CANDLE).name("§0.").build();
         chain = new ItemBuilder(ItemType.CHAIN).name("§0.").build();
-        empty = new ItemStack[54];
-        for (int i = 0; i < 54; i++) {
-            //empty[i] = new ItemBuilder(i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8 ? ((i & 1) == 0 ? ItemType.PURPLE_STAINED_GLASS_PANE : ItemType.RED_STAINED_GLASS_PANE) : ItemType.GRAY_STAINED_GLASS_PANE).name("§0.").build();
-            //empty[i] = i < 9 || i > 44 || i % 9 == 0 || i % 9 == 8  ?  ( (i & 1) == 0 ? purple : red) : gray;
-            if (i < 9 || i > 44) {
-                empty[i] = (i & 1) == 0 ? purple : red;
-            } else {
-                switch (i % 9) {
-                    case 0, 8:
-                        empty[i] = (i & 1) == 0 ? purple : red;
-                        break;
-                    case 1, 7:
-                        empty[i] = chain;
-                        break;
-                    default:
-                        break;
-                }
-            }
+        light = new ItemBuilder(ItemType.SHROOMLIGHT).name("§0.").build();
+        empty = new ItemStack[27];
+        for (int i = 0; i != 27; i++) {
+            if (i / 9 != 1) empty[i] = (i & 1) == 0 ? red : purple;
         }
-        /*black = new ItemBuilder(ItemType.BLACK_STAINED_GLASS_PANE).name("§8не изучено").build();
-        gray = new ItemBuilder(ItemType.GRAY_STAINED_GLASS_PANE).name("§8не изучено").build();
-        know1 = new ItemBuilder(ItemType.GREEN_STAINED_GLASS_PANE).name("§fУров.1").build();
-        know2 = new ItemBuilder(ItemType.GREEN_STAINED_GLASS_PANE).name("§fУров.2").build();
-        know3 = new ItemBuilder(ItemType.GREEN_STAINED_GLASS_PANE).name("§fУров.3").build();
-        know4 = new ItemBuilder(ItemType.LIME_STAINED_GLASS_PANE).name("§fПолностью изучено!").build();
-        charge1 = new ItemBuilder(ItemType.BLUE_STAINED_GLASS_PANE).name("§cНабирает силу..").build();
-        charge2 = new ItemBuilder(ItemType.CYAN_STAINED_GLASS_PANE).name("§cНабирает силу..").build();*/
+        empty[9] = empty[17] = chain;
+//        empty[18] = empty[26] = candle;
+//        empty[0] = empty[8] = light;
     }
 
     private static final int NEW_SKILL_LVL = 10;
@@ -94,35 +75,39 @@ public class SkillMenu implements InventoryProvider {
     
     @Override
     public void init(final Player p, final InventoryContent its) {
-        p.playSound(p.getLocation(), Sound.BLOCK_SCULK_SENSOR_CLICKING, 0.6f, skillIx * 0.2f);
+        p.playSound(p.getLocation(), Sound.BLOCK_SCULK_SENSOR_CLICKING, 1f, skillIx * 0.2f);
         final Inventory inv = its.getInventory();
         if (inv != null) inv.setContents(empty);
 
-        //content.getInventory().setItem(49, new ItemBuilder(sv.skill.mat).name(sv.skill.color+sv.skill.name()).build());
-        its.set(49, ClickableItem.from(
-            new ItemBuilder(sv.role.getIcon()).lore("").lore(TCUtil.P + "Клик - Главное меню").build(), e-> {
+        its.set(22, ClickableItem.from(new ItemBuilder(sv.role.getIcon())
+            .name(TCUtil.sided(TCUtil.P + "Главное Меню", "🢙")).deLore().build(), e -> {
                 p.performCommand("skill");
-            }
-        ));
+        }));
 
         final Skill sk = skillIx < sv.skills.size() ? sv.skills.get(skillIx) : null;
         if (sk == null) {
             if (skillIx > sv.skills.size()) skillIx = sv.skills.size();
-            its.set(10, ClickableItem.from(new ItemBuilder(EMPTY_TRIG).name(Trigger.color + "Триггер")
-                .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- выбрать").build(), e -> {
+            its.set(10, ClickableItem.from(new ItemBuilder(EMPTY_TRIG).name(TCUtil
+                .sided(Trigger.color + "Триггер", "🟃") + " <dark_gray>(клик)").build(), e -> {
                 SmartInventory.builder()
                     .id("Trig "+p.getName())
-                    .provider(new TrigSelect(sv,  skillIx, null))
+                    .provider(new TrigSelect(sv, skillIx, null))
                     .size(2)
                     .title(Trigger.color + "         §lВыбор Тригера")
-                    .build();
+                    .build().open(p);
             }));
             return;
         }
 
-        its.set(10, ClickableItem.from(new ItemBuilder(sk.trig.getIcon())
-            .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- заменить")
-            .lore(TCUtil.A + "Выброс " + TCUtil.N + "- разобрать скилл").build(), e -> {
+        its.set(4, new InputButton(InputButton.InputType.ANVILL, new ItemBuilder(ItemType.COPPER_BULB)
+            .name(TCUtil.sided(TCUtil.P + sk.name, TCUtil.A + "✞") + " <dark_gray>(клик - назвать)")
+            .lore("<dark_gray>При использовании:").lore(sk.describe(sv)).build(), sk.name, nm -> {
+            sv.setSkill(skillIx, new Skill(nm, sk.trig, sk.sels, sk.abils, sk.mods));
+            reopen(p, its);
+        }));
+
+        its.set(10, ClickableItem.from(new ItemBuilder(sk.trig.icon()).lore("<dark_gray>(клик - заменить)")
+            .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Разобрать").build(), e -> {
             switch (e.getClick()) {
                 case DROP, CONTROL_DROP:
                     for (final Ability.AbilState as : sk.abils) {
@@ -141,10 +126,10 @@ public class SkillMenu implements InventoryProvider {
 
             SmartInventory.builder()
                 .id("Trig "+p.getName())
-                .provider(new TrigSelect(sv,  skillIx, sk))
+                .provider(new TrigSelect(sv, skillIx, sk))
                 .size(2)
                 .title(Trigger.color + "         §lВыбор Тригера")
-                .build();
+                .build().open(p);
         }));
 
         final int lvl = sv.getLevel();
@@ -152,113 +137,140 @@ public class SkillMenu implements InventoryProvider {
         int slot = 0;
         for (; slot != sk.abils.length; slot++) {
             final int pos = slot;
-            final int spc = (pos << 1);
-            final Ability.AbilState as = sk.abils[slot];
-            its.set(28 + spc, ClickableItem.from(new ItemBuilder(as.abil().display(as.lvl()))
-                .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- заменить")
-                .lore(TCUtil.A + "Q " + TCUtil.N + "- убрать способность").build(), e -> {
+            final Ability.AbilState as = sk.abils[pos];
+            its.set(12 + (pos << 1), ClickableItem.from(new ItemBuilder(as.abil().display(as.lvl()))
+                .lore("<dark_gray>(клик - заменить)").lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP)
+                    + TCUtil.N + " - Убрать").build(), e -> {
                 switch (e.getClick()) {
                     case DROP, CONTROL_DROP:
                         sv.setSkillAbil(p, null, pos, skillIx);
+                        reopen(p, its);
                         return;
                 }
 
                 SmartInventory.builder()
                     .id("Abil "+p.getName())
-                    .provider(new AbilSelect(sv,  skillIx, sk, pos))
+                    .provider(new AbilSelect(sv, skillIx, sk, pos))
                     .size(6, 9)
-                    .title(TCUtil.P + "         §lВыбор Способности")
-                    .build();
+                    .title(TCUtil.P + "      §lВыбор Способности")
+                    .build().open(p);
             }));
             final Selector.SelState ss = sk.sels[slot];
             if (Selector.CASTER.equals(ss.sel())) {
-                its.set(28 + spc - 9, ClickableItem.empty(ss.sel().display(ss.lvl())));
+                its.set(11 + (pos << 1), ClickableItem.empty(ss.sel().display(ss.lvl())));
             } else {
-                its.set(28 + spc - 9, ClickableItem.from(new ItemBuilder(ss.sel().display(ss.lvl()))
-                    .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- заменить").build(), e -> {
-                    switch (e.getClick()) {
-                        case DROP, CONTROL_DROP:
-                            sv.setSkillAbil(p, null, pos, skillIx);
-                            return;
-                    }
-
+                its.set(11 + (pos << 1), ClickableItem.from(new ItemBuilder(ss.sel().display(ss.lvl()))
+                    .lore("<dark_gray>(клик - заменить)").build(), e -> {
                     SmartInventory.builder()
                         .id("Sel "+p.getName())
-                        .provider(new SelSelect(sv,  skillIx, sk, pos))
+                        .provider(new SelSelect(sv, skillIx, sk, pos))
                         .size(6, 9)
                         .title(TCUtil.P + "         §lВыбор Подборника")
-                        .build();
+                        .build().open(p);
                 }));
             }
-            if (slot == 0) continue;
-            its.set(28 + spc - 1, ClickableItem.empty(arrow));
         }
 
         final int maxAbils = Math.min((remLvl / NEW_ABIL_LVL) + 1, 4);
         if (slot < maxAbils) {
-            final int pos = slot + 1;
-            its.set(28 + (pos << 1), ClickableItem.from(new ItemBuilder(EMPTY_ABIL).name(TCUtil.N + "Способность")
-                .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- выбрать").build(), e -> {
+            final int pos = slot;
+            its.set(12 + (pos << 1), ClickableItem.from(new ItemBuilder(EMPTY_ABIL)
+                .name(TCUtil.sided(TCUtil.N + "Способность"))
+                .lore("<dark_gray>(клик - заменить)").build(), e -> {
                 SmartInventory.builder()
                     .id("Abil "+p.getName())
-                    .provider(new AbilSelect(sv,  skillIx, sk, pos))
+                    .provider(new AbilSelect(sv, skillIx, sk, pos))
                     .size(6, 9)
-                    .title(TCUtil.P + "         §lВыбор Способности")
-                    .build();
+                    .title(TCUtil.P + "      §lВыбор Способности")
+                    .build().open(p);
             }));
         }
 
         slot = 0;
         for (; slot != sk.mods.length; slot++) {
             final int pos = slot;
-            final Modifier.ModState as = sk.mods[slot];
-            its.set(46 + pos, ClickableItem.from(new ItemBuilder(as.mod().display(as.lvl()))
-                .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- заменить")
-                .lore(TCUtil.A + "Q " + TCUtil.N + "- убрать модификатор").build(), e -> {
+            final Chastic[] chs = getChs(sk);
+            final Modifier.ModState ms = sk.mods[slot];
+            its.set(23 * (19 + pos) / 22, ClickableItem.from(new ItemBuilder(ms.mod()
+                .display(ms.lvl())).lore("<dark_gray>(клик - заменить)").lore(relate(ms.mod(), chs))
+                .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Убрать").build(), e -> {
                 switch (e.getClick()) {
                     case DROP, CONTROL_DROP:
                         sv.remSkillMod(p, pos, skillIx);
+                        reopen(p, its);
                         return;
                 }
 
                 SmartInventory.builder()
                     .id("Mod "+p.getName())
-                    .provider(new ModSelect(sv,  skillIx, sk, pos))
+                    .provider(new ModSelect(sv, skillIx, sk, pos))
                     .size(6, 9)
-                    .title(TCUtil.P + "         §lВыбор Модификатора")
-                    .build();
+                    .title(TCUtil.P + "     §lВыбор Модификатора")
+                    .build().open(p);
             }));
         }
 
-        final int maxMods = Math.min((remLvl / NEW_MOD_LVL) + 1, 6);
+        final int maxMods = Math.min((remLvl / NEW_MOD_LVL) + 1, 7);
         if (slot < maxMods) {
-            final int pos = slot + 1;
-            its.set(46 + slot, ClickableItem.from(new ItemBuilder(EMPTY_ABIL).name(TCUtil.N + "Способность")
-                .lore("").lore(TCUtil.P + "Клик " + TCUtil.N + "- выбрать").build(), e -> {
+            final int pos = slot;
+            its.set(23 * (19 + pos) / 22, ClickableItem.from(new ItemBuilder(EMPTY_MOD)
+                .name(TCUtil.sided(TCUtil.N + "Модификатор")).lore("<dark_gray>(клик - заменить)").build(), e -> {
                 if (e.getEvent() instanceof InventoryClickEvent) {
                     SmartInventory.builder()
                         .id("Mod "+p.getName())
-                        .provider(new ModSelect(sv,  skillIx, sk, pos))
+                        .provider(new ModSelect(sv, skillIx, sk, pos))
                         .size(6, 9)
-                        .title(TCUtil.P + "         §lВыбор Модификатора")
-                        .build();
+                        .title(TCUtil.P + "     §lВыбор Модификатора")
+                        .build().open(p);
                 }
             }));
         }
 
         if (skillIx != 0) {
-            its.set(5, 0, ClickableItem.of(ItemUtil.previosPage, e -> {
+            its.set(2, 0, ClickableItem.of(ItemUtil.previosPage, e -> {
                     skillIx--; reopen(p, its);
                 })
             );
         }
 
         if (skillIx < lvl / NEW_SKILL_LVL) {
-            its.set(5, 8, ClickableItem.of(ItemUtil.nextPage, e -> {
+            its.set(2, 8, ClickableItem.of(ItemUtil.nextPage, e -> {
                     skillIx++; reopen(p, its);
                 })
             );
         }
+    }
+
+    private static Chastic[] getChs(final Skill sk) {
+        if (sk == null) return new Chastic[0];
+        final Set<Chastic> chs = EnumSet.noneOf(Chastic.class);
+        for (final Selector.SelState sls : sk.sels) {
+            for (final ChasMod cm : sls.sel().stats()) {
+                chs.add(cm.chs);
+            }
+        }
+        for (final Ability.AbilState abs : sk.abils) {
+            for (final ChasMod cm : abs.abil().stats()) {
+                chs.add(cm.chs);
+            }
+        }
+        final Chastic[] cha = chs.toArray(new Chastic[0]);
+        Arrays.sort(cha);
+        return cha;
+    }
+
+    private static String[] relate(final Modifier md, final Chastic[] chs) {
+        if (chs.length == 0) return new String[]{"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
+            "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями" + "<red>навыка!"};
+        final List<String> fnd = new ArrayList<>();
+        for (final Chastic ch : md.chastics()) {
+            if (Arrays.binarySearch(chs, ch) < 0) continue;
+            fnd.add(ch.disName());
+        }
+        if (fnd.isEmpty()) return new String[]{"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
+            "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями" + "<red>навыка!"};
+        return new String[]{TCUtil.N + "Общие " + TCUtil.P + "статы " + TCUtil.N + "с навыком:",
+            String.join(TCUtil.N + ", ", fnd)};
     }
 }
 

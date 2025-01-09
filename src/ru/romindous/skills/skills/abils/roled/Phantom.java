@@ -39,7 +39,7 @@ public class Phantom implements Ability.AbilReg {
             final ChasMod DIST = new ChasMod(this, "dist", Chastic.DISTANCE);
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             final ChasMod[] stats = new ChasMod[] {DIST, DAMAGE};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             final Trigger[] trigs = new Trigger[] {USER_HURT};
@@ -73,7 +73,7 @@ public class Phantom implements Ability.AbilReg {
             public String id() {
                 return "dispulse";
             }
-            public String disName() {
+            public String name() {
                 return "Диспульсия";
             }
             private final String[] desc = new String[] {
@@ -96,7 +96,7 @@ public class Phantom implements Ability.AbilReg {
         new Ability() {//Прыжок
             final ChasMod SPEED = new ChasMod(this, "dist", Chastic.VELOCITY);
             final ChasMod[] stats = new ChasMod[] {SPEED};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -113,7 +113,7 @@ public class Phantom implements Ability.AbilReg {
             public String id() {
                 return "jump";
             }
-            public String disName() {
+            public String name() {
                 return "Прыжок";
             }
             private final String[] desc = new String[] {
@@ -135,7 +135,7 @@ public class Phantom implements Ability.AbilReg {
         new Ability() {//Дислокация
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {TIME};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             private final double secMul = value("secMul", 0.5d);
@@ -166,7 +166,7 @@ public class Phantom implements Ability.AbilReg {
             public String id() {
                 return "ghost";
             }
-            public String disName() {
+            public String name() {
                 return "Дислокация";
             }
             private final String[] desc = new String[] {
@@ -189,7 +189,7 @@ public class Phantom implements Ability.AbilReg {
         new Ability() {//Скример
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {TIME};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             private final int amp = value("amp", 1);
@@ -211,7 +211,7 @@ public class Phantom implements Ability.AbilReg {
             public String id() {
                 return "scare";
             }
-            public String disName() {
+            public String name() {
                 return "Скример";
             }
             private final String[] desc = new String[] {
@@ -248,7 +248,7 @@ public class Phantom implements Ability.AbilReg {
             public boolean cast(final EntityCastEvent ece, final int lvl, final Skill sk, final int next) {
                 if (!(ch.ev() instanceof final EntityDamageEvent ee)) return false;
                 final LivingEntity caster = ch.caster();
-                final double dmg = DAMAGE.modify(ch.sk(), lvl, ee);
+                final double dmg = DAMAGE.modify(ch, lvl, ee);
                 if (ee.getFinalDamage() < dmg) return false;
                 final ArrayList<Event> evs = new ArrayList<>();
                 final Location loc = caster.getLocation();
@@ -294,7 +294,7 @@ public class Phantom implements Ability.AbilReg {
         new Ability() {//Путаница
             final ChasMod DIST = new ChasMod(this, "dist", Chastic.DISTANCE);
             final ChasMod[] stats = new ChasMod[] {DIST};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             final Trigger[] trigs = new Trigger[] {ATTACK_ENTITY};
@@ -322,7 +322,7 @@ public class Phantom implements Ability.AbilReg {
             public String id() {
                 return "confuse";
             }
-            public String disName() {
+            public String name() {
                 return "Путаница";
             }
             private final String[] desc = new String[] {
@@ -346,7 +346,7 @@ public class Phantom implements Ability.AbilReg {
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             //            final Stat MAX_DMG = new Stat("ma_dmg", Chastic.DAMAGE_DEALT);
             final ChasMod[] stats = new ChasMod[] {TIME, DAMAGE};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             final Trigger[] trigs = new Trigger[] {ATTACK_ENTITY};
@@ -376,7 +376,7 @@ public class Phantom implements Ability.AbilReg {
             public String id() {
                 return "essect";
             }
-            public String disName() {
+            public String name() {
                 return "Эссект";
             }
             private final String[] desc = new String[] {

@@ -8,16 +8,9 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
-import ru.komiss77.modules.world.AreaSpawner;
 import ru.romindous.skills.mobs.Minion;
 
 public class MiniRat extends Minion {
-
-    @Override
-    protected AreaSpawner.SpawnCondition condition() {
-        return COND_EMPTY;
-//        return new AreaSpawner.SpawnCondition(mobConfig("amount", 2), CreatureSpawnEvent.SpawnReason.NATURAL);
-    }
 
     @Override
     protected MiniGoal miniGoal(final Mob mb, final LivingEntity owner) {

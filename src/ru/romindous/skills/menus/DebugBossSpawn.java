@@ -9,7 +9,7 @@ public class DebugBossSpawn /*implements InventoryProvider*/ {/*
 
                 content.add( ClickableItem.from(
                         new ItemBuilder(ItemType.FIREWORK_STAR)
-                            .name(bt.displayName)
+                            .name(bt.disName)
                             .build(), e-> {
                                 p.closeInventory();
                                 Main.bossMgr.spawn(p, p.getLocation(), bt, null);

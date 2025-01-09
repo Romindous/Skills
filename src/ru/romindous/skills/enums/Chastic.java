@@ -22,7 +22,7 @@ public enum Chastic {
         this.color = color;
     }
 
-    public String getName() {
+    public String disName() {
         return color + name;
     }
 

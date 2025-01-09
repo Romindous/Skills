@@ -39,7 +39,7 @@ public class Mage implements Ability.AbilReg {
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {DAMAGE, TIME};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -61,7 +61,7 @@ public class Mage implements Ability.AbilReg {
             public String id() {
                 return "leap";
             }
-            public String disName() {
+            public String name() {
                 return "Молния";
             }
             private final String[] desc = new String[] {
@@ -84,7 +84,7 @@ public class Mage implements Ability.AbilReg {
         new Ability() {//Метеор
             final ChasMod POWER = new ChasMod(this, "power", Chastic.EFFECT);
             final ChasMod[] stats = new ChasMod[] {POWER};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             private final double range = value("range", 12d);
@@ -109,7 +109,7 @@ public class Mage implements Ability.AbilReg {
             public String id() {
                 return "meteor";
             }
-            public String disName() {
+            public String name() {
                 return "Метеор";
             }
             private final String[] desc = new String[] {
@@ -132,7 +132,7 @@ public class Mage implements Ability.AbilReg {
             final ChasMod HEAL = new ChasMod(this, "heal", Chastic.REGENERATION);
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {HEAL, TIME};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -154,7 +154,7 @@ public class Mage implements Ability.AbilReg {
             public String id() {
                 return "harden";
             }
-            public String disName() {
+            public String name() {
                 return "Обновление";
             }
             private final String[] desc = new String[] {
@@ -177,7 +177,7 @@ public class Mage implements Ability.AbilReg {
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             final ChasMod DIST = new ChasMod(this, "dist", Chastic.DISTANCE);
             final ChasMod[] stats = new ChasMod[] {DAMAGE, DIST};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -201,7 +201,7 @@ public class Mage implements Ability.AbilReg {
             public String id() {
                 return "bunch";
             }
-            public String disName() {
+            public String name() {
                 return "Скопление";
             }
             private final String[] desc = new String[] {
@@ -224,7 +224,7 @@ public class Mage implements Ability.AbilReg {
         new Ability() {//Дисперсия
             final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
             final ChasMod[] stats = new ChasMod[] {SPEED};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -255,7 +255,7 @@ public class Mage implements Ability.AbilReg {
             public String id() {
                 return "disperce";
             }
-            public String disName() {
+            public String name() {
                 return "Дисперсия";
             }
             private final String[] desc = new String[] {

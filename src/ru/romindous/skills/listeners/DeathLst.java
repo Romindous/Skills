@@ -1,5 +1,6 @@
 package ru.romindous.skills.listeners;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -46,7 +47,7 @@ public class DeathLst implements Listener {
         final Player p = e.getPlayer();
         final Location loc = p.getLocation();
         p.setLastDeathLocation(loc);
-        p.sendMessage(TCUtil.form(Main.prefix + "Вы умерли в мире " + Main.subServer.displayName
+        p.sendMessage(TCUtil.form(Main.prefix + "Вы умерли в мире " + Main.subServer.disName
             + "§7,\n§7на координатах (§4" + loc.getBlockX() + "§7, §4" + loc.getBlockY() + "§7, §4" + loc.getBlockZ() + "§7)"));
 
         final Survivor sv = PM.getOplayer(p, Survivor.class);
@@ -155,7 +156,7 @@ public class DeathLst implements Listener {
         if (!el.callEvent()) return;
         kSv.trigger(Trigger.KILL_ENTITY, el, killer);
         e.setDroppedExp(el.getExp());
-        kSv.addMana(killer, el.getMana());
+        kSv.chgMana(killer, el.getMana());
 
         final Location loc = EntityUtil.center(mob);
 //        final float thresh = SRL_CH_DEL / Math.max(exp, 1);
@@ -173,36 +174,35 @@ public class DeathLst implements Listener {
     private static void dropScroll(final Location loc) {
         final Scroll sc;
         switch (Main.srnd.nextInt(SC_ROLL)) {
-            case 0://selector
-                sc = randScroll(Selector.RARITIES);
-                break;
-            case 1://ability
-                sc = randScroll(Ability.RARITIES);
-                break;
-            case 2://modifier
-                sc = randScroll(Modifier.RARITIES);
-                break;
-            default: return;
+            case 0 -> sc = randScroll(Selector.RARITIES);//selector
+            case 1, 2 -> sc = randScroll(Ability.RARITIES);//ability
+            case 3, 4, 5 -> sc = randScroll(Modifier.RARITIES);//modifier
+            default -> {return;}
         }
-
+        if (sc == null) return;
         final TextColor tc = TCUtil.getTextColor(sc.rarity().color());
-        Nms.colorGlow(loc.getWorld().dropItem(loc, sc.drop(1)),
+        Nms.colorGlow(loc.getWorld().dropItem(loc, sc.drop(0)),
             NamedTextColor.nearestTo(tc), false);
     }
 
     private static final Rarity[] RAR_VALS = Rarity.values();
+    private static final int RAR_MAX =
+        Math.min(RAR_VALS.length - 1, Main.subServer.ordinal() + 1);
     private static final int RAR_CH = getMaxRar();
+    private static final int RAR_DEL = 1;
+
     private static int getMaxRar() {
         int rar = 0;
-        for (int i = 1; i != RAR_VALS.length; i++)
-            rar += i << 1;
+        for (int i = 1; i != RAR_MAX + 1; i++)
+            rar += i << RAR_DEL;
         return rar;
     }
 
-    private static <S extends Scroll> S randScroll(final Map<Rarity, List<S>> values) {
+    private static <S extends Scroll> @Nullable S randScroll(final Map<Rarity, List<S>> values) {
         int ch = Main.srnd.nextInt(RAR_CH);
-        int i = 0; for (;ch != 0; i++) ch = ch >> 1;
-        final List<S> rsc = values.get(RAR_VALS[i]);
+        int i = 0; for (;ch != 0; i++) ch = ch >> RAR_DEL;
+        final List<S> rsc = values.get(RAR_VALS[RAR_MAX - i]);
+        if (rsc == null) return null;
         return rsc.get(Main.srnd.nextInt(rsc.size()));
     }
 

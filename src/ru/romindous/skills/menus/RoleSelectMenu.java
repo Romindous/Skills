@@ -51,22 +51,18 @@ public class RoleSelectMenu implements InventoryProvider {
 
         if (timeLeft > 0 && !ApiOstrov.isLocalBuilder(p)) {
             for (final Role rl : Role.values()) {
-                content.set((i & 1) == 1 ? i : i + 9, ClickableItem.empty(
-                    new ItemBuilder(rl.getIcon())
-                        .lore(sv.role == rl ? "§fТвой класс сейчас" : "")
-                        .lore("§cДо смены: " + TimeUtil.secondToTime(timeLeft))
-                        .build()
-                ));
+                content.set((i & 1) == 1 ? i : i + 9,
+                    ClickableItem.empty(new ItemBuilder(rl.getIcon()).lore(sv.role == rl ? "§fТвой класс сейчас" : "")
+                        .lore("§cДо смены: " + TimeUtil.secondToTime(timeLeft)).build()));
                 i += i == 12 ? 2 : 1;
             }
         } else {
             for (final Role rl : Role.values()) {
                 final boolean eq = sv.role == rl;
-                content.set((i & 1) == 1 ? i : i + 9, ClickableItem.from(
-                    new ItemBuilder(rl.getIcon())
-                            .lore(eq ? "§fТвой класс сейчас" : "")
-                            .lore(!eq || sv.role == null ? "" : "§7Перевыбор класса - §cполный сброс §7характеристик!")
-                            .build(), e -> {
+                content.set((i & 1) == 1 ? i : i + 9,
+                    ClickableItem.from(new ItemBuilder(rl.getIcon()).lore(eq ? "§fТвой класс сейчас" : "")
+                        .lore(!eq || sv.role == null ? "" : "§7Перевыбор класса - §cполный сброс §7характеристик!")
+                        .build(), e -> {
                         p.closeInventory();
                         p.performCommand("skill select " + rl.name());
                     }));

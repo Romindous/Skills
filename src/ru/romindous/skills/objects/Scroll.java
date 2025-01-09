@@ -1,9 +1,9 @@
 package ru.romindous.skills.objects;
 
 import javax.annotation.Nullable;
-import net.kyori.adventure.key.Key;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
+import ru.komiss77.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.config.ConfigVars;
@@ -20,21 +20,24 @@ public interface Scroll {
 
     String id();
 
-    String disName();
+    String name();
 
     default String name(final int lvl) {
-        return rarity().color() + disName() + " " + toINums(lvl);
+        return rarity().color() + name() + " " + toINums(lvl);
     }
 
     String[] desc(final int lvl);
 
+    //✵🌟🟃🞜💠⛨✞
+    String side();
+
     default ItemStack display(final int lvl) {
-        return new ItemBuilder(icon()).name(name(lvl)).lore(desc(lvl)).build();
+        return new ItemBuilder(icon()).name(TCUtil.sided(name(lvl), side())).lore(desc(lvl)).build();
     }
 
     default ItemStack drop(final int lvl) {
-        return new ItemBuilder(icon()).name(name(lvl)).lore(desc(lvl)).data(Key.key(data()), id())
-            .data(Key.key(LVL), lvl).lore(TCUtil.P + "ПКМ " + TCUtil.N + "- присвоить").build();
+        return new ItemBuilder(icon()).name(TCUtil.sided("<u>" + name(lvl) + "</u>", side())).lore(desc(lvl))
+            .data(OStrap.key(data()), id()).data(OStrap.key(LVL), lvl).lore(TCUtil.P + "ПКМ " + TCUtil.N + "- присвоить").build();
     }
 
     ItemType icon();
@@ -55,7 +58,7 @@ public interface Scroll {
             case 8 -> "IIX";
             case 9 -> "IX";
             case 10 -> "X";
-            default -> String.valueOf(lvl);
+            default -> String.valueOf(lvl + 1);
         };
     }
 

@@ -23,12 +23,13 @@ import ru.komiss77.modules.world.AreaSpawner;
 import ru.komiss77.modules.world.LocFinder;
 import ru.komiss77.modules.world.WXYZ;
 import ru.komiss77.utils.LocUtil;
+import ru.komiss77.utils.NumUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.SM;
 import ru.romindous.skills.Survivor;
 import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.listeners.DeathLst;
-import ru.romindous.skills.listeners.EntityDamageLst;
+import ru.romindous.skills.listeners.DamageLst;
 
 public abstract class SednaMob extends CustomEntity {
 
@@ -36,7 +37,7 @@ public abstract class SednaMob extends CustomEntity {
     private static final MobGoals MOB_GOALS = Bukkit.getMobGoals();
     private static final int LOC_ENCD = 10;
     private static final int COORD_DEL = 6;
-    private static final int REM_SPAWN = 20;
+    private static final int REM_SPAWN = 10;
     private static final int PER_PLAYER = 4;
 
     private static final String prefix = "mob.";
@@ -146,12 +147,12 @@ public abstract class SednaMob extends CustomEntity {
 
     @Override
     protected void onAttack(final EntityDamageByEntityEvent e) {
-        EntityDamageLst.onCustomAttack(e, this);
+        DamageLst.onCustomAttack(e, this);
     }
 
     @Override
     protected void onHurt(final EntityDamageEvent e) {
-        EntityDamageLst.onCustomDefense(e, this);
+        DamageLst.onCustomDefense(e, this);
     }
 
     @Override
@@ -166,9 +167,6 @@ public abstract class SednaMob extends CustomEntity {
 
     @Override
     protected void onShoot(final ProjectileLaunchEvent e) {}
-
-    @Override
-    protected void onExtra(final EntityEvent e) {}
 
     public int mobConfig(final String id, final int val) {
         return ConfigVars.get(prefix() + key().value() + "." + id, val);
@@ -214,9 +212,9 @@ public abstract class SednaMob extends CustomEntity {
 
         public final SpawnCondition condition(final WXYZ loc) {
             if (!Nms.getBiomeKey(loc).equals(biome())) return NONE;
-            return LocUtil.getChEnts(loc, radius(), getEntClass(),
-                e -> SednaMob.this.equals(CustomEntity.get(e))).size() < cond.amt()
-                && extra(loc) ? cond : NONE;
+            return LocUtil.getChEnts(loc, NumUtil.abs(radius - offset),
+                    getEntClass(), e -> SednaMob.this.equals(CustomEntity.get(e)))
+                .isEmpty() && extra(loc) ? cond : NONE;
         }
 
         protected abstract boolean extra(final WXYZ loc);

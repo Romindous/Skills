@@ -71,7 +71,7 @@ public class Stoner implements Ability.AbilReg {
         new Ability() {//Толчок
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             final ChasMod[] stats = new ChasMod[] {DAMAGE};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -93,7 +93,7 @@ public class Stoner implements Ability.AbilReg {
             public String id() {
                 return "bump";
             }
-            public String disName() {
+            public String name() {
                 return "Толчок";
             }
             private final String[] desc = new String[] {
@@ -117,7 +117,7 @@ public class Stoner implements Ability.AbilReg {
             final ChasMod HEAL = new ChasMod(this, "heal", Chastic.REGENERATION);
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {HEAL};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             private final int amp = value("amp", 1);
@@ -139,7 +139,7 @@ public class Stoner implements Ability.AbilReg {
             public String id() {
                 return "harden";
             }
-            public String disName() {
+            public String name() {
                 return "Укрепление";
             }
             private final String[] desc = new String[] {
@@ -314,7 +314,7 @@ public class Stoner implements Ability.AbilReg {
         new Ability() {//Подскок
             final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
             final ChasMod[] stats = new ChasMod[] {SPEED};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             private final double defY = value("defY", 1d);
@@ -331,7 +331,7 @@ public class Stoner implements Ability.AbilReg {
             public String id() {
                 return "leap";
             }
-            public String disName() {
+            public String name() {
                 return "Подскок";
             }
             private final String[] desc = new String[] {
@@ -355,7 +355,7 @@ public class Stoner implements Ability.AbilReg {
             final ChasMod EFFECT = new ChasMod(this, "effect", Chastic.EFFECT);
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {TIME, EFFECT};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -377,7 +377,7 @@ public class Stoner implements Ability.AbilReg {
             public String id() {
                 return "pinch";
             }
-            public String disName() {
+            public String name() {
                 return "Прищемление";
             }
             private final String[] desc = new String[] {
@@ -400,7 +400,7 @@ public class Stoner implements Ability.AbilReg {
         new Ability() {//Зубчатость
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_TAKEN);
             final ChasMod[] stats = new ChasMod[] {DAMAGE};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -423,7 +423,7 @@ public class Stoner implements Ability.AbilReg {
             public String id() {
                 return "thorns";
             }
-            public String disName() {
+            public String name() {
                 return "Зубчатость";
             }
             private final String[] desc = new String[] {

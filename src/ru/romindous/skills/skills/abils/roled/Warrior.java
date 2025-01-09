@@ -89,7 +89,7 @@ public class Warrior implements Ability.AbilReg {
             final ChasMod DIST = new ChasMod(this, "dist", Chastic.DISTANCE);
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             final ChasMod[] stats = new ChasMod[] {DIST, DAMAGE};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             private final double arc = value("arc", 0.2d);
@@ -122,7 +122,7 @@ public class Warrior implements Ability.AbilReg {
             public String id() {
                 return "spear";
             }
-            public String disName() {
+            public String name() {
                 return "Пронзание";
             }
             private final String[] desc = new String[] {
@@ -144,7 +144,7 @@ public class Warrior implements Ability.AbilReg {
         new Ability() {//Просвет
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             final ChasMod[] stats = new ChasMod[] {DAMAGE};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             final Trigger[] trigs = new Trigger[] {ATTACK_ENTITY};
@@ -174,13 +174,13 @@ public class Warrior implements Ability.AbilReg {
             public String id() {
                 return "light";
             }
-            public String disName() {
+            public String name() {
                 return "Просвет";
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Взывает к " + CLR + "святости  " + TCUtil.N + "оружия пользователя,",
-                TCUtil.N + "нанося дополнительный (" + DAMAGE.id + " ед. " + TCUtil.N + "макс.) урон,",
-                TCUtil.N + "завися от уровня " + CLR + "света " + TCUtil.N + "в точке удара"};
+                TCUtil.N + "нанося (" + DAMAGE.id + " ед. " + TCUtil.N + "макс.) урон, завися",
+                TCUtil.N + "от уровня " + CLR + "света " + TCUtil.N + "в точке удара"};
             public String[] descs() {
                 return desc;
             }
@@ -262,7 +262,7 @@ public class Warrior implements Ability.AbilReg {
             final ChasMod EFFECT = new ChasMod(this, "effect", Chastic.EFFECT);
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {TIME, EFFECT};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -285,7 +285,7 @@ public class Warrior implements Ability.AbilReg {
             public String id() {
                 return "focus";
             }
-            public String disName() {
+            public String name() {
                 return "Фокус";
             }
             private final String[] desc = new String[] {
@@ -308,7 +308,7 @@ public class Warrior implements Ability.AbilReg {
         new Ability() {//Рипост
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             final ChasMod[] stats = new ChasMod[] {DAMAGE};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -331,7 +331,7 @@ public class Warrior implements Ability.AbilReg {
             public String id() {
                 return "repost";
             }
-            public String disName() {
+            public String name() {
                 return "Рипост";
             }
             private final String[] desc = new String[] {
@@ -353,7 +353,7 @@ public class Warrior implements Ability.AbilReg {
         new Ability() {//Триумф
             final ChasMod TIME = new ChasMod(this, "time", Chastic.DAMAGE_DEALT);
             final ChasMod[] stats = new ChasMod[] {TIME};
-            protected ChasMod[] stats() {
+            public ChasMod[] stats() {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
@@ -369,7 +369,7 @@ public class Warrior implements Ability.AbilReg {
             public String id() {
                 return "triumph";
             }
-            public String disName() {
+            public String name() {
                 return "Триумф";
             }
             private final String[] desc = new String[] {

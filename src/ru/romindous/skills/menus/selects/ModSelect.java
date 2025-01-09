@@ -1,7 +1,6 @@
 package ru.romindous.skills.menus.selects;
 
-import javax.annotation.Nullable;
-import java.util.Map;
+import java.util.*;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -13,8 +12,12 @@ import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
 import ru.romindous.skills.Survivor;
+import ru.romindous.skills.enums.Chastic;
+import ru.romindous.skills.skills.ChasMod;
 import ru.romindous.skills.skills.Skill;
+import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
+import ru.romindous.skills.skills.sels.Selector;
 
 public class ModSelect extends SvSelect {
 
@@ -22,7 +25,7 @@ public class ModSelect extends SvSelect {
     private static final ItemStack rail; //окантовка
 
     static {
-        rail = new ItemBuilder(ItemType.ACTIVATOR_RAIL).name("§0.").build();
+        rail = new ItemBuilder(ItemType.DETECTOR_RAIL).name("§0.").build();
         empty = new ItemStack[54];
         for (int i = 0; i < 54; i++) {
             switch (i % 9) {
@@ -42,7 +45,7 @@ public class ModSelect extends SvSelect {
 
     private final int mdSlot;
 
-    public ModSelect(final Survivor sv, final int skIx, final @Nullable Skill sk, final int abSlot) {
+    public ModSelect(final Survivor sv, final int skIx, final Skill sk, final int abSlot) {
         super(sv, skIx, sk);
         this.mdSlot = abSlot;
     }
@@ -55,16 +58,14 @@ public class ModSelect extends SvSelect {
 
         //content.getInventory().setItem(49, new ItemBuilder(sv.skill.mat).name(sv.skill.color+sv.skill.name()).build());
         int slot = 0;
+        final Chastic[] chs = getChs(sk);
         for (final Map.Entry<Modifier.ModState, Integer> en : sv.mods.entrySet()) {
-            switch (slot / 9) {
-                case 0, 8:
-                    slot++;
-                    continue;
-            }
+            while (switch (slot % 9) {case 0, 8 -> true; default -> false;}) slot++;
             final Modifier.ModState md = en.getKey();
             if (!sv.canUse(md.mod())) continue;
-            its.set(slot, ClickableItem.from(new ItemBuilder(md.mod().display(md.lvl())).amount(en.getValue()).lore("")
-                .lore(TCUtil.P + "Клик - Выбрать").lore("<red>Выброс" + TCUtil.P + " - Выдать предметом").build(), e -> {
+            its.set(slot, ClickableItem.from(new ItemBuilder(md.mod().display(md.lvl()))
+                .amount(en.getValue()).lore("<dark_gray>(клик - выбор)").lore(relate(md.mod(), chs))
+                .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
                     switch (e.getClick()) {
                         case DROP, CONTROL_DROP:
                             if (sv.change(md, -1) < 0) return;
@@ -86,11 +87,40 @@ public class ModSelect extends SvSelect {
             slot++;
         }
 
-        its.set(17, ClickableItem.from(new ItemBuilder(sv.role.getIcon())
-            .name("<red>Отмена Выбора").build(), e -> {
-                openLast(p);
+        its.set(49, ClickableItem.from(new ItemBuilder(ItemType.DAYLIGHT_DETECTOR)
+            .name(TCUtil.sided("<red>Отмена")).build(), e -> openLast(p)));
+    }
+
+    private static Chastic[] getChs(final Skill sk) {
+        if (sk == null) return new Chastic[0];
+        final Set<Chastic> chs = EnumSet.noneOf(Chastic.class);
+        for (final Selector.SelState sls : sk.sels) {
+            for (final ChasMod cm : sls.sel().stats()) {
+                chs.add(cm.chs);
             }
-        ));
+        }
+        for (final Ability.AbilState abs : sk.abils) {
+            for (final ChasMod cm : abs.abil().stats()) {
+                chs.add(cm.chs);
+            }
+        }
+        final Chastic[] cha = chs.toArray(new Chastic[0]);
+        Arrays.sort(cha);
+        return cha;
+    }
+
+    private static String[] relate(final Modifier md, final Chastic[] chs) {
+        if (chs.length == 0) return new String[]{"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
+            "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями" + "<red>навыка!"};
+        final List<String> fnd = new ArrayList<>();
+        for (final Chastic ch : md.chastics()) {
+            if (Arrays.binarySearch(chs, ch) < 0) continue;
+            fnd.add(ch.disName());
+        }
+        if (fnd.isEmpty()) return new String[]{"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
+            "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями" + "<red>навыка!"};
+        return new String[]{TCUtil.N + "Общие " + TCUtil.P + "статы " + TCUtil.N + "с навыком:",
+            String.join(TCUtil.N + ", ", fnd)};
     }
 
 }

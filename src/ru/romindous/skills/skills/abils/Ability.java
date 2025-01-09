@@ -8,10 +8,14 @@ import org.bukkit.damage.DamageType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import ru.komiss77.OStrap;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
@@ -21,14 +25,15 @@ import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.enums.Chastic;
 import ru.romindous.skills.enums.Rarity;
 import ru.romindous.skills.enums.Role;
-import ru.romindous.skills.listeners.EntityDamageLst;
+import ru.romindous.skills.listeners.DamageLst;
 import ru.romindous.skills.objects.Scroll;
 import ru.romindous.skills.skills.ChasMod;
+import ru.romindous.skills.skills.Skill;
 
 public abstract class Ability implements Scroll {//способность
 
     public static final Map<String, Ability> VALUES = new HashMap<>();
-    public static final Map<Rarity, List<Ability>> RARITIES = new HashMap<>();
+    public static final Map<Rarity, List<Ability>> RARITIES = new EnumMap<>(Rarity.class);
 
     public static final ArrayList<InterNext> nexts = new ArrayList<>();
     public record InterNext(Chain ch, int time, @Nullable Runnable rn) {
@@ -70,11 +75,15 @@ public abstract class Ability implements Scroll {//способность
 
     protected abstract String[] descs();
 
-    protected abstract ChasMod[] stats();
+    public abstract ChasMod[] stats();
 
     public abstract boolean selfCast();
 
-//    public int mana(final int level) {
+    public String side() {
+        return "✵";
+    }
+
+    //    public int mana(final int level) {
 //        return (int) (manaScale * level + manaBase);
 //    }
 
@@ -89,6 +98,16 @@ public abstract class Ability implements Scroll {//способность
         }
         return false;
     }*/
+
+    public ItemStack display(final int lvl) {
+        return new ItemBuilder(icon()).name(TCUtil.sided(name(lvl), side()))
+            .flags(true, ItemFlag.HIDE_ADDITIONAL_TOOLTIP).lore(desc(lvl)).build();
+    }
+
+    public ItemStack drop(final int lvl) {
+        return new ItemBuilder(icon()).name(TCUtil.sided("<u>" + name(lvl) + "</u>", side())).flags(true, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+            .lore(desc(lvl)).data(OStrap.key(data()), id()).data(OStrap.key(LVL), lvl).lore(TCUtil.P + "ПКМ " + TCUtil.N + "- присвоить").build();
+    }
 
     public ItemType icon() {
         return switch (role()) {
@@ -110,27 +129,48 @@ public abstract class Ability implements Scroll {//способность
 
     private static final byte SIG_FIGS = 2;
 
-    public String[] desc(final int lvl) {
+    public List<String> context(final Skill sk, final int lvl) {
         final List<String> dscs = new ArrayList<>();
-        dscs.add(TCUtil.N + "Применим для: " + (role() == null ? Role.ANY : role().getName()));
-        if (selfCast()) dscs.add(TCUtil.P + "Всегда подбирает только пользователя!");
-        dscs.add(" ");
+        final ChasMod[] stats = stats();
         for (final String d : descs()) {
             String ed = d.replace(CLR, rarity().color());
-            for (final ChasMod st : stats()) {
+            for (final ChasMod st : stats) {
+                ed = ed.replace(st.id, st.chs.color()
+                    + StringUtil.toSigFigs(st.modify(sk, lvl), SIG_FIGS));
+            }
+            dscs.add(ed);
+        }
+        return dscs;
+    }
+
+    public String[] desc(final int lvl) {
+        final List<String> dscs = new ArrayList<>();
+        dscs.add(TCUtil.N + "Применимая роль: " + (role() == null ? Role.ANY : role().disName()));
+        if (selfCast()) dscs.add(TCUtil.P + "Всегда подбирает пользователя!");
+        dscs.add("<dark_gray>Способность:");
+        final ChasMod[] stats = stats();
+        for (final String d : descs()) {
+            String ed = d.replace(CLR, rarity().color());
+            for (final ChasMod st : stats) {
                 ed = ed.replace(st.id, st.chs.color()
                     + StringUtil.toSigFigs(st.calc(lvl), SIG_FIGS));
             }
             dscs.add(ed);
         }
+        if (!InvCondition.NONE.equals(equip())) {
+            dscs.add("<dark_gray>Нужно иметь:");
+            dscs.add(equip().describe());
+        }
+        dscs.add(" ");
+        dscs.add(TCUtil.N + "Влияющие Модификаторы:");
+        dscs.add(TCUtil.N + "- " + Chastic.MANA.disName());
+        dscs.add(TCUtil.N + "- " + Chastic.COOLDOWN.disName());
+        for (final ChasMod st : stats()) {
+            dscs.add(TCUtil.N + "- " + st.chs.disName());
+        }
         dscs.add(" ");
         dscs.add(TCUtil.N + "Стоимость: " + Main.manaClr + (int) MANA.calc(lvl) + " душ");
         dscs.add(TCUtil.N + "Перезарядка: " + Main.cdClr + (int) CD.calc(lvl) + " сек");
-        dscs.add(" ");
-        dscs.add(TCUtil.N + "Влияющие Модификаторы:");
-        for (final ChasMod st : stats()) {
-            dscs.add(TCUtil.N + "- " + st.chs.getName());
-        }
         return dscs.toArray(new String[0]);
     }
 
@@ -307,7 +347,7 @@ public abstract class Ability implements Scroll {//способность
     }
 
     protected static EntityDamageByEntityEvent makeDamageEvent(final LivingEntity caster, final LivingEntity le) {
-        return EntityDamageLst.damageEvent(caster, le, le, DamageType.MAGIC, 0d);
+        return DamageLst.damageEvent(caster, le, le, DamageType.MAGIC, 0d);
     }
 
     protected static void defKBLe(final LivingEntity caster, final LivingEntity tgt, final boolean up) {

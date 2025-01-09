@@ -9,24 +9,26 @@ import org.bukkit.entity.Mob;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
+import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Survivor;
 import ru.romindous.skills.config.ConfigVars;
 
 public enum Stat {
-    STRENGTH("Сила", "§c", ItemType.REDSTONE_BLOCK), //warrior - max hp, melee dmg
-    AGILITY("Ловкость", "§e", ItemType.SCAFFOLDING), //assasin - move speed, skill cd
-    METABOLISM("Метаболизм", "§6", ItemType.SMOKER), //vampire - hp regen, saturation
-    CONTROL("Контроль", "§a", ItemType.SCULK_SHRIEKER), //necros - minion stats, mob stats
-    PASSIVE("Находчивость", "§б", ItemType.REINFORCED_DEEPSLATE), //stone - hurt dmg, mob drops
-    MAGIC("Магия", "§9", ItemType.ENCHANTING_TABLE), //mage - max mana, magic dmg
-    ACCURACY("Точность", "§b", ItemType.TARGET), //cross - ranged dmg, exp
-    SPIRIT("Душевность", "§d", ItemType.SOUL_CAMPFIRE); //phantom - mana regen, skill mana
+    STRENGTH("Сила", "<red>", ItemType.REDSTONE_BLOCK), //warrior - max hp, melee dmg
+    AGILITY("Ловкость", "<beige>", ItemType.SCAFFOLDING), //assasin - move speed, skill cd
+    METABOLISM("Метаболизм", "<gold>", ItemType.SMOKER), //vampire - hp regen, saturation
+    CONTROL("Контроль", "<apple>", ItemType.SCULK_SHRIEKER), //necros - minion stats, mob stats
+    PASSIVE("Находчивость", "<mithril>", ItemType.REINFORCED_DEEPSLATE), //stone - hurt dmg, mob drops
+    MAGIC("Магия", "<dark_aqua>", ItemType.ENCHANTING_TABLE), //mage - max mana, magic dmg
+    ACCURACY("Точность", "<sky>", ItemType.TARGET), //cross - ranged dmg, exp
+    SPIRIT("Душевность", "<pink>", ItemType.SOUL_CAMPFIRE); //phantom - mana regen, skill mana
 
     private static final String prefix = "stats.";
-    private static final String plus = "§2(+) " + TCUtil.N;
-    private static final String minus = "§4(-) " + TCUtil.N;
+    private static final String plus = "<dark_green>(+) " + TCUtil.N;
+    private static final String minus = "<dark_red>(-) " + TCUtil.N;
+    private static final String split = ":";
     private static final byte SIG_FIGS = 2;
 
     private final String name;
@@ -39,7 +41,7 @@ public enum Stat {
         this.icon = icon;
     }
 
-    public String getName() {
+    public String disName() {
         return clr + name;
     }
 
@@ -57,7 +59,7 @@ public enum Stat {
     }
 
     public ItemStack getItem(final Survivor sv) {
-        return new ItemBuilder(icon).name(getName()).lore(getDesc(sv)).build();
+        return new ItemBuilder(icon).name(TCUtil.sided("<u>" + disName() + "</u>", "❖")).lore(getDesc(sv)).build();
     }
 
     private String[] getDesc(final Survivor sv) {
@@ -77,7 +79,7 @@ public enum Stat {
                 break;
             case AGILITY:
                 numDesc(plus + clr + "Скорость " + TCUtil.N + "перемещения",
-                    rt, nrt, next, speedAdd, true, dscs);
+                    rt, nrt, next, speedMul, false, dscs);
                 numDesc(minus + clr + "Перезарядка " + TCUtil.N + "способностей",
                     rt, nrt, next, skillCDAdd, skillCDMul, dscs);
                 break;
@@ -88,24 +90,24 @@ public enum Stat {
                     rt, nrt, next, nutriAdd, nutriMul, dscs);
                 break;
             case CONTROL:
-                numDesc(plus + "Здоровье " + plus + clr + "преспешников "
-                    + TCUtil.N + "и " + minus + clr + "враждебных мобов",
+                numDesc(TCUtil.N + "Здоровье " + plus + clr + "преспешников "
+                    + TCUtil.N + "и " + split + minus + clr + "враждебных мобов",
                     rt, nrt, next, mobHealthMul, false, dscs);
-                numDesc(plus + "Защита " + plus + clr + "преспешников "
-                    + TCUtil.N + "и " + minus + clr + "враждебных мобов",
+                numDesc(TCUtil.N + "Защита " + plus + clr + "преспешников "
+                    + TCUtil.N + "и " + split + minus + clr + "враждебных мобов",
                     rt, nrt, next, mobArmorMul, false, dscs);
-                numDesc(plus + "Урон " + plus + clr + "преспешников "
-                    + TCUtil.N + "и " + minus + clr + "враждебных мобов",
+                numDesc(TCUtil.N + "Урон " + plus + clr + "преспешников "
+                    + TCUtil.N + "и " + split + minus + clr + "враждебных мобов",
                     rt, nrt, next, mobDamageMul, false, dscs);
-                numDesc(plus + "Скорость " + plus + clr + "преспешников "
-                    + TCUtil.N + "и " + minus + clr + "враждебных мобов",
+                numDesc(TCUtil.N + "Скорость " + plus + clr + "преспешников "
+                    + TCUtil.N + "и " + split + minus + clr + "враждебных мобов",
                     rt, nrt, next, mobSpeedMul, false, dscs);
                 break;
             case PASSIVE:
-                numDesc(minus + "Полученный " + clr + "урон" + minus,
+                numDesc(minus + "Полученный " + clr + "урон",
                     rt, nrt, next, defenseAdd, defenseMul, dscs);
-                numDesc(plus + "Дроп с " + clr + "мобов" + plus,
-                    rt, nrt, next, dropsAdd, true, dscs);
+                numDesc(plus + "Дроп с " + clr + "мобов",
+                    rt, nrt, next, dropsMul, false, dscs);
                 break;
             case MAGIC:
                 numDesc(plus + clr + "Магический " + TCUtil.N + "урон",
@@ -120,33 +122,33 @@ public enum Stat {
                     rt, nrt, next, expAdd, expMul, dscs);
                 break;
             case SPIRIT:
-                numDesc(plus + "Возобновление " + clr + "душ ",
+                numDesc(plus + "Возобновление " + clr + "душ",
                     rt, nrt, next, reManaAdd, reManaMul, dscs);
                 numDesc(minus + "Затрата " + clr + "душ " + TCUtil.N + "на скиллы",
                     rt, nrt, next, skillManaAdd, skillManaMul, dscs);
                 break;
         }
 
-        if (next) dscs.add("Клик - улучшить " + TCUtil.P + "(" + sv.statsPoints + ")");
+        if (next) dscs.add(TCUtil.A + "<u>Клик - улучшить</u> " + TCUtil.N + "(" + sv.statsPoints + ")");
         return dscs.toArray(new String[0]);
     }
 
     private void numDesc(final String name, final double rt, final double nrt,
         final boolean next, final double num, final boolean add, final List<String> dscs) {
-        dscs.add(name);
+        final String fin = addRest(name, dscs);
         if (next) {
             if (add) {
-                dscs.add(TCUtil.N + "на " + clr + StringUtil.toSigFigs(num * rt, SIG_FIGS));
+                dscs.add(fin + TCUtil.N + " на " + clr + StringUtil.toSigFigs(num * rt, SIG_FIGS)
+                    + TCUtil.P + " (-> " + StringUtil.toSigFigs(num * nrt, SIG_FIGS) + ")");
             } else {
-                dscs.add(TCUtil.N + "на " + clr + StringUtil.toSigFigs(num * rt, SIG_FIGS) + "%");
+                dscs.add(fin + TCUtil.N + " на " + clr + StringUtil.toSigFigs(100d * num * rt, SIG_FIGS) + "%"
+                    + TCUtil.P + " (-> " + StringUtil.toSigFigs(100d * num * nrt, SIG_FIGS) + "%)");
             }
         } else {
             if (add) {
-                dscs.add(TCUtil.N + "на " + clr + StringUtil.toSigFigs(num * rt, SIG_FIGS)
-                    + TCUtil.P + " (-> " + StringUtil.toSigFigs(num * nrt, SIG_FIGS) + ")");
+                dscs.add(fin + TCUtil.N + " на " + clr + StringUtil.toSigFigs(num * rt, SIG_FIGS));
             } else {
-                dscs.add(TCUtil.N + "на " + clr + StringUtil.toSigFigs(num * rt, SIG_FIGS) + "%"
-                    + TCUtil.P + " (-> " + StringUtil.toSigFigs(num * nrt, SIG_FIGS) + "%)");
+                dscs.add(fin + TCUtil.N + " на " + clr + StringUtil.toSigFigs(100d * num * rt, SIG_FIGS) + "%");
             }
         }
         dscs.add(" ");
@@ -154,18 +156,26 @@ public enum Stat {
 
     private void numDesc(final String name, final double rt, final double nrt,
         final boolean next, final double add, final double mul, final List<String> dscs) {
-        dscs.add(name);
+        final String fin = addRest(name, dscs);
         if (next) {
-            dscs.add(TCUtil.N + "на " + clr + StringUtil.toSigFigs(add * rt, SIG_FIGS)
-                + TCUtil.N + " или " + clr + StringUtil.toSigFigs(mul * rt, SIG_FIGS) + "%");
-        } else {
+            dscs.add(fin);
             dscs.add(TCUtil.N + "на " + clr + StringUtil.toSigFigs(add * rt, SIG_FIGS)
                 + TCUtil.P + " (-> " + StringUtil.toSigFigs(add * nrt, SIG_FIGS) + ")"
-                + TCUtil.N + " или " + clr + StringUtil.toSigFigs(mul * rt, SIG_FIGS) + "%"
-                + TCUtil.P + " (-> " + StringUtil.toSigFigs(mul * nrt, SIG_FIGS) + "%)");
+                + TCUtil.N + " или " + clr + StringUtil.toSigFigs(100d * mul * rt, SIG_FIGS) + "%"
+                + TCUtil.P + " (-> " + StringUtil.toSigFigs(100d * mul * nrt, SIG_FIGS) + "%)");
+        } else {
+            dscs.add(fin + TCUtil.N + " на " + clr + StringUtil.toSigFigs(add * rt, SIG_FIGS)
+                + TCUtil.N + " или " + clr + StringUtil.toSigFigs(100d * mul * rt, SIG_FIGS) + "%");
         }
-        dscs.add(TCUtil.N + "смотря какое значение " + clr + "ниже");
+        dscs.add(TCUtil.N + "смотря какое " + clr + "значение " + TCUtil.N + "ниже");
         dscs.add(" ");
+    }
+
+    private String addRest(final String name, final List<String> dscs) {
+        final String[] sps = name.split(split);
+        if (sps.length < 2) return name;
+        for (int i = 1; i != sps.length; i++) dscs.add(sps[i-1]);
+        return sps[sps.length - 1];
     }
 
     public static double getVar(final String id, final double def) {
@@ -175,7 +185,7 @@ public enum Stat {
     private static final int del = 4;
     private static final int sub = del - 1;
     private static double rootate(final int stat) {
-        return stat == 0 ? 0d : Math.sqrt(stat << del) - sub;
+        return stat == 0 ? 0d : NumUtil.sqrt(stat << del) - sub;
     }
 
     private final static double defenseAdd = getVar("defenseAdd", 0.5d);
@@ -212,9 +222,9 @@ public enum Stat {
         return def + manaAdd * rootate(magic);
     }
 
-    private final static double speedAdd = getVar("speedAdd", 0.004d);
+    private final static double speedMul = getVar("speedMul", 0.04d);
     public static double speed(final double def, final int agility) {
-        return def + speedAdd * rootate(agility);
+        return def + (def * speedMul) * rootate(agility);
     }
 
     private final static double skillCDAdd = getVar("skillCDAdd", 0.5d);
@@ -247,9 +257,9 @@ public enum Stat {
         return def + Math.min(expAdd, def * expMul) * rootate(accuracy);
     }
 
-    private final static double dropsAdd = getVar("dropsAdd", 0.1d);
+    private final static double dropsMul = getVar("dropsMul", 0.1d);
     public static double drops(final double def, final int passive) {
-        return def + dropsAdd * rootate(passive);
+        return def + (def * dropsMul) * rootate(passive);
     }
 
     private final static double reManaAdd = getVar("reManaAdd", 0.5d);
@@ -261,7 +271,7 @@ public enum Stat {
     private final static double mobHealthMul = getVar("mobHealthMul", 0.0025d);
     private final static double mobArmorMul = getVar("mobArmorMul", 0.004d);
     private final static double mobDamageMul = getVar("mobDamageMul", 0.002d);
-    private final static double mobSpeedMul = getVar("mobDamageMul", 0.002d);
+    private final static double mobSpeedMul = getVar("mobSpeedMul", 0.002d);
 
     public static void modMini(final Mob mb, final int control) {
         final double rt = rootate(control);

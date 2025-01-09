@@ -2,6 +2,7 @@ package ru.romindous.skills.mobs;
 
 import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.UUID;
@@ -16,10 +17,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -28,24 +26,20 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.modules.world.AreaSpawner;
+import ru.komiss77.modules.world.WXYZ;
 import ru.komiss77.utils.LocUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.Survivor;
 import ru.romindous.skills.enums.Stat;
 import ru.romindous.skills.enums.Trigger;
-import ru.romindous.skills.listeners.EntityDamageLst;
+import ru.romindous.skills.listeners.DamageLst;
 
 public abstract class Minion extends SednaMob {
 
-    public static final int SPOT_DST = 40;
-
     private static final String prefix = "mob.mini.";
 
-    protected final AreaSpawner.SpawnCondition cond_mini;
     protected Minion() {
         super();
-        cond_mini = new AreaSpawner.SpawnCondition(mobConfig("amount", 1),
-            CreatureSpawnEvent.SpawnReason.NATURAL);
     }
 
     protected String prefix() {
@@ -59,7 +53,7 @@ public abstract class Minion extends SednaMob {
 
     @Override
     protected AreaSpawner.SpawnCondition condition() {
-        return cond_mini;
+        return COND_EMPTY;
     }
 
     @Override
@@ -136,7 +130,14 @@ public abstract class Minion extends SednaMob {
             e.setDamage(0d);
             return;
         }
-        EntityDamageLst.onCustomDefense(e, this);
+        DamageLst.onCustomDefense(e, this);
+    }
+
+    @Override
+    protected void onTarget(final EntityTargetEvent e) {
+        if (!(e.getTarget() instanceof final LivingEntity tgt)
+            || !isOwner(e.getEntity(), tgt)) return;
+        e.setCancelled(true);
     }
 
     @Override
@@ -146,7 +147,6 @@ public abstract class Minion extends SednaMob {
     }
 
     private final int life = mobConfig("life", 100);
-
     protected int ticksLife() {
         return life;
     }
@@ -156,24 +156,29 @@ public abstract class Minion extends SednaMob {
     }
 
     public void apply(final Entity ent, final LivingEntity owner) {
-        final UUID uid = owner.getUniqueId();
-        ent.getPersistentDataContainer().set(KEY, ID_TYPE, uid);
+        ent.getPersistentDataContainer().set(KEY, ID_TYPE, owner.getUniqueId());
         apply(ent);
     }
 
     private static final NamespacedKey KEY = new NamespacedKey(Main.main, "minion");
-    private static final PersistentDataType<String, UUID> ID_TYPE = new PersistentDataType<>() {
-        public Class<String> getPrimitiveType() {
-            return String.class;
+    private static final PersistentDataType<byte[], UUID> ID_TYPE = new PersistentDataType<>() {
+        public Class<byte[]> getPrimitiveType() {
+            return byte[].class;
         }
         public Class<UUID> getComplexType() {
             return UUID.class;
         }
-        public String toPrimitive(final UUID uuid, final PersistentDataAdapterContext cont) {
-            return uuid.toString();
+        public byte[] toPrimitive(final UUID uid, final PersistentDataAdapterContext cont) {
+            final ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+            bb.putLong(uid.getMostSignificantBits());
+            bb.putLong(uid.getLeastSignificantBits());
+            return bb.array();
         }
-        public UUID fromPrimitive(final String s, final PersistentDataAdapterContext cont) {
-            return UUID.fromString(s);
+        public UUID fromPrimitive(final byte[] bar, final PersistentDataAdapterContext cont) {
+            final ByteBuffer bb = ByteBuffer.wrap(bar);
+            final long firstLong = bb.getLong();
+            final long secondLong = bb.getLong();
+            return new UUID(firstLong, secondLong);
         }
     };
 
@@ -191,18 +196,19 @@ public abstract class Minion extends SednaMob {
         return owner != null && owner.getUniqueId().equals(id);
     }
 
+    private static final int AGRO_DST = 40;
     public static void setAgroOf(final LivingEntity owner, final LivingEntity target) {
         final Location olc = owner.getLocation();
-        final Location dlc = target.getLocation().subtract(olc);
-        final double dst = Math.abs(dlc.getX()) + Math.abs(dlc.getY()) + Math.abs(dlc.getZ());
-        for (final Mob mb : LocUtil.getChEnts(olc, dst, Mob.class,
-            ent -> isOwner(ent, owner) && ent.getTarget() == null )) mb.setTarget(target);
+        //Bukkit.getConsoleSender().sendMessage("ow-" + owner.getType().name() +  " tgt1-" + target.getType().name());
+        for (final Mob mb : LocUtil.getChEnts(new WXYZ(olc), AGRO_DST, Mob.class, ent -> {
+            final LivingEntity tgt = ent.getTarget();
+            return isOwner(ent, owner) && (tgt == null || !tgt.isValid());
+        })) mb.setTarget(target);
     }
 
     protected abstract class MiniGoal implements Goal<Mob> {
 
-        private static final double JUMP_DST_SQ = 4d;
-        private static final EnumSet<GoalType> types = EnumSet.of(GoalType.MOVE, GoalType.LOOK, GoalType.UNKNOWN_BEHAVIOR);
+        private static final EnumSet<GoalType> types = EnumSet.noneOf(GoalType.class);
 
         private final GoalKey<Mob> key = GoalKey.of(Mob.class, Minion.this.getKey());
         private final WeakReference<LivingEntity> ownRef;

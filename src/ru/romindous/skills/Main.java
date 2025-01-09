@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.BlockType;
@@ -19,12 +18,12 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.komiss77.OConfigManager;
 import ru.komiss77.Ostrov;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.menuItem.MenuItem;
 import ru.komiss77.modules.menuItem.MenuItemBuilder;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.utils.ClassUtil;
-import ru.komiss77.utils.FastMath;
-import ru.komiss77.modules.items.ItemBuilder;
+import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.enums.Role;
@@ -43,7 +42,7 @@ public class Main extends JavaPlugin {
     public static final String P = "<dark_red>";
     public static final String A = "<dark_purple>";
     public static final String manaClr = "§9🔥 ";
-    public static final String cdClr = "§б⏰⌚ ";
+    public static final String cdClr = "§б⌚ ";
     public static final String prefix = Main.N + "[" + Main.A + "SN" + Main.N + "] ";
     public static final SecureRandom srnd = new SecureRandom();
     public static final SubServer subServer = SubServer.getForThis();
@@ -61,15 +60,15 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         //OSTROV stuff
-        TCUtil.N = "§ф";
-        TCUtil.P = "§к";
-        TCUtil.A = "§5";
+        TCUtil.N = "<indigo>";
+        TCUtil.P = "<cardinal>";
+        TCUtil.A = "<dark_purple>";
         PM.setOplayerFun(Survivor::new, true);
 
         main = this;
         configManager = new OConfigManager(main);
         Ostrov.log_ok("Skills loading...");
-        Ostrov.log_ok("§bПодсервер седны: " + subServer.displayName);
+        Ostrov.log_ok("§bПодсервер седны: " + subServer.disName);
         ConfigVars.load();
 
         if (Bukkit.getPluginManager().getPlugin("MyPet") == null || turnOffAddons) {
@@ -129,21 +128,22 @@ public class Main extends JavaPlugin {
     }
 
     public static boolean canAttack(final LivingEntity dmgr, final Entity tgt, final boolean tell) {
-        if (dmgr.getEntityId() == tgt.getEntityId() || Minion.isOwner(tgt, dmgr)) return false;
-        if (dmgr instanceof final Player dpl) {
-            final Survivor dsv = PM.getOplayer(dpl, Survivor.class);
-            if (dsv == null) return false;
+        if (!(dmgr instanceof final Player dpl) || !(tgt instanceof final Player tpl)) {
+            return dmgr.getEntityId() != tgt.getEntityId() && !Minion.isOwner(tgt, dmgr);
+        }
+        final Survivor dsv = PM.getOplayer(dpl, Survivor.class);
+        if (dsv == null) return false;
+        final Survivor tsv = PM.getOplayer(tpl, Survivor.class);
+        if (tsv == null) return false;
 
-            if (tgt instanceof final Player tpl) {
-                final Survivor tsv = PM.getOplayer(tpl, Survivor.class);
-                if (tsv == null) return false;
-
-                if (tell && FastMath.mulDiff(dsv.exp, dsv.exp) != 0) {
-                    dmgr.sendMessage(Main.prefix + "§cТы не можешь ударить этого игрока, разница в вашем уровне слишком велика!");
-                    return false;
-                }
+        if (tell) {
+            if (dpl.getEntityId() == tpl.getEntityId()) {
+                dmgr.sendMessage(Main.prefix + "§cНельзя атаковать себя!");
+                return false;
+            } else if (NumUtil.mulDiff(tsv.exp, dsv.exp) != 1) {
+                dmgr.sendMessage(Main.prefix + "§cРазница в вашем уровне слишком велика!");
+                return false;
             }
-            return true;
         }
         return true;
     }

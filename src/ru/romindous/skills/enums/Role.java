@@ -7,6 +7,8 @@ import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.objects.Scroll;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.abils.roled.*;
+import ru.romindous.skills.skills.mods.Modifier;
+import ru.romindous.skills.skills.sels.Selector;
 
 import java.util.Locale;
 
@@ -63,7 +65,7 @@ public enum Role {
         this.desc = dsc;
     }
 
-    public String getName() {
+    public String disName() {
         return color + name;
     }
 
@@ -72,7 +74,7 @@ public enum Role {
     }
 
     public ItemStack getIcon() {
-        return new ItemBuilder(icon).name(getName()).lore(desc).build();
+        return new ItemBuilder(icon).name(TCUtil.sided(disName(), "🌟")).lore(desc).build();
     }
 
     public static Role get(final String rl) {
@@ -89,5 +91,7 @@ public enum Role {
         for (final Role r : Role.values()) {
             r.reg.register();
         }
+        Selector.register();
+        Modifier.register();
     }
 }

@@ -30,32 +30,32 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
 			default:
 				recType.setType(ItemType.CHEST);
 				im = recType.getItemMeta();
-				im.displayName(Component.text("§dФормированые"));
+				im.disName(Component.text("§dФормированые"));
 				break;
 			case CHEST:
 				recType.setType(ItemType.ENDER_CHEST);
 				im = recType.getItemMeta();
-				im.displayName(Component.text("§5Безформенные"));
+				im.disName(Component.text("§5Безформенные"));
 				break;
 			case ENDER_CHEST:
 				recType.setType(ItemType.FURNACE);
 				im = recType.getItemMeta();
-				im.displayName(Component.text("§6Печевые"));
+				im.disName(Component.text("§6Печевые"));
 				break;
 			case FURNACE:
 				recType.setType(ItemType.SMITHING_TABLE);
 				im = recType.getItemMeta();
-				im.displayName(Component.text("§fКующие"));
+				im.disName(Component.text("§fКующие"));
 				break;
 			case SMITHING_TABLE:
 				recType.setType(ItemType.STONECUTTER);
 				im = recType.getItemMeta();
-				im.displayName(Component.text("§7Режущие"));
+				im.disName(Component.text("§7Режущие"));
 				break;
 			case STONECUTTER:
 				recType.setType(ItemType.BEACON);
 				im = recType.getItemMeta();
-				im.displayName(Component.text("§bВсе Типы Крафтов"));
+				im.disName(Component.text("§bВсе Типы Крафтов"));
 				break;
 			}
     		recType.setItemMeta(im);
@@ -63,7 +63,7 @@ public class CraftBookMenu /*implements InventoryProvider*/ {/*
     		reopen(p, its);
     	}));
     	
-    	its.set(3, ClickableItem.empty(new ItemBuilder(Main.subServer.displayMat).name(Main.subServer.displayName).build()));
+    	its.set(3, ClickableItem.empty(new ItemBuilder(Main.subServer.displayMat).name(Main.subServer.disName).build()));
     	
     	final HashSet<ItemStack> results = new HashSet<>();
     	final Material craftMat = recType.getType();

@@ -1,16 +1,35 @@
 package ru.romindous.skills.listeners;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import com.destroystokyo.paper.ParticleBuilder;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Spellcaster.Spell;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
 import org.bukkit.potion.PotionEffectType;
+import ru.komiss77.Ostrov;
+import ru.komiss77.modules.entities.CustomEntity;
+import ru.komiss77.modules.world.WXYZ;
+import ru.komiss77.utils.ClassUtil;
+import ru.komiss77.utils.EntityUtil;
+import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.enums.SubServer;
+import ru.romindous.skills.mobs.wastes.Crawler;
+import ru.romindous.skills.mobs.wastes.Spored;
 
 
 public class EntityLst implements Listener {
@@ -25,7 +44,7 @@ public class EntityLst implements Listener {
         e.setCancelled(e.getSpell() == Spell.BLINDNESS);
     }
 
-    @EventHandler
+    @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onTgt(final EntityTargetLivingEntityEvent e) {
         final LivingEntity tgt = e.getTarget();
         if (tgt == null) {
@@ -39,23 +58,68 @@ public class EntityLst implements Listener {
             }
         }
     }
-    
+
+    @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
+    protected void onExtra(final ProjectileHitEvent e) {
+        final Projectile prj = e.getEntity();
+        if (!prj.isValid() || !(prj.getShooter() instanceof final Mob shtr)
+            || !(CustomEntity.get(shtr) instanceof Crawler)) return;
+        final Location loc = prj.getLocation();
+        final Block b = loc.getBlock();
+        if (b.getType().isAir()) {
+            b.setType(Crawler.WEB.getType(), false);
+            Ostrov.sync(() -> {
+                final Block bl = loc.getBlock();
+                if (bl.getType() == Crawler.WEB.getType()) {
+                    bl.setBlockData(Main.AIR_DATA, false);
+                }
+            }, 100);
+        }
+    }
+
+    @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
+    protected void onExtra(final EntityExplodeEvent e) {
+        if (!(e.getEntity() instanceof final Mob mb)
+            || !(CustomEntity.get(mb) instanceof Spored)) return;
+        final double dmg = mb.getAttribute(Attribute.ATTACK_DAMAGE).getBaseValue();
+        e.setYield((float) dmg);
+        new ParticleBuilder(Particle.COMPOSTER).location(mb.getLocation())
+            .count((int) (dmg * 20d)).offset(dmg, dmg, dmg).allPlayers().spawn();
+        final List<Block> bls = e.blockList();
+        final Set<WXYZ> bps = bls.stream().map(WXYZ::new).collect(Collectors.toSet());
+        final WXYZ[] sbls = ClassUtil.shuffle(bps.toArray(new WXYZ[0]));
+        final List<WXYZ> finLocs = new LinkedList<>();
+        for (int i = sbls.length >> 2; i != 0; i--) {
+            final WXYZ bl = sbls[i];
+            final WXYZ below = new WXYZ(bl.w, bl.x, bl.y - 1, bl.z);
+            if (bps.contains(below) || !Spored.DIRT.contains(Nms.fastType(below))) continue;
+            bls.removeIf(bb -> bl.distAbs(bb.getLocation()) == 0);
+            final Block b = bl.getBlock();
+            b.setBlockData(Spored.MOSS_DATA, false);
+            Ostrov.sync(() -> {
+                final Block b2 = bl.getBlock();
+                if (b2.getType() == Spored.MOSS.getType()) {
+                    b2.setBlockData(Main.AIR_DATA, false);
+                    EntityUtil.effect(Main.mobs.SPORED.spawn(bl.getCenterLoc()),
+                        Sound.BLOCK_BIG_DRIPLEAF_BREAK, 0.6f, Particle.HAPPY_VILLAGER);
+                }
+            }, Spored.SPORE_TICKS);
+        }
+
+    }
     
     @EventHandler
     public void onExpld(final EntityExplodeEvent e) {
     	final Entity ent = e.getEntity();
-        if (ent instanceof Mob) {
-            //return;
-        } else {
-            switch (e.getEntityType()) {
-            	case FIREBALL, SMALL_FIREBALL, TNT, WITHER_SKULL:
-                    if (Main.subServer != SubServer.INFERNAL) {
-                        e.blockList().clear();
-                    }
-                default:
-                	break;
-            }
-		}
+        if (ent instanceof Mob) return;
+        switch (e.getEntityType()) {
+            case FIREBALL, SMALL_FIREBALL, TNT, WITHER_SKULL:
+                if (Main.subServer != SubServer.INFERNAL) {
+                    e.blockList().clear();
+                }
+            default:
+                break;
+        }
     }
 
     /*case SLIME:

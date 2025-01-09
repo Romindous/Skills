@@ -21,7 +21,7 @@ import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
-import ru.romindous.skills.objects.SkillGroups;
+import ru.romindous.skills.items.SkillGroups;
 
 public class Hiverfish extends SednaMob {
 

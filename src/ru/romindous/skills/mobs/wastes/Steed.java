@@ -64,8 +64,8 @@ public class Steed extends SednaMob {
     }
 
     private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_flesh", ItemType.ROTTEN_FLESH.createItemStack(), 2, 2), 6)
-        .add(new ItemRoll(key().value() + "_kelp", ItemType.DRIED_KELP.createItemStack(), 1, 2), 2)
+        .add(new ItemRoll(key().value() + "_flesh", ItemType.ROTTEN_FLESH.createItemStack(), 2, 1), 6)
+        .add(new ItemRoll(key().value() + "_kelp", ItemType.DRIED_KELP.createItemStack(), 1, 1), 2)
         .add(new ItemRoll(key().value() + "_leather", ItemType.LEATHER.createItemStack(), 1, 0), 1)
         .add(new NARoll(), 2).build(1, 1);
 
@@ -192,7 +192,7 @@ public class Steed extends SednaMob {
                 .add(new ItemRoll(key().value() + "_coal", new ItemBuilder(ItemType.CHARCOAL).build(), 1, 0), 2)
                 .add(new ItemRoll(key().value() + "_flint", new ItemBuilder(ItemType.FLINT).build(), 1, 0), 1)
                 .build(1, 0), 1)
-            .add(new NARoll(), 1).build(1, 1);
+            .add(new NARoll(), 2).build(1, 0);
 
         @Override
         public RollTree loot() {

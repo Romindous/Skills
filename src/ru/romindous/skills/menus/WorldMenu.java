@@ -42,9 +42,9 @@ public class WorldMenu implements InventoryProvider {
             if (!sv.isWorldOpen(ss)) {
                 content.set(ss.ordinal() / 3 + ss.ordinal(), ClickableItem.from(
                     new ItemBuilder(ItemType.FIREWORK_STAR)
-                        .name("§7§k"+ss.displayName.substring(2))
+                        .name("§7§k"+ss.disName.substring(2))
                         .lore("§eДля открытия мира")
-                        .lore("§eдобудьте или скрафтите ключ!")
+                        .lore("§eдобудь или скрафти ключ!")
                         .lore(ApiOstrov.isLocalBuilder(p)? "§f*Билдер: открыть" : "")
                         .build(), e-> {
                             if (ApiOstrov.isLocalBuilder(p)) {
@@ -55,41 +55,19 @@ public class WorldMenu implements InventoryProvider {
                             }
                         }
                 ));
-
             } else {
-                
                 if (Main.subServer == ss) {
-                    
-                    content.set(ss.ordinal()/3 + ss.ordinal(), ClickableItem.empty(
-                        new ItemBuilder(ss.displayMat)
-                            .name(ss.displayName)
-                            .lore("§fВы здесь")
-                            .build()
-                    ));
-                    
+                    content.set(ss.ordinal()/3 + ss.ordinal(), ClickableItem.from(new ItemBuilder(ss.displayMat)
+                        .name(TCUtil.sided(ss.disName, "⛨")).lore(TCUtil.N + "Ты здесь")
+                        .build(), e -> p.performCommand("skill")));
                 } else {
-                    
-                    content.set(ss.ordinal()/3 + ss.ordinal(), ClickableItem.from(
-                        new ItemBuilder(ss.displayMat)
-                            .name(ss.displayName)
-                            .build(), e -> {
-                                moveTo(p, ss, true);
-                            }
-                    ));
-                    
+                    content.set(ss.ordinal()/3 + ss.ordinal(), ClickableItem.from(new ItemBuilder(ss.displayMat)
+                        .name(TCUtil.sided(ss.disName, "⛨")).build(), e -> moveTo(p, ss, true)));
                 }
-
             }
-
         }
-
-
     }
 
-        
-        
-        
-        
     public static void moveTo(final Player p, final SubServer ss, final boolean dry) {
         if (dry && dryWaterInv(p.getInventory())) {
             p.playSound(p.getLocation(), Sound.ENTITY_GENERIC_EXTINGUISH_FIRE, 1f, 0.8f);

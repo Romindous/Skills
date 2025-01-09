@@ -337,7 +337,7 @@ public class BlockLst implements Listener {
             //p.sendMessage("boss-" + bossByMat.toString());
             if (bossByMat.subserver != Main.subServer) {//чтоб не надоедать игрокам, пока что
                 //p.playSound(b.getLocation(), Sound.BLOCK_CONDUIT_DEACTIVATE, 1f, 2f);
-                //p.sendMessage("Этот босс спавнится только в мире "+bossByMat.subserver.displayName);
+                //p.sendMessage("Этот босс спавнится только в мире "+bossByMat.subserver.disName);
                 return;
             }
             
@@ -346,10 +346,10 @@ public class BlockLst implements Listener {
                 return;
             }
 
-            final Schematic schem = WE.getSchematic(Bukkit.getConsoleSender(), bossByMat.displayName);
+            final Schematic schem = WE.getSchematic(Bukkit.getConsoleSender(), bossByMat.disName);
             if (schem == null) {
                 //p.sendMessage("no schem");
-                Ostrov.log_err("Нет схематика для спавна босса " + bossByMat.displayName);
+                Ostrov.log_err("Нет схематика для спавна босса " + bossByMat.disName);
                 e.setCancelled(true);
                 return;
             }

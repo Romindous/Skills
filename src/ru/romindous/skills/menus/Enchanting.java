@@ -24,6 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.komiss77.OStrap;
+import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.world.WXYZ;
 import ru.komiss77.utils.*;
 import ru.komiss77.utils.inventory.ClickableItem;
@@ -202,7 +203,7 @@ public class Enchanting implements InventoryProvider {
                         	.name("§e" + StringUtil.nrmlzStr(e.getKey().value()));
                         final LinkedList<String> lr;
                         final int lvlCost = getCost(e);
-                        final int nexp = (int) (FastMath.square(lv + 1) * costDecrease * lvlCost);
+                        final int nexp = (int) (NumUtil.square(lv + 1) * costDecrease * lvlCost);
                         if (l == 0) {
                             lr = new LinkedList<>(Arrays.asList("§dЛКМ §7-> +1 уровень",
                                 l < e.getMaxLevel() ? (p.getTotalExperience() < nexp ? "§7(§cНужно §6"
@@ -215,7 +216,7 @@ public class Enchanting implements InventoryProvider {
                         	lr.add("§8-=-=-=-=-=-=-=-=-=-=-");
                         	lr.add(costDecrease == 1f ? " " : "§7Цена снижена до: §6"
                                 + StringUtil.toSigFigs(costDecrease * 100d, (byte) 1) + "%");
-                        	lr.add("§7Шанс проклятия: §c" + StringUtil.toSigFigs(100d * FastMath.square(enchSize + 1)
+                        	lr.add("§7Шанс проклятия: §c" + StringUtil.toSigFigs(100d * NumUtil.square(enchSize + 1)
                                 / (CURSE_CH_MUL * getMtp(item.getType())), (byte) 3) + "%");
                             it.lore(lr);
                         } else {
@@ -363,7 +364,7 @@ public class Enchanting implements InventoryProvider {
             final LinkedList<Component> lr = new LinkedList<Component>(im.lore());
             
             if (frm == 0) {
-                lr.addFirst(en.displayName(to));
+                lr.addFirst(en.disName(to));
             } else if (to == 0) {
             	int cEnchs = 0;
             	for (final Entry<Enchantment, Integer> ent : im.getEnchants().entrySet()) {
@@ -372,7 +373,7 @@ public class Enchanting implements InventoryProvider {
             			if (ent.getKey().getKey().equals(en.getKey())) {
             				lr.remove(cEnchs);
             			} else {
-            				lr.set(cEnchs, ent.getKey().displayName(ent.getValue()));
+            				lr.set(cEnchs, ent.getKey().disName(ent.getValue()));
             			}
             			cEnchs++;
             		}
@@ -383,9 +384,9 @@ public class Enchanting implements InventoryProvider {
             		if (ent.getKey() instanceof CustomEnchant) {
             			if (ent.getKey().equals(CustomEnchant.GLINT)) continue;
             			if (ent.getKey().getKey().equals(en.getKey())) {
-            				lr.set(cEnchs, ent.getKey().displayName(to));
+            				lr.set(cEnchs, ent.getKey().disName(to));
             			} else {
-            				lr.set(cEnchs, ent.getKey().displayName(ent.getValue()));
+            				lr.set(cEnchs, ent.getKey().disName(ent.getValue()));
             			}
             			cEnchs++;
             		}
@@ -393,7 +394,7 @@ public class Enchanting implements InventoryProvider {
             }
             im.lore(lr);
         } else {
-            im.lore(Arrays.asList(en.displayName(to)));
+            im.lore(Arrays.asList(en.disName(to)));
         }
     }*/
 

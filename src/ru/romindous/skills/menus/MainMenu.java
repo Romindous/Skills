@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemType;
 import ru.komiss77.ApiOstrov;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
-import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TimeUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
@@ -122,10 +121,10 @@ public class MainMenu implements InventoryProvider {
                         if (((InventoryClickEvent) e.getEvent()).isLeftClick()) {
                             if (sv.showScoreBoard) {
                                 sv.showScoreBoard = false;
-                                sv.score.getSideBar().reset();
+                                sv.score.getSideBar().reset().title("");
                             } else {
                                 sv.showScoreBoard = true;
-                                sv.updateBoard(p, SM.infoType.ALL);
+                                sv.updateBoard(p, SM.Info.ALL);
                             }
             				reopen(p, content);
                             //content.getInventory().getItem(38)
@@ -166,25 +165,22 @@ public class MainMenu implements InventoryProvider {
         final List<String> lore = new ArrayList<>();
         final int level = sv.getLevel();
         lore.add("§7Уровень: §f"+ level);
-        lore.add(StringUtil.getPercentBar(20, level, false));
         lore.add("");
-        lore.add("§7Души: §3" + sv.mana.intValue());
+        lore.add("§7Души: §3" + sv.mana());
         lore.add("§7Очки статы: §6" + sv.statsPoints);
         lore.add("");
-        lore.add("    §8Статистика");
         for (Stat st : Stat.values()) {
-            lore.add(st.getName()+(sv.role.stat==st?": §l":": ")+sv.getStat(st));
+            lore.add(st.disName()+(sv.role.stat==st?": §l":": ")+sv.getStat(st));
         }
         lore.add("");
         
         final int timeLeft = ApiOstrov.isLocalBuilder(p) ? 0 : 86400 - (ApiOstrov.currentTimeSec()-sv.roleStamp);
         //p.sendMessage("tm=" + timeLeft);
         if (timeLeft>0) {
-            
             lore.add("§7До смены класса:");
             lore.add("§c"+ TimeUtil.secondToTime(timeLeft));
             content.set(49, ClickableItem.empty(new ItemBuilder(ItemType.CAMPFIRE)
-                .name("§c<obf>k</obf> "+sv.role.getName()+" §c<obf>k") //.name("§c<obf>k</obf>§6 Статистика Игры §c<obf>k")
+                .name("§c<obf>k</obf> "+sv.role.disName()+" §c<obf>k") //.name("§c<obf>k</obf>§6 Статистика Игры §c<obf>k")
                 .lore(lore)
                 .build()
                 )
@@ -193,12 +189,12 @@ public class MainMenu implements InventoryProvider {
             if (PM.getOplayer(p).hasGroup("legend")) {
                 lore.add("§6ЛКМ §7- сменить без штрафа");
             } else {
-                lore.add("§6ЛКМ §7- сменить с потерей 50%");
-                lore.add("§8*(легенда меняет без штрафа)");
+                lore.add("§6ЛКМ §7- сменить с потерей опыта");
+                lore.add("§8*(Легенда - меняет без штрафа)");
             }
             
             content.set(49, ClickableItem.from(new ItemBuilder(ItemType.CAMPFIRE)
-                    .name("§c<obf>k</obf> "+sv.role.getName()+" §c<obf>k") //.name("§c<obf>k</obf>§6 Статистика Игры §c<obf>k")
+                    .name("§c<obf>k</obf> "+sv.role.disName()+" §c<obf>k") //.name("§c<obf>k</obf>§6 Статистика Игры §c<obf>k")
                     .lore(lore)
                     .build(), e-> {
                         p.performCommand("skill select");
