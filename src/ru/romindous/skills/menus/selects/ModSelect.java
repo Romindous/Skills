@@ -11,9 +11,9 @@ import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Chastic;
-import ru.romindous.skills.skills.ChasMod;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.skills.chas.Chastic;
+import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
@@ -94,6 +94,7 @@ public class ModSelect extends SvSelect {
     private static Chastic[] getChs(final Skill sk) {
         if (sk == null) return new Chastic[0];
         final Set<Chastic> chs = EnumSet.noneOf(Chastic.class);
+        chs.add(Chastic.MANA); chs.add(Chastic.COOLDOWN);
         for (final Selector.SelState sls : sk.sels) {
             for (final ChasMod cm : sls.sel().stats()) {
                 chs.add(cm.chs);
@@ -109,17 +110,17 @@ public class ModSelect extends SvSelect {
         return cha;
     }
 
+    private static final String[] UNRELATED = {"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
+        "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями " + "<red>навыка!"};
     private static String[] relate(final Modifier md, final Chastic[] chs) {
-        if (chs.length == 0) return new String[]{"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
-            "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями" + "<red>навыка!"};
+        if (chs.length == 0) return UNRELATED;
         final List<String> fnd = new ArrayList<>();
         for (final Chastic ch : md.chastics()) {
             if (Arrays.binarySearch(chs, ch) < 0) continue;
             fnd.add(ch.disName());
         }
-        if (fnd.isEmpty()) return new String[]{"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
-            "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями" + "<red>навыка!"};
-        return new String[]{TCUtil.N + "Общие " + TCUtil.P + "статы " + TCUtil.N + "с навыком:",
+        if (fnd.isEmpty()) return UNRELATED;
+        return new String[]{"<apple>Общие " + TCUtil.P + "статы " + "<apple>с навыком:",
             String.join(TCUtil.N + ", ", fnd)};
     }
 

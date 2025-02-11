@@ -3,7 +3,7 @@ package ru.romindous.skills.menus.selects;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import ru.komiss77.utils.inventory.InventoryProvider;
-import ru.romindous.skills.Survivor;
+import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.skills.Skill;
 
 public abstract class SvSelect implements InventoryProvider {

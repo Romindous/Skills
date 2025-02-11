@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.utils.ScreenUtil;
+import ru.romindous.skills.survs.Survivor;
 
 
 public class MainAsyncTask implements Runnable {
@@ -51,13 +52,13 @@ public class MainAsyncTask implements Runnable {
                             break;
                     }
                 }*/
-                if (sv.currentPlyTime == 60) {
-                    ScreenUtil.sendTitle(p, "", "§fАльфа-тест §4Седны", 20, 40, 10);
-                } else if (sv.currentPlyTime == 64) {
-                    ScreenUtil.sendTitle(p, "§fВозможны", "§6рестарт §f, §cпотеря данных!", 20, 40, 10);
+                if (sv.currentPlyTime == 40) {
+                    ScreenUtil.sendTitle(p, "", "§fАльфа-тест §4Седны", 10, 20, 8);
+                } else if (sv.currentPlyTime == 42) {
+                    ScreenUtil.sendTitle(p, "§fВозможны", "§6рестарт §f, §cпотеря данных!", 10, 20, 8);
                 }
 
-                if (sv.currentPlyTime % 60 == 0) { //раз в минкту
+                if (sv.currentPlyTime % 60 == 0) { //раз в минуту
                     //p.sendMessage("§fbleeds:"+sv.bleeds.size()+" arrowsHitInfo:"+sv.arrowsHitInfo.size());
                 }
 

@@ -20,10 +20,10 @@ import ru.komiss77.modules.player.PM;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.SM;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Stat;
-import ru.romindous.skills.enums.SubServer;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.SubServer;
 
 
 
@@ -75,9 +75,9 @@ public class RehabLst implements Listener {
         if (Math.abs(deathLoc.getBlockX() - rspLoc.getBlockX()) < 2
             && Math.abs(deathLoc.getBlockY() - rspLoc.getBlockY()) < 2
             && Math.abs(deathLoc.getBlockZ() - rspLoc.getBlockZ()) < 2) {
-            p.sendMessage(TCUtil.form(Main.prefix + "Похоже что ты " + Main.P + "застрял " + Main.N + "возле своей " + Main.P + "кровати " + Main.N + "("
-                + Main.P + rspLoc.getBlockX() + Main.N + ", " + Main.P + rspLoc.getBlockY() + Main.N + ", " + Main.P + rspLoc.getBlockZ()
-                + Main.N + ")!\n" + Main.N + "Перемещаем тебя в более " + Main.P + "безопасное " + Main.N + "место..."));
+            p.sendMessage(TCUtil.form(Main.prefix + "Похоже что ты " + TCUtil.P + "застрял " + TCUtil.N + "возле своей " + TCUtil.P + "кровати " + TCUtil.N + "("
+                + TCUtil.P + rspLoc.getBlockX() + TCUtil.N + ", " + TCUtil.P + rspLoc.getBlockY() + TCUtil.N + ", " + TCUtil.P + rspLoc.getBlockZ()
+                + TCUtil.N + ")!\n" + TCUtil.N + "Перемещаем тебя в более " + TCUtil.P + "безопасное " + TCUtil.N + "место..."));
             SM.setSpawn(p, null);
 //            PM.getOplayer(p).world_positions.replace(p.getWorld().getName(), null);
             SM.randomJoin(p, Main.subServer == SubServer.WASTES);

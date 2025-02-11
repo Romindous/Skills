@@ -94,7 +94,7 @@ public class PetManager /*implements IPetManager*/ {/*
                     .lore("§7HP: §c" + (int) mp.getHealth() + "§7/§c" + (int) mp.getMaxHealth())
                     .lore("§7Голод: §e" + (int) mp.getSaturation())
                     .lore("")
-                    .lore("§6ЛКМ §7- призвать")
+                    .lore("§6Клик §7- призвать")
                     .lore("§6ПКМ §7- отозвать")
                     .lore("§e/petinfo §7 - более информации")
                     .build(), e -> {
@@ -114,7 +114,7 @@ public class PetManager /*implements IPetManager*/ {/*
         } else {
             return ClickableItem.of(new ItemBuilder(ItemType.RABBIT_HIDE).name("§e<obf>k</obf>§6 Твой Питомец §e<obf>k")
                     .lore("")
-                    .lore("§6ЛКМ §7- создать питомца")
+                    .lore("§6Клик §7- создать питомца")
                     .build(), e -> {
                         p.closeInventory();
                         p.performCommand("skill pet");

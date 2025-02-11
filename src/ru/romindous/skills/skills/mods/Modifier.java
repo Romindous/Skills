@@ -2,25 +2,22 @@ package ru.romindous.skills.skills.mods;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.notes.OverrideMe;
+import ru.komiss77.objects.IntHashMap;
 import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
-import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.enums.Chastic;
-import ru.romindous.skills.enums.Rarity;
-import ru.romindous.skills.enums.Role;
-import ru.romindous.skills.objects.Scroll;
+import ru.romindous.skills.skills.chas.Chastic;
+import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Chain;
-import ru.romindous.skills.skills.abils.InvCondition;
 
 public abstract class Modifier implements Scroll {//модификатор
 
     public static final Map<String, Modifier> VALUES = new HashMap<>();
-    public static final Map<Rarity, List<Modifier>> RARITIES = new EnumMap<>(Rarity.class);
+    public static final IntHashMap<List<Modifier>> RARITIES = new IntHashMap<>();
 
     public static final String prefix = "mods.";
     public static final String data = "mod";
@@ -34,17 +31,16 @@ public abstract class Modifier implements Scroll {//модификатор
 
     protected Modifier() {
         VALUES.put(id(), this);
-        final List<Modifier> mds = RARITIES.get(rarity());
-        if (mds == null) {
-            RARITIES.put(rarity(), new ArrayList<>(Arrays.asList(this)));
-        } else mds.add(this);
+        final List<Modifier> mds = RARITIES.get(sum());
+        if (mds != null) mds.add(this);
+        else RARITIES.put(sum(), new ArrayList<>(Arrays.asList(this)));
 
         for (final Chastic ch : chastics()) {
             chMods[ch.ordinal()] = new Mod(
-                ConfigVars.get(prefix + id() + ".conBase", 1d),
-                ConfigVars.get(prefix + id() + ".conScale", 1d),
-                ConfigVars.get(prefix + id() + ".mulBase", 1d),
-                ConfigVars.get(prefix + id() + ".mulScale", 1d));
+                value("conBase", 1d),
+                value("conScale", 1d),
+                value("mulBase", 0d),
+                value("mulScale", 0d));
         }
     }
 
@@ -57,8 +53,9 @@ public abstract class Modifier implements Scroll {//модификатор
         return "";
     }
 
+    public static final String SIDE = "💠";
     public String side() {
-        return "💠";
+        return SIDE;
     }
 
     public abstract ItemType icon();
@@ -68,8 +65,9 @@ public abstract class Modifier implements Scroll {//модификатор
     public double modify(final Chastic ch, final double def, final int lvl, final @Nullable Chain info) {
         final Mod md = chMods[ch.ordinal()];
         if (md == null) return def;
-        return def + NumUtil.absMin(md.conScale * lvl + md.conBase,
-            (md.mulScale * lvl + md.mulBase) * def);
+        final double dm = ch.dec() ? -1d : 1d;
+        return dm * NumUtil.absMin(md.conScale * lvl + md.conBase,
+             (md.mulScale * lvl + md.mulBase) * def) + def;
     }
 
     /*protected double modified(final double def, final Chastic ch, final int level) {
@@ -122,287 +120,4 @@ public abstract class Modifier implements Scroll {//модификатор
     }
 
     private record Mod(double conBase, double conScale, double mulBase, double mulScale) {}
-
-    public static void register() {
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.DAMAGE_DEALT};
-            }
-            public String id() {return "damage_inc";}
-            public String name() {
-                return "Нанесенный Урон";
-            }
-            public ItemType icon() {
-                return ItemType.BLADE_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public Role role() {return null;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.DAMAGE_TAKEN};
-            }
-            public String id() {
-                return "hurt_dec";
-            }
-            public String name() {
-                return "Полученный Урон";
-            }
-            public ItemType icon() {
-                return ItemType.HEARTBREAK_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.UNCOM;
-            }
-            public Role role() {return null;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.AMOUNT};
-            }
-            public String id() {
-                return "amount_inc";
-            }
-            public String name() {
-                return "Количество";
-            }
-            public ItemType icon() {
-                return ItemType.PLENTY_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public Role role() {return null;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.REWARD};
-            }
-            public String id() {
-                return "reward_inc";
-            }
-            public String name() {
-                return "Награда";
-            }
-            public ItemType icon() {
-                return ItemType.PRIZE_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public Role role() {return null;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.REGENERATION};
-            }
-            public String id() {
-                return "regen_inc";
-            }
-            public String name() {
-                return "Регенерация";
-            }
-            public ItemType icon() {
-                return ItemType.HEART_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.UNCOM;
-            }
-            public Role role() {return null;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.VELOCITY};
-            }
-            public String id() {
-                return "velocity_inc";
-            }
-            public String name() {
-                return "Стремление";
-            }
-            public ItemType icon() {
-                return ItemType.FLOW_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public Role role() {return null;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.NUTRITION};
-            }
-            public String id() {
-                return "food_inc";
-            }
-            public String name() {
-                return "Насыщение";
-            }
-            public ItemType icon() {
-                return ItemType.SHEAF_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public Role role() {return null;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.COOLDOWN};
-            }
-            public String id() {
-                return "cooldown_dec";
-            }
-            public String name() {
-                return "Рефляция";
-            }
-            public ItemType icon() {
-                return ItemType.ARMS_UP_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.UNCOM;
-            }
-            public Role role() {return null;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.MANA};
-            }
-            public String id() {
-                return "abil_mana_dec";
-            }
-            public String name() {
-                return "Расход";
-            }
-            public ItemType icon() {
-                return ItemType.BURN_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public Role role() {return null;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.DISTANCE};
-            }
-            public String id() {
-                return "distance_inc";
-            }
-            public String name() {
-                return "Зазор";
-            }
-            public ItemType icon() {
-                return ItemType.EXPLORER_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public Role role() {return null;}
-        };
-
-        //mage
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.MANA, Chastic.COOLDOWN};
-            }
-            public String id() {
-                return "abil_mana_to_cd";
-            }
-            public String name() {
-                return "Кандиас";
-            }
-            public ItemType icon() {
-                return ItemType.BREWER_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public Role role() {return Role.MAGE;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.DAMAGE_DEALT};
-            }
-            public String id() {
-                return "burning_dmg_inc";
-            }
-            public String name() {
-                return "Ингорто";
-            }
-            protected String needs() {
-                return TCUtil.N + "Поджег указаной " + CLR + "цели";
-            }
-            public double modify(Chastic ch, double def, int lvl, @Nullable Chain info) {
-                if (info == null || info.target().getFireTicks() < 1) return def;
-                return super.modify(ch, def, lvl, info);
-            }
-            public ItemType icon() {
-                return ItemType.BURN_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.UNCOM;
-            }
-            public Role role() {return Role.MAGE;}
-        };
-
-        //warior
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.DAMAGE_DEALT, Chastic.DISTANCE};
-            }
-            public String id() {
-                return "dmg_and_dst_inc";
-            }
-            public String name() {
-                return "Минера";
-            }
-            public ItemType icon() {
-                return ItemType.BLADE_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.COMMON;
-            }
-            public Role role() {return Role.WARRIOR;}
-        };
-
-        new Modifier() {
-            public Chastic[] chastics() {
-                return new Chastic[] {Chastic.DAMAGE_TAKEN};
-            }
-            public String id() {
-                return "shield_hurt_dec";
-            }
-            public String name() {
-                return "Шандре";
-            }
-            protected String needs() {
-                return TCUtil.N + "Экипировка щита " + CLR + "пользователем";
-            }
-            public double modify(Chastic ch, double def, int lvl, @Nullable Chain info) {
-                if (info == null || InvCondition.SHIELD_OFF.test(info.caster()
-                    .getEquipment()) != EquipmentSlot.OFF_HAND) return def;
-                return super.modify(ch, def, lvl, info);
-            }
-            public ItemType icon() {
-                return ItemType.HEARTBREAK_POTTERY_SHERD;
-            }
-            public Rarity rarity() {
-                return Rarity.UNCOM;
-            }
-            public Role role() {return Role.WARRIOR;}
-        };
-    }
 }

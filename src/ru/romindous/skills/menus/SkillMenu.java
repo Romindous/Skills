@@ -11,14 +11,14 @@ import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.*;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Chastic;
-import ru.romindous.skills.enums.Trigger;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.skills.chas.Chastic;
+import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.menus.selects.AbilSelect;
 import ru.romindous.skills.menus.selects.ModSelect;
 import ru.romindous.skills.menus.selects.SelSelect;
 import ru.romindous.skills.menus.selects.TrigSelect;
-import ru.romindous.skills.skills.ChasMod;
+import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
@@ -88,7 +88,7 @@ public class SkillMenu implements InventoryProvider {
         if (sk == null) {
             if (skillIx > sv.skills.size()) skillIx = sv.skills.size();
             its.set(10, ClickableItem.from(new ItemBuilder(EMPTY_TRIG).name(TCUtil
-                .sided(Trigger.color + "Триггер", "🟃") + " <dark_gray>(клик)").build(), e -> {
+                .sided(Trigger.color + "Тригер", "🟃") + " <dark_gray>(клик)").build(), e -> {
                 SmartInventory.builder()
                     .id("Trig "+p.getName())
                     .provider(new TrigSelect(sv, skillIx, null))
@@ -110,15 +110,9 @@ public class SkillMenu implements InventoryProvider {
             .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Разобрать").build(), e -> {
             switch (e.getClick()) {
                 case DROP, CONTROL_DROP:
-                    for (final Ability.AbilState as : sk.abils) {
-                        sv.change(as, 1);
-                    }
-                    for (final Modifier.ModState ms : sk.mods) {
-                        sv.change(ms, 1);
-                    }
-                    for (final Selector.SelState ss : sk.sels) {
-                        sv.change(ss, 1);
-                    }
+                    for (final Ability.AbilState as : sk.abils) sv.change(as, 1);
+                    for (final Modifier.ModState ms : sk.mods) sv.change(ms, 1);
+                    for (final Selector.SelState ss : sk.sels) sv.change(ss, 1);
                     sv.setSkill(skillIx, null);
                     reopen(p, its);
                     return;
@@ -244,6 +238,7 @@ public class SkillMenu implements InventoryProvider {
     private static Chastic[] getChs(final Skill sk) {
         if (sk == null) return new Chastic[0];
         final Set<Chastic> chs = EnumSet.noneOf(Chastic.class);
+        chs.add(Chastic.MANA); chs.add(Chastic.COOLDOWN);
         for (final Selector.SelState sls : sk.sels) {
             for (final ChasMod cm : sls.sel().stats()) {
                 chs.add(cm.chs);
@@ -259,17 +254,17 @@ public class SkillMenu implements InventoryProvider {
         return cha;
     }
 
+    private static final String[] UNRELATED = {"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
+        "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями " + "<red>навыка!"};
     private static String[] relate(final Modifier md, final Chastic[] chs) {
-        if (chs.length == 0) return new String[]{"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
-            "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями" + "<red>навыка!"};
+        if (chs.length == 0) return UNRELATED;
         final List<String> fnd = new ArrayList<>();
         for (final Chastic ch : md.chastics()) {
             if (Arrays.binarySearch(chs, ch) < 0) continue;
             fnd.add(ch.disName());
         }
-        if (fnd.isEmpty()) return new String[]{"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
-            "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями" + "<red>навыка!"};
-        return new String[]{TCUtil.N + "Общие " + TCUtil.P + "статы " + TCUtil.N + "с навыком:",
+        if (fnd.isEmpty()) return UNRELATED;
+        return new String[]{"<apple>Общие " + TCUtil.P + "статы " + "<apple>с навыком:",
             String.join(TCUtil.N + ", ", fnd)};
     }
 }

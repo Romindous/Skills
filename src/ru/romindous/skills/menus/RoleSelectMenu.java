@@ -13,8 +13,8 @@ import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
 import ru.komiss77.utils.inventory.InventoryProvider;
 import ru.komiss77.utils.inventory.SmartInventory;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Role;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.survs.Role;
 
 public class RoleSelectMenu implements InventoryProvider {
 

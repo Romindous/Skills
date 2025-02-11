@@ -20,9 +20,9 @@ import ru.komiss77.Ostrov;
 import ru.komiss77.modules.items.ItemRoll;
 import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
+import ru.komiss77.utils.BlockUtil;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.version.Nms;
-import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
 
 public class Spored extends SednaMob {
@@ -64,7 +64,7 @@ public class Spored extends SednaMob {
                 Ostrov.sync(() -> {
                     final Block b2 = loc.getBlock();
                     if (b2.getType() == MOSS.getType()) {
-                        b2.setBlockData(Main.AIR_DATA, false);
+                        b2.setBlockData(BlockUtil.air, false);
                         EntityUtil.effect(spawn(loc), Sound.BLOCK_BIG_DRIPLEAF_BREAK,
                             0.6f, Particle.HAPPY_VILLAGER);
                     }

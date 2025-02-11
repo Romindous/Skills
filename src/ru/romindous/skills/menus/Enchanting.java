@@ -23,7 +23,7 @@ import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.komiss77.OStrap;
+import ru.komiss77.boot.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.world.WXYZ;
 import ru.komiss77.utils.*;
@@ -33,7 +33,7 @@ import ru.komiss77.utils.inventory.InventoryProvider;
 import ru.komiss77.utils.inventory.SlotPos;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.Survivor;
+import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.config.ConfigVars;
 
 public class Enchanting implements InventoryProvider {

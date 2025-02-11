@@ -11,8 +11,8 @@ import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
 import ru.komiss77.utils.inventory.InventoryProvider;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Stat;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.survs.Stat;
 
 
 public class StatsMenu implements InventoryProvider {

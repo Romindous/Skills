@@ -29,9 +29,9 @@ import ru.komiss77.modules.world.AreaSpawner;
 import ru.komiss77.modules.world.WXYZ;
 import ru.komiss77.utils.LocUtil;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Stat;
-import ru.romindous.skills.enums.Trigger;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.listeners.DamageLst;
 
 public abstract class Minion extends SednaMob {

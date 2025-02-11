@@ -12,16 +12,15 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
-import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.objects.IntHashMap;
 import ru.komiss77.utils.ItemUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.MainTask;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.SubServer;
-import ru.romindous.skills.enums.Trigger;
+import ru.romindous.skills.SubServer;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Survivor;
 
 
 
@@ -65,7 +64,7 @@ public class ShotLst implements Listener {
                 //TODO staff dmg enchant
                 yield d;
             }
-            case final Firework pr -> 5 + (pr.getFireworkMeta().getEffectsSize() << 1);
+            case final Firework pr -> 5d + (pr.getFireworkMeta().getEffectsSize() << 1);
             case final ShulkerBullet ignored -> 4d;
             default -> 0d;
         };

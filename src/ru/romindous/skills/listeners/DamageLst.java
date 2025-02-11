@@ -18,12 +18,12 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.komiss77.modules.player.PM;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.Survivor;
 import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.enums.Stat;
-import ru.romindous.skills.enums.Trigger;
 import ru.romindous.skills.mobs.Minion;
 import ru.romindous.skills.mobs.SednaMob;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.survs.Survivor;
 
 
 public class DamageLst implements Listener {
@@ -50,93 +50,91 @@ public class DamageLst implements Listener {
     }
 
     public static void onCustomAttack(final EntityDamageByEntityEvent e, final SednaMob sm) {
-        if (!(e.getDamageSource().getCausingEntity() instanceof final Mob dmgr)
+        final DamageSource ds = e.getDamageSource();
+        if (!(ds.getCausingEntity() instanceof final Mob dmgr)
             || !(e.getEntity() instanceof final LivingEntity tgt)) return;
         if (!(sm instanceof Minion)) Minion.setAgroOf(dmgr, tgt);
         Minion.setAgroOf(tgt, dmgr);
 
-        double dmg = e.getDamage();
-        if (e.getDamageSource().getDirectEntity() instanceof Projectile) {
-            dmg = dmgr.getAttribute(Attribute.ATTACK_DAMAGE).getValue();
-        }
+        double dmg = initDmg(ds.getDirectEntity(), e.getDamage());
         if (dmg < 1d) return;
 
-        if (tgt instanceof Player) {
-            final Survivor sv = PM.getOplayer(tgt.getUniqueId(), Survivor.class);
-            if (sv == null) return;
-            e.setDamage(Stat.defense(e.getDamage(), sv.getStat(Stat.PASSIVE)));
-        }
+        if (!(tgt instanceof Player)) return;
+        final Survivor sv = PM.getOplayer(tgt.getUniqueId(), Survivor.class);
+        if (sv == null) return;
+        e.setDamage(Stat.defense(dmg, sv.getStat(Stat.PASSIVE)));
+        sv.trigger(Trigger.USER_HURT, e, tgt);
     }
 
     public static void onCustomDefense(final EntityDamageEvent e, final SednaMob sm) {
         if (!(e.getEntity() instanceof final Mob tgt)) return;
-
         final DamageSource ds = e.getDamageSource();
-        if (ds.getCausingEntity() instanceof final LivingEntity dmgr) {
-            if (!(sm instanceof Minion)) Minion.setAgroOf(tgt, dmgr);
-            Minion.setAgroOf(dmgr, tgt);
+        if (!(ds.getCausingEntity() instanceof final LivingEntity dmgr)) return;
+        if (!(sm instanceof Minion)) Minion.setAgroOf(tgt, dmgr);
+        Minion.setAgroOf(dmgr, tgt);
 
-            if (dmgr instanceof final Player p) {
-                final Survivor sv = PM.getOplayer(p, Survivor.class);
-                if (sv == null) return;
+        if (!(dmgr instanceof final Player p)) return;
+        final Survivor sv = PM.getOplayer(p, Survivor.class);
+        if (sv == null) return;
 
-                final DamageType dt = ds.getDamageType();
-                double dmg = checkDirect(ds.getDirectEntity(), e.getDamage());
-                if (dmg < 1d) return;
+        final DamageType dt = ds.getDamageType();
+        double dmg = initDmg(ds.getDirectEntity(), e.getDamage());
+        if (dmg < 1d) return;
 
-                if (DIRECT.contains(dt)) {
-                    e.setDamage(Stat.direct(dmg, sv.getStat(Stat.STRENGTH)));
-                    sv.trigger(Trigger.ATTACK_ENTITY, e, p);
-                } else if (RANGED.contains(dt)) {
-                    e.setDamage(Stat.ranged(dmg, sv.getStat(Stat.ACCURACY)));
-                    sv.trigger(Trigger.ATTACK_ENTITY, e, p);
+        if (DIRECT.contains(dt)) {
+            e.setDamage(Stat.direct(dmg, sv.getStat(Stat.STRENGTH)));
+            sv.trigger(Trigger.ATTACK_ENTITY, e, p);
+        } else if (RANGED.contains(dt)) {
+            e.setDamage(Stat.ranged(dmg, sv.getStat(Stat.ACCURACY)));
+            sv.trigger(Trigger.ATTACK_ENTITY, e, p);
 //                    sv.trigger(Trigger.RANGED_HIT, e, p);
-                } else if (MAGIC.contains(dt)) {
-                    e.setDamage(Stat.magic(dmg, sv.getStat(Stat.MAGIC)));
-                }
-            }
+        } else if (MAGIC.contains(dt)) {
+            e.setDamage(Stat.magic(dmg, sv.getStat(Stat.MAGIC)));
         }
     }
 
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerDamagePlayer (final EntityDamageByEntityEvent e) {
         final DamageSource ds = e.getDamageSource();
-        if (e.getEntity() instanceof final Player tgt
-            && ds.getCausingEntity() instanceof final Player dmgr
-            && Main.canAttack(dmgr, tgt, true)) {
-            final Survivor dmgrSv = PM.getOplayer(dmgr, Survivor.class);
-            final Survivor tgtSv = PM.getOplayer(tgt, Survivor.class);
-            if (dmgrSv == null || tgtSv == null) return;
-            Minion.setAgroOf(dmgr, tgt);
-            Minion.setAgroOf(tgt, dmgr);
-
-            final DamageType dt = ds.getDamageType();
-            double dmg = checkDirect(ds.getDirectEntity(), e.getDamage());
-            if (dmg < 1d) return;
-
-            if (DIRECT.contains(dt)) {
-                dmg = Stat.direct(dmg, dmgrSv.getStat(Stat.STRENGTH));
-                dmgrSv.trigger(Trigger.ATTACK_ENTITY, e, dmgr);
-            } else if (RANGED.contains(dt)) {
-                dmg = Stat.ranged(dmg, dmgrSv.getStat(Stat.ACCURACY));
-                dmgrSv.trigger(Trigger.ATTACK_ENTITY, e, dmgr);
-//                dmgrSv.trigger(Trigger.RANGED_HIT, e, dmgr);
-            } else if (MAGIC.contains(dt)) {
-                dmg = Stat.magic(dmg, dmgrSv.getStat(Stat.MAGIC));
-            } else return;
-
-            e.setDamage(Stat.defense(dmg, tgtSv.getStat(Stat.PASSIVE)));
-            tgtSv.trigger(Trigger.USER_HURT, e, tgt);
+        if (!(e.getEntity() instanceof final Player tgt)
+            || !(ds.getCausingEntity() instanceof final Player dmgr)) return;
+        if (!Main.canAttack(dmgr, tgt, true)) {
+            e.setCancelled(true);
+            e.setDamage(0d);
+            return;
         }
+        final Survivor dmgrSv = PM.getOplayer(dmgr, Survivor.class);
+        final Survivor tgtSv = PM.getOplayer(tgt, Survivor.class);
+        if (dmgrSv == null || tgtSv == null) return;
+        Minion.setAgroOf(dmgr, tgt);
+        Minion.setAgroOf(tgt, dmgr);
+
+        final DamageType dt = ds.getDamageType();
+        double dmg = initDmg(ds.getDirectEntity(), e.getDamage());
+        if (dmg < 1d) return;
+
+        if (DIRECT.contains(dt)) {
+            dmg = Stat.direct(dmg, dmgrSv.getStat(Stat.STRENGTH));
+            dmgrSv.trigger(Trigger.ATTACK_ENTITY, e, dmgr);
+        } else if (RANGED.contains(dt)) {
+            dmg = Stat.ranged(dmg, dmgrSv.getStat(Stat.ACCURACY));
+            dmgrSv.trigger(Trigger.ATTACK_ENTITY, e, dmgr);
+//                dmgrSv.trigger(Trigger.RANGED_HIT, e, dmgr);
+        } else if (MAGIC.contains(dt)) {
+            dmg = Stat.magic(dmg, dmgrSv.getStat(Stat.MAGIC));
+        } else return;
+
+        e.setDamage(Stat.defense(dmg, tgtSv.getStat(Stat.PASSIVE)));
+        tgtSv.trigger(Trigger.USER_HURT, e, tgt);
     }
 
-    private static double checkDirect(final Entity ent, final double dmg) {
-        return switch (ent) {
-            case final Snowball sb -> ShotLst.damage(sb);
-            case final Firework sb -> ShotLst.damage(sb);
-            case final ShulkerBullet sb -> ShotLst.damage(sb);
-            case null, default -> dmg;
-        };
+    private static double initDmg(final Entity ent, final double dmg) {
+        if (!(ent instanceof final Projectile prj)) return dmg;
+        if (prj.getShooter() instanceof final Mob mb)
+            return mb.getAttribute(Attribute.ATTACK_DAMAGE).getValue();
+        final double pd = ShotLst.damage(prj);
+//        Bukkit.getConsoleSender().sendMessage(prj.getType().name() + " dmg2-" + pd);
+        return pd == 0d ? dmg : pd;
     }
 
     private static final double envDmgPer = ConfigVars.get("damage.envFrac", 0.05d);
@@ -158,11 +156,10 @@ public class DamageLst implements Listener {
         if (ENVIRONMENT.contains(dt)) {
             dmg = ent.getAttribute(Attribute.MAX_HEALTH).getBaseValue() * envDmgPer * dmg;
         } else if (FALL.contains(dt)) {
-            if (ent instanceof Mob) {
-                e.setCancelled(true);
-                e.setDamage(0d);
-                return;
-            }
+            if (!(ent instanceof Mob)) return;
+            e.setCancelled(true);
+            e.setDamage(0d);
+            return;
         }
 
         final Survivor sv = PM.getOplayer(ent.getUniqueId(), Survivor.class);

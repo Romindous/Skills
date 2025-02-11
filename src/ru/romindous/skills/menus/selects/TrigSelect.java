@@ -8,8 +8,9 @@ import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Trigger;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.guides.Entries;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
@@ -59,6 +60,7 @@ public class TrigSelect extends SvSelect {
             }) slot++;
             its.set(slot, ClickableItem.from(new ItemBuilder(tr.icon())
                 .lore("").lore(Trigger.color + "Клик - Выбрать").build(), e -> {
+                    Entries.trig.complete(p, sv, false);
                     if (sk == null) {
                         sv.setSkill(skIx, new Skill("Навык-" + skIx, tr, new Selector.SelState[0],
                             new Ability.AbilState[0], new Modifier.ModState[0]));

@@ -4,7 +4,7 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import ru.komiss77.utils.inventory.ClickableItem;
-import ru.romindous.skills.Survivor;
+import ru.romindous.skills.survs.Survivor;
 
 public interface IPetManager extends Listener {
 	

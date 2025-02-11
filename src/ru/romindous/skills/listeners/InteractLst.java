@@ -24,19 +24,19 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import ru.komiss77.ApiOstrov;
-import ru.komiss77.OStrap;
+import ru.komiss77.boot.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Role;
-import ru.romindous.skills.enums.Stat;
-import ru.romindous.skills.enums.Trigger;
-import ru.romindous.skills.objects.ItemTags;
-import ru.romindous.skills.objects.Scroll;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.items.ItemTags;
+import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
@@ -74,7 +74,31 @@ public class InteractLst implements Listener {
                             }
                             break;
                         }
-                    }
+                    } /*else if (ItemUtil.is(hand, ItemType.WOODEN_PICKAXE)) {
+                        p.sendMessage(Registry.BLOCK.getTag(BlockTypeTagKeys.LOGS).resolve(Registry.BLOCK).getClass().getSimpleName());
+                        p.sendMessage(Registry.BLOCK.getTag(BlockTypeTagKeys.LOGS).getClass().getName());
+                        final long tm = System.currentTimeMillis();
+                        final WXYZ lc = new WXYZ(e.getClickedBlock());
+                        final int dst = 10;
+                        final World w = lc.w();
+                        final Set<BlockPosition> toChop = new HashSet<>();
+                        final Set<BlockPosition> checked = new HashSet<>();
+                        for (int x = -dst + 1; x != dst; x++) {
+                            for (int z = -dst + 1; z != dst; z++) {
+                                final WXYZ start = lc.clone().add(x, 0, z);
+                                if (checked.contains(start)) continue;
+                                if (!LOGS.contains(Nms.fastType(start))) continue;
+                                final BlockPosition stp = Position.block(start.x, start.y, start.z);
+                                checked.add(stp); toChop.add(stp);
+                                checkTree(stp, toChop, checked, w);
+                            }
+                        }
+                        p.sendMessage("tm1-" + (System.currentTimeMillis() - tm));
+                        for (final BlockPosition chop : toChop) {
+                            w.getBlockAt(chop.blockX(), chop.blockY(), chop.blockZ()).setBlockData(BlockUtil.air, true);
+                        }
+                        p.sendMessage("tm2-" + (System.currentTimeMillis() - tm));
+                    }*/
                 }
                 if (p.isSneaking()) sv.trigger(Trigger.SHIFT_LEFT, e, p);
                 break;
@@ -169,6 +193,39 @@ public class InteractLst implements Listener {
                 break;
         }
     }
+
+    /*private static final Set<BlockType> LOGS = new HashSet<>(Registry.BLOCK.getTag(BlockTypeTagKeys.LOGS).resolve(Registry.BLOCK));
+    private void checkTree(final BlockPosition start, final Set<BlockPosition> toChop, final Set<BlockPosition> checked, final World w) {
+        final BlockFace[] topped = {BlockFace.NORTH_EAST, BlockFace.NORTH_WEST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_WEST,
+            BlockFace.SELF, BlockFace.SOUTH, BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST};
+        final BlockFace[] sided = {BlockFace.SOUTH, BlockFace.NORTH, BlockFace.EAST, BlockFace.WEST};
+        final Set<BlockPosition> current = new HashSet<>();
+        final Set<BlockPosition> next = new HashSet<>();
+        next.add(start);
+        do {
+            current.clear();
+            current.addAll(next);
+            next.clear();
+            for (final BlockPosition prnt : current) {
+                for (final BlockFace bf : sided) {
+                    final BlockPosition nps = Position.block(prnt.blockX() + bf.getModX(),
+                        prnt.blockY(), prnt.blockZ() + bf.getModZ());
+                    if (!checked.add(nps)) continue;
+                    if (!LOGS.contains(Nms.fastType(w, nps.blockX(), nps.blockY(), nps.blockZ()))) continue;
+                    toChop.add(nps);
+                    next.add(nps);
+                }
+                for (final BlockFace bf : topped) {
+                    final BlockPosition nps = Position.block(prnt.blockX() + bf.getModX(),
+                        prnt.blockY() + 1, prnt.blockZ() + bf.getModZ());
+                    if (!checked.add(nps)) continue;
+                    if (!LOGS.contains(Nms.fastType(w, nps.blockX(), nps.blockY(), nps.blockZ()))) continue;
+                    toChop.add(nps);
+                    next.add(nps);
+                }
+            }
+        } while (!next.isEmpty());
+    }*/
 
     private void claim(final ItemStack hand, final Player p, final Survivor sv, final EquipmentSlot slot) {
         final PersistentDataContainerView pdc = hand.getPersistentDataContainer();
@@ -284,6 +341,14 @@ public class InteractLst implements Listener {
     	if (e.getEntity() instanceof ItemFrame) {
 			new EntityDamageEvent(e.getEntity(), DamageCause.CONTACT, 1d).callEvent();
     	}
+    }*/
+
+    /*@EventHandler (priority = EventPriority.LOW, ignoreCancelled = false)
+    public void onPick(final EntityPickupItemEvent e) {
+        if (!(e.getEntity() instanceof final Player pl)) return;
+        final Survivor sv = PM.getOplayer(pl, Survivor.class);
+        final ItemStack it = e.getItem().getItemStack();
+        final ItemType tp = it.getType().asItemType();
     }*/
 
     @EventHandler

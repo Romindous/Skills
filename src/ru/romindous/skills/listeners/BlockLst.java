@@ -10,6 +10,7 @@ import org.bukkit.block.data.type.Farmland;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import ru.komiss77.modules.world.XYZ;
 import ru.komiss77.version.Nms;
@@ -263,8 +264,8 @@ public class BlockLst implements Listener {
         return true;
     }*/
 
-    
-    
+
+
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true) //может быть cancel в BossListener
     public void onPlace(final BlockPlaceEvent e) {
 //        final ItemStack is = e.getItemInHand();
@@ -315,19 +316,19 @@ public class BlockLst implements Listener {
 
         switch (b.getType()) {
             case MELON_STEM, PUMPKIN_STEM, BEETROOTS, WHEAT, POTATOES, CARROTS:
-            	if (BlockType.FARMLAND.equals(b.getRelative(BlockFace.DOWN).getType().asBlockType())) {
+                if (BlockType.FARMLAND.equals(b.getRelative(BlockFace.DOWN).getType().asBlockType())) {
                     final Farmland fl = (Farmland) b.getRelative(BlockFace.DOWN).getBlockData();
                     if (fl.getMoisture() == 0) {
-                    	e.setBuild(false);
+                        e.setBuild(false);
                     }
-            	}
-            	break;
-			default:
-				break;
+                }
+                break;
+            default:
+                break;
         }
 
         /*final BossType bossByMat = BossType.finBlks.get(b.getType());
-            *//*if (Timer.has(p, "bossSpawn")) {
+         *//*if (Timer.has(p, "bossSpawn")) {
                 p.sendMessage(Main.prefix + "босса можно призвать снова через "+Timer.getLeft(p, "bossSpawn"));
                 return;
             }
@@ -393,37 +394,37 @@ public class BlockLst implements Listener {
 
         int hight = 1;
         int width = 1;
-        
+
         while (!Nms.fastType(w, loc.x, loc.y, loc.z).isSolid() && hight < 20) {
-        	loc.y += 1;
-        	hight++;
+            loc.y += 1;
+            hight++;
         }
         loc.y -= hight;
-        
+
         final int dr;
         if (bf.getModX() == 0) {
-        	dr = bf.getModZ();
+            dr = bf.getModZ();
             while (!Nms.fastType(w, loc.x, loc.y, loc.z).isSolid() && width < 20) {
-            	loc.z += dr;
-            	width++;
+                loc.z += dr;
+                width++;
             }
-        	loc.z -= dr * width;
-        	
+            loc.z -= dr * width;
+
             if (!nrMinBlck(loc, w, BlockType.OBSIDIAN, 2)
-                    || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + hight - 1, loc.z), w, BlockType.OBSIDIAN, 2)
-                    || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y, loc.z + width - 1), w, BlockType.OBSIDIAN, 2)
-                    || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + hight - 1, loc.z + width - 1), w, BlockType.OBSIDIAN, 2)) {
+                || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + hight - 1, loc.z), w, BlockType.OBSIDIAN, 2)
+                || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y, loc.z + width - 1), w, BlockType.OBSIDIAN, 2)
+                || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + hight - 1, loc.z + width - 1), w, BlockType.OBSIDIAN, 2)) {
                 return false;
             }
             for (byte y = 1; y < hight - 1; y++) {
                 if (!nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + y, loc.z), w, BlockType.OBSIDIAN, 1)
-                        || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + y, loc.z + width - 1), w, BlockType.OBSIDIAN, 1)) {
+                    || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + y, loc.z + width - 1), w, BlockType.OBSIDIAN, 1)) {
                     return false;
                 }
             }
             for (byte xz = 1; xz < width - 1; xz++) {
                 if (!nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y, loc.z + xz), w, BlockType.OBSIDIAN, 1)
-                        || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + hight - 1, loc.z + xz), w, BlockType.OBSIDIAN, 1)) {
+                    || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + hight - 1, loc.z + xz), w, BlockType.OBSIDIAN, 1)) {
                     return false;
                 }
             }
@@ -445,34 +446,34 @@ public class BlockLst implements Listener {
                     }
                 }
             }
-            
+
             final Orientable or = BlockType.NETHER_PORTAL.createBlockData();
             or.setAxis(Axis.Z);
             for (final Block pb : pbs) pb.setBlockData(or, false);
         } else {
-        	dr = bf.getModX();
+            dr = bf.getModX();
             while (!Nms.fastType(w, loc.x, loc.y, loc.z).isSolid() && width < 20) {
-            	loc.x += dr;
-            	width++;
+                loc.x += dr;
+                width++;
             }
-        	loc.x -= dr * width;
+            loc.x -= dr * width;
 
-        	
+
             if (!nrMinBlck(loc, w, BlockType.OBSIDIAN, 2)
-                    || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + hight - 1, loc.z), w, BlockType.OBSIDIAN, 2)
-                    || !nrMinBlck(new XYZ(loc.worldName, loc.x + width - 1, loc.y, loc.z), w, BlockType.OBSIDIAN, 2)
-                    || !nrMinBlck(new XYZ(loc.worldName, loc.x + width - 1, loc.y + hight - 1, loc.z), w, BlockType.OBSIDIAN, 2)) {
+                || !nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + hight - 1, loc.z), w, BlockType.OBSIDIAN, 2)
+                || !nrMinBlck(new XYZ(loc.worldName, loc.x + width - 1, loc.y, loc.z), w, BlockType.OBSIDIAN, 2)
+                || !nrMinBlck(new XYZ(loc.worldName, loc.x + width - 1, loc.y + hight - 1, loc.z), w, BlockType.OBSIDIAN, 2)) {
                 return false;
             }
             for (byte y = 1; y < hight - 1; y++) {
                 if (!nrMinBlck(new XYZ(loc.worldName, loc.x, loc.y + y, loc.z), w, BlockType.OBSIDIAN, 1)
-                        || !nrMinBlck(new XYZ(loc.worldName, loc.x + width - 1, loc.y + y, loc.z), w, BlockType.OBSIDIAN, 1)) {
+                    || !nrMinBlck(new XYZ(loc.worldName, loc.x + width - 1, loc.y + y, loc.z), w, BlockType.OBSIDIAN, 1)) {
                     return false;
                 }
             }
             for (byte xz = 1; xz < width - 1; xz++) {
                 if (!nrMinBlck(new XYZ(loc.worldName, loc.x + xz, loc.y, loc.z), w, BlockType.OBSIDIAN, 1)
-                        || !nrMinBlck(new XYZ(loc.worldName, loc.x + xz, loc.y + hight - 1, loc.z), w, BlockType.OBSIDIAN, 1)) {
+                    || !nrMinBlck(new XYZ(loc.worldName, loc.x + xz, loc.y + hight - 1, loc.z), w, BlockType.OBSIDIAN, 1)) {
                     return false;
                 }
             }
@@ -484,13 +485,13 @@ public class BlockLst implements Listener {
             for (int xz = 0; xz < width; xz++) {
                 for (int y = 0; y < hight; y++) {
                     switch ((pbs[j] = b.getRelative(xz, y, 0)).getType()) {
-                    case AIR:
-                    case CAVE_AIR:
-                    case FIRE:
-                        j++;
-                        break;
-                    default:
-                        return false;
+                        case AIR:
+                        case CAVE_AIR:
+                        case FIRE:
+                            j++;
+                            break;
+                        default:
+                            return false;
                     }
                 }
             }

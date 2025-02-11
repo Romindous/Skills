@@ -17,8 +17,8 @@ import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.ItemUtil;
 import ru.romindous.skills.Main;
+import ru.romindous.skills.items.Groups;
 import ru.romindous.skills.mobs.SednaMob;
-import ru.romindous.skills.items.SkillGroups;
 
 public class Rotting extends SednaMob {
 
@@ -34,22 +34,21 @@ public class Rotting extends SednaMob {
     @Override
     public Map<EquipmentSlot, ItemStack> equipment() {
         return Map.of(EquipmentSlot.HAND, ClassUtil.rndElmt(
-                SkillGroups.MEDAL.item(ItemType.GOLDEN_AXE),
-                SkillGroups.MEDAL.item(ItemType.GOLDEN_SWORD),
+                Groups.MEDAL.item(ItemType.GOLDEN_HOE),
+                Groups.MEDAL.item(ItemType.GOLDEN_PICKAXE),
                 new ItemBuilder(ItemType.WOODEN_PICKAXE).build(),
+                new ItemBuilder(ItemType.WOODEN_HOE).build(),
                 ItemUtil.air),
 
             EquipmentSlot.HEAD, ClassUtil.rndElmt(
-                SkillGroups.MEDAL.item(ItemType.GOLDEN_HELMET),
+                Groups.MEDAL.item(ItemType.GOLDEN_HELMET),
                 new ItemBuilder(ItemType.SHROOMLIGHT).build(),
                 new ItemBuilder(ItemType.RED_STAINED_GLASS).build(),
                 new ItemBuilder(ItemType.CRIMSON_HYPHAE).build(),
                 new ItemBuilder(ItemType.NETHER_WART_BLOCK).build(), ItemUtil.air),
-            EquipmentSlot.CHEST, ClassUtil.rndElmt(SkillGroups.MEDAL.item(ItemType.GOLDEN_CHESTPLATE), ItemUtil.air,
-                new ItemBuilder(ItemType.LEATHER_CHESTPLATE).color(Color.ORANGE).build(), ItemUtil.air),
-            EquipmentSlot.LEGS, ClassUtil.rndElmt(SkillGroups.MEDAL.item(ItemType.GOLDEN_LEGGINGS), ItemUtil.air, ItemUtil.air,
-                new ItemBuilder(ItemType.LEATHER_LEGGINGS).color(Color.ORANGE).build(), ItemUtil.air),
-            EquipmentSlot.FEET, ClassUtil.rndElmt(SkillGroups.MEDAL.item(ItemType.GOLDEN_BOOTS), ItemUtil.air, ItemUtil.air,
+            EquipmentSlot.CHEST, ClassUtil.rndElmt(new ItemBuilder(ItemType.LEATHER_CHESTPLATE).color(Color.ORANGE).build(), ItemUtil.air),
+            EquipmentSlot.LEGS, ClassUtil.rndElmt(new ItemBuilder(ItemType.LEATHER_LEGGINGS).color(Color.ORANGE).build(), ItemUtil.air),
+            EquipmentSlot.FEET, ClassUtil.rndElmt(Groups.MEDAL.item(ItemType.GOLDEN_BOOTS),
                 new ItemBuilder(ItemType.LEATHER_BOOTS).color(Color.ORANGE).build(), ItemUtil.air));
     }
 
@@ -68,7 +67,7 @@ public class Rotting extends SednaMob {
 
     private final RollTree drop = RollTree.of(key().value())
         .add(new ItemRoll(key().value() + "_flesh", new ItemBuilder(ItemType.ROTTEN_FLESH).build(), 0, 2), 4)
-        .add(new ItemRoll(key().value() + "_nugget", SkillGroups.MEDAL.item(ItemType.GOLD_NUGGET), 1, 2), 2)
+        .add(new ItemRoll(key().value() + "_nugget", Groups.MEDAL.item(ItemType.GOLD_NUGGET), 1, 2), 2)
         .add(new ItemRoll(key().value() + "_copper", new ItemBuilder(ItemType.RAW_COPPER).build(), 1, 0), 1)
         .add(new ItemRoll(key().value() + "_pork", new ItemBuilder(ItemType.PORKCHOP).build(), 1, 0), 1)
         .add(new NARoll(), 2).build(1, 1);

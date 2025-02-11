@@ -14,10 +14,10 @@ import ru.komiss77.utils.TimeUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
 import ru.komiss77.utils.inventory.InventoryProvider;
-import ru.romindous.skills.Main;
-import ru.romindous.skills.SM;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Stat;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.guides.Section;
 
 
 public class MainMenu implements InventoryProvider {
@@ -59,7 +59,7 @@ public class MainMenu implements InventoryProvider {
         empty[45] = shroom;                       empty[53] = shroom;
         
         worlds = ClickableItem.from(new ItemBuilder(ItemType.RAW_COPPER_BLOCK).name("§4<obf>k</obf>§6 Мировое Смещение §4<obf>k")
-            .lore("§6ЛКМ §7- открытые миры")
+            .lore("§6Клик §7- открытые миры")
             .build(), e -> {
                 if (e.getEvent() instanceof final InventoryClickEvent ev) {
                     ((Player) ev.getWhoClicked()).performCommand("skill world");
@@ -67,7 +67,7 @@ public class MainMenu implements InventoryProvider {
         });
         
         ability = ClickableItem.from(new ItemBuilder(ItemType.SWEET_BERRIES).name("§4<obf>k</obf>§c Кластер Навыков §4<obf>k")
-            .lore("§6ЛКМ §7- навыки класса")
+            .lore("§6Клик §7- навыки класса")
             .build(), e -> {
                 if (e.getEvent() instanceof final InventoryClickEvent ev) {
                     ((Player) ev.getWhoClicked()).performCommand("skill ability");
@@ -99,7 +99,7 @@ public class MainMenu implements InventoryProvider {
             .lore(sv.statsPoints >0 ? "§f§lДоступно очков" : "§8Доступно очков")
             .lore(sv.statsPoints >0 ? "§f§lстатистики : §b§l"+sv.statsPoints : "§8статистики : §70")
             .lore("")
-            .lore("§6ЛКМ §7- статистика")
+            .lore("§6Клик §7- статистика")
             .build(), e -> {
                 p.performCommand("skill stats");
         }));
@@ -108,7 +108,8 @@ public class MainMenu implements InventoryProvider {
 
         content.set(24, worlds);
         
-        content.set(31, Main.petMgr.getMenuItem(p));
+//        content.set(31, Main.petMgr.getMenuItem(p));
+        content.set(31, ClickableItem.from(Section.jrIt(sv), e -> Section.journal(p, sv)));
 
         //табло
         content.set(38, ClickableItem.from(new ItemBuilder(sv.showScoreBoard ? ItemType.GLOW_ITEM_FRAME : ItemType.ITEM_FRAME).name("§7Отображение Табло")
@@ -151,7 +152,7 @@ public class MainMenu implements InventoryProvider {
         
         /*content.set(42, ClickableItem.from(new ItemBuilder(ItemType.WRITABLE_BOOK).name("§c<obf>k</obf>§e Книга Изделий §c<obf>k")
             .lore("")
-            .lore("§6ЛКМ §7- посмотреть крафты")
+            .lore("§6Клик §7- посмотреть крафты")
             .lore("")
             .build(), e -> {
                 if (e.getEvent() instanceof InventoryClickEvent) {
@@ -166,7 +167,7 @@ public class MainMenu implements InventoryProvider {
         final int level = sv.getLevel();
         lore.add("§7Уровень: §f"+ level);
         lore.add("");
-        lore.add("§7Души: §3" + sv.mana());
+        lore.add("§7Души: §3" + (int) sv.mana());
         lore.add("§7Очки статы: §6" + sv.statsPoints);
         lore.add("");
         for (Stat st : Stat.values()) {
@@ -187,9 +188,9 @@ public class MainMenu implements InventoryProvider {
             );
         } else {
             if (PM.getOplayer(p).hasGroup("legend")) {
-                lore.add("§6ЛКМ §7- сменить без штрафа");
+                lore.add("§6Клик §7- сменить без штрафа");
             } else {
-                lore.add("§6ЛКМ §7- сменить с потерей опыта");
+                lore.add("§6Клик §7- сменить с потерей опыта");
                 lore.add("§8*(Легенда - меняет без штрафа)");
             }
             

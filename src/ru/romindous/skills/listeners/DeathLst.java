@@ -2,7 +2,6 @@ package ru.romindous.skills.listeners;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.GameMode;
@@ -20,26 +19,30 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.objects.IntHashMap;
+import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.Survivor;
+import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.enums.Rarity;
-import ru.romindous.skills.enums.Stat;
-import ru.romindous.skills.enums.Trigger;
+import ru.romindous.skills.skills.Rarity;
+import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.events.PlayerKillEntityEvent;
+import ru.romindous.skills.guides.Entries;
 import ru.romindous.skills.mobs.SednaMob;
-import ru.romindous.skills.objects.Scroll;
+import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
 
 
 public class DeathLst implements Listener {
-//    private static final float DROP_MUL = 0.8f;
+    //    private static final float DROP_MUL = 0.8f;
 //    private static final float SRL_CH_DEL = 10f;
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -57,12 +60,12 @@ public class DeathLst implements Listener {
             p.getWorld().playSound(p.getLocation(), switch (sv.role) {
             case ARCHER -> Sound.ENTITY_SKELETON_DEATH;
             case ASSASIN -> Sound.ENTITY_GUARDIAN_DEATH;
-            case VAMPIRE -> Sound.ENTITY_ENDERMAN_DEATH;
+//            case VAMPIRE -> Sound.ENTITY_ENDERMAN_DEATH;
             case STONER -> Sound.ENTITY_ELDER_GUARDIAN_DEATH;
             case MAGE -> Sound.ENTITY_WITHER_HURT;
             case PHANTOM -> Sound.ENTITY_SHULKER_DEATH;
             case WARRIOR -> Sound.BLOCK_ANVIL_DESTROY;
-            case NECROS -> Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED;
+//            case NECROS -> Sound.ENTITY_ZOMBIE_VILLAGER_CONVERTED;
             }, 20.0F, 0.8F);
             
 //            if (sv.vampireBatTime>0) SM.unmakeBat(p, sv);
@@ -71,7 +74,7 @@ public class DeathLst implements Listener {
 
         final Mob mb = (Mob) p.getWorld().spawnEntity(loc, Main.subServer.mobType, false);
         mb.setCanPickupItems(true);
-        mb.customName(TCUtil.form(Main.N + "Труп игрока " + Main.P + p.getName()));
+        mb.customName(TCUtil.form(TCUtil.N + "Труп игрока " + TCUtil.P + p.getName()));
         mb.setCustomNameVisible(false);
         mb.setTicksLived(2);
         mb.setRemoveWhenFarAway(false);
@@ -154,6 +157,7 @@ public class DeathLst implements Listener {
         final float mana = (float) Stat.remana(sm.mana, kSv.getStat(Stat.SPIRIT));
         final PlayerKillEntityEvent el = new PlayerKillEntityEvent(killer, mob, mana, dropNum, exp);
         if (!el.callEvent()) return;
+        Entries.mob.complete(killer, kSv, false);
         kSv.trigger(Trigger.KILL_ENTITY, el, killer);
         e.setDroppedExp(el.getExp());
         kSv.chgMana(killer, el.getMana());
@@ -166,17 +170,20 @@ public class DeathLst implements Listener {
             }
 
 //            if (Main.srnd.nextFloat() > thresh)
-            dropScroll(loc);
+            dropScroll(loc, killer, kSv);
         }
     }
 
     private static final int SC_ROLL = ConfigVars.get("drops.scroll", 1000);
-    private static void dropScroll(final Location loc) {
+    private static void dropScroll(final Location loc, final Player pl, final Survivor sv) {
         final Scroll sc;
         switch (Main.srnd.nextInt(SC_ROLL)) {
-            case 0 -> sc = randScroll(Selector.RARITIES);//selector
-            case 1, 2 -> sc = randScroll(Ability.RARITIES);//ability
-            case 3, 4, 5 -> sc = randScroll(Modifier.RARITIES);//modifier
+            case 0 -> sc = randScroll(sv, Selector.RARITIES);//selector
+            case 1, 2 -> {
+                sc = randScroll(sv, Ability.RARITIES);//ability
+                Entries.abil.complete(pl, sv, false);
+            }
+            case 3, 4, 5 -> sc = randScroll(sv, Modifier.RARITIES);//modifier
             default -> {return;}
         }
         if (sc == null) return;
@@ -198,12 +205,18 @@ public class DeathLst implements Listener {
         return rar;
     }
 
-    private static <S extends Scroll> @Nullable S randScroll(final Map<Rarity, List<S>> values) {
+    private static <S extends Scroll> @Nullable S randScroll(final Survivor sv, final IntHashMap<List<S>> values) {
         int ch = Main.srnd.nextInt(RAR_CH);
         int i = 0; for (;ch != 0; i++) ch = ch >> RAR_DEL;
-        final List<S> rsc = values.get(RAR_VALS[RAR_MAX - i]);
+        final List<S> rsc = values.get(Scroll.total(RAR_VALS[RAR_MAX - i], randRole(sv)));
         if (rsc == null) return null;
         return rsc.get(Main.srnd.nextInt(rsc.size()));
+    }
+
+    public static final Role[] ROLE_VALS = Role.values();
+    private static @Nullable Role randRole(final Survivor sv) {
+        return Main.srnd.nextInt(ROLE_VALS.length) == 0 ? ClassUtil.rndElmt(ROLE_VALS)
+            : Main.srnd.nextBoolean() ? null : sv.role;
     }
 
     /*@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)

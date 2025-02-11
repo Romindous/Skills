@@ -7,8 +7,6 @@ import java.util.Arrays;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.block.BlockType;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -26,43 +24,42 @@ import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.enums.Role;
-import ru.romindous.skills.enums.SubServer;
+import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.guides.Entries;
+import ru.romindous.skills.items.Groups;
+import ru.romindous.skills.items.SkillGroup;
 import ru.romindous.skills.mobs.Minion;
 import ru.romindous.skills.mobs.Mobs;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.utils.pets.IPetManager;
-import ru.romindous.skills.utils.pets.PetVanilla;
-
 
 
 public class Main extends JavaPlugin {
 
     public static Main main;
-    public static final String N = "<indigo>";
-    public static final String P = "<dark_red>";
-    public static final String A = "<dark_purple>";
     public static final String manaClr = "§9🔥 ";
     public static final String cdClr = "§б⌚ ";
-    public static final String prefix = Main.N + "[" + Main.A + "SN" + Main.N + "] ";
+    public static final String prefix = "<sky>[<cardinal>SN<sky>] ";
     public static final SecureRandom srnd = new SecureRandom();
-    public static final SubServer subServer = SubServer.getForThis();
+    public static final SubServer subServer = SubServer.get();
     public static MenuItem diary;
     public static Mobs mobs;
+    public static SkillGroup mats;
 
     public static OConfigManager configManager;
     public static IPetManager petMgr;
     public static final Path configDir = Path.of(Path.of(Bukkit.getPluginsFolder().toURI())
         .toAbsolutePath().getParent().getParent().toString(), "skills");
-    public static final BlockData AIR_DATA = BlockType.AIR.createBlockData();
 
     private static final boolean turnOffAddons = false;
 
     @Override
     public void onEnable() {
         //OSTROV stuff
-        TCUtil.N = "<indigo>";
+        TCUtil.N = "<sky>";
         TCUtil.P = "<cardinal>";
-        TCUtil.A = "<dark_purple>";
+        TCUtil.A = "<indigo>";
         PM.setOplayerFun(Survivor::new, true);
 
         main = this;
@@ -71,25 +68,25 @@ public class Main extends JavaPlugin {
         Ostrov.log_ok("§bПодсервер седны: " + subServer.disName);
         ConfigVars.load();
 
-        if (Bukkit.getPluginManager().getPlugin("MyPet") == null || turnOffAddons) {
+        /*if (Bukkit.getPluginManager().getPlugin("MyPet") == null || turnOffAddons) {
             petMgr = new PetVanilla();
         } else {
             petMgr = new PetVanilla();
-//            petMgr = new PetManager();
-//            Bukkit.getPluginManager().registerEvents(petMgr, Main.main);
-        }
+        }*/
 
         diary = new MenuItemBuilder("diary", new ItemBuilder(ItemType.WRITTEN_BOOK)
             .name("§6Дневник").lore(Arrays.asList(" ", "§7С двойкой домой", "§7не приходить!")).glint(true).build())
             .slot(8).giveOnJoin(false).giveOnRespavn(true).giveOnWorld_change(false)
-            .anycase(false).canDrop(false).canMove(true).canPickup(false)
+            .forced(false).canDrop(false).canMove(true).canPickup(false)
             .duplicate(false).rightClickCmd("skill menu").leftClickCmd("menu").create();
 
         mobs = new Mobs();
 
-        SM.init();
         SubServer.init();
         Role.init();
+        Groups.init();
+        Entries.init();
+        SM.init();
 
         for (final Class<?> clazz : ClassUtil.getClasses(main.getFile(), "ru.romindous.skills.listeners")) {
             try {
@@ -136,14 +133,12 @@ public class Main extends JavaPlugin {
         final Survivor tsv = PM.getOplayer(tpl, Survivor.class);
         if (tsv == null) return false;
 
-        if (tell) {
-            if (dpl.getEntityId() == tpl.getEntityId()) {
-                dmgr.sendMessage(Main.prefix + "§cНельзя атаковать себя!");
-                return false;
-            } else if (NumUtil.mulDiff(tsv.exp, dsv.exp) != 1) {
-                dmgr.sendMessage(Main.prefix + "§cРазница в вашем уровне слишком велика!");
-                return false;
-            }
+        if (dpl.getEntityId() == tpl.getEntityId()) {
+            if (tell) dmgr.sendMessage(TCUtil.form(Main.prefix + "§cНельзя атаковать себя!"));
+            return false;
+        } else if (NumUtil.mulDiff(tsv.exp, dsv.exp) != 1) {
+            if (tell) dmgr.sendMessage(TCUtil.form(Main.prefix + "§cРазница в вашем уровне слишком велика!"));
+            return false;
         }
         return true;
     }

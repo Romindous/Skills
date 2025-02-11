@@ -13,9 +13,9 @@ import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.player.PlayerInputEvent;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
-import ru.romindous.skills.Main;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.Trigger;
+import ru.komiss77.utils.BlockUtil;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.skills.trigs.Trigger;
 
 
 public class MoveLst implements Listener {
@@ -26,11 +26,11 @@ public class MoveLst implements Listener {
             final Player p = (Player) e.getEntity();
             final Block b = e.getEntity().getLocation().getBlock();
             if (BlockType.NETHER_PORTAL.equals(b.getType().asBlockType())) {
-                b.setBlockData(Main.AIR_DATA);
+                b.setBlockData(BlockUtil.air);
             } else {
                 for (final BlockFace bf : RehabLst.near) {
                     if (BlockType.NETHER_PORTAL.equals(b.getRelative(bf).getType().asBlockType())) {
-                        b.getRelative(bf).setBlockData(Main.AIR_DATA);
+                        b.getRelative(bf).setBlockData(BlockUtil.air);
                         break;
                     }
                 }

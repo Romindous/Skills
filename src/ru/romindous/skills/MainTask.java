@@ -17,9 +17,11 @@ import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.ScreenUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.listeners.ShotLst;
-import ru.romindous.skills.objects.Bleeding;
+import ru.romindous.skills.skills.abils.Bleeding;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.utils.EffectUtil;
 
 
@@ -29,7 +31,8 @@ public class MainTask implements Runnable {
 	public static int proccesTime;
     private final World w = Bukkit.getWorlds().getFirst();
 
-	public static final int PRJ_DMG_SEC = 10;
+	public static final int PRJ_DMG_SEC = 8;
+	public static final int UPD_TCK_PER = 2;
 
     @Override
     public void run() {
@@ -187,33 +190,34 @@ public class MainTask implements Runnable {
 		}
 
 		final int sec = tick / 20;
-		final int sectm = sec * 20;
-		if (sectm == tick) {
+		final boolean isSec = sec * 20 == tick;
+		if (isSec) {
 			ShotLst.projDmg.values().removeIf(dmgPrj ->
-				dmgPrj.startSec() + PRJ_DMG_SEC > sec);
+				dmgPrj.startSec() + PRJ_DMG_SEC < sec);
 		}
 
+		final boolean upd = tick % UPD_TCK_PER == 0;
         for (final Player p : Bukkit.getOnlinePlayers()) {
             final Survivor sv = PM.getOplayer(p, Survivor.class);
             if (sv == null) continue;
             //каждую секунду с рабросом по тикам для игроков
-            if (sectm != tick) continue;
-            Bleeding.bleeds.values().removeIf(Bleeding::endTick);
-            //задания
-            if (sv.miniQuestTask != null && sv.miniQuestTask.secondTick()) {
-                sv.miniQuestTask=null;
-            }
+            if (isSec) {
+                Bleeding.bleeds.values().removeIf(Bleeding::endTick);
+                //задания
+                if (sv.miniQuestTask != null && sv.miniQuestTask.secondTick()) {
+                    sv.miniQuestTask = null;
+                }
 //                sv.transferTick(p.getWorld());
-            if (sv.role == null) continue;
-            for (final Skill sk : sv.skills) {
-                sk.updateKd(p);
+				if (sv.acBarPause > 0) sv.acBarPause--;
+				else sv.updateBar(p);
             }
-			sv.updateBoard(p, SM.Info.HEALTH);
-			if (sv.acBarPause > 0) sv.acBarPause--;
-            else sv.updateBar(p);
-            // --- конец блока, где скилл!=null ---
 
-            // --- конец блока каждую секунду игрока ---
+			if (!upd || sv.role == null) continue;
+			for (final Skill sk : sv.skills) {
+				sk.updateKd(p);
+			}
+			sv.updateBoard(p, SM.Info.HEALTH);
+			// --- конец блока каждую секунду игрока ---
         }
         // --- конец блока каждый тик игрока ---
 

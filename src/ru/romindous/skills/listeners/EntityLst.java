@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.destroystokyo.paper.ParticleBuilder;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
@@ -23,11 +22,12 @@ import org.bukkit.potion.PotionEffectType;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.entities.CustomEntity;
 import ru.komiss77.modules.world.WXYZ;
+import ru.komiss77.utils.BlockUtil;
 import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.enums.SubServer;
+import ru.romindous.skills.SubServer;
 import ru.romindous.skills.mobs.wastes.Crawler;
 import ru.romindous.skills.mobs.wastes.Spored;
 
@@ -60,21 +60,11 @@ public class EntityLst implements Listener {
     }
 
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
-    protected void onExtra(final ProjectileHitEvent e) {
+    protected void onHit(final ProjectileHitEvent e) {
         final Projectile prj = e.getEntity();
         if (!prj.isValid() || !(prj.getShooter() instanceof final Mob shtr)
-            || !(CustomEntity.get(shtr) instanceof Crawler)) return;
-        final Location loc = prj.getLocation();
-        final Block b = loc.getBlock();
-        if (b.getType().isAir()) {
-            b.setType(Crawler.WEB.getType(), false);
-            Ostrov.sync(() -> {
-                final Block bl = loc.getBlock();
-                if (bl.getType() == Crawler.WEB.getType()) {
-                    bl.setBlockData(Main.AIR_DATA, false);
-                }
-            }, 100);
-        }
+            || !(CustomEntity.get(shtr) instanceof final Crawler cr)) return;
+        cr.onHit(e);
     }
 
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -99,7 +89,7 @@ public class EntityLst implements Listener {
             Ostrov.sync(() -> {
                 final Block b2 = bl.getBlock();
                 if (b2.getType() == Spored.MOSS.getType()) {
-                    b2.setBlockData(Main.AIR_DATA, false);
+                    b2.setBlockData(BlockUtil.air, false);
                     EntityUtil.effect(Main.mobs.SPORED.spawn(bl.getCenterLoc()),
                         Sound.BLOCK_BIG_DRIPLEAF_BREAK, 0.6f, Particle.HAPPY_VILLAGER);
                 }

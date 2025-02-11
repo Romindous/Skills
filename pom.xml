@@ -6,7 +6,7 @@
 
   <groupId>ru.Romindous</groupId>
   <artifactId>Skills</artifactId>
-  <version>2.4</version>
+  <version>2.6</version>
   <packaging>jar</packaging>
 
   <name>Skills</name>
@@ -36,9 +36,6 @@
         <executions>
           <execution>
             <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>

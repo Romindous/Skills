@@ -3,7 +3,7 @@ package ru.romindous.skills.transfers.modules;
 import org.bukkit.World;
 import org.bukkit.entity.Slime;
 
-import ru.romindous.skills.enums.CuBType;
+import ru.romindous.skills.transfers.CuBType;
 import ru.romindous.skills.transfers.CuBlock;
 
 public class Relay extends CuBlock {

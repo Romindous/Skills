@@ -13,17 +13,18 @@ import ru.komiss77.modules.player.PM;
 import ru.komiss77.utils.*;
 import ru.komiss77.utils.inventory.ConfirmationGUI;
 import ru.komiss77.utils.inventory.SmartInventory;
-import ru.romindous.skills.enums.Role;
-import ru.romindous.skills.enums.Stat;
-import ru.romindous.skills.enums.SubServer;
+import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Stat;
 import ru.romindous.skills.menus.MainMenu;
 import ru.romindous.skills.menus.RoleSelectMenu;
 import ru.romindous.skills.menus.StatsMenu;
 import ru.romindous.skills.menus.WorldMenu;
-import ru.romindous.skills.objects.Scroll;
+import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.survs.Survivor;
 
 
 public class SkillCmd implements CommandExecutor, TabCompleter {
@@ -344,7 +345,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                     .id("Menu"+p.getName())
                     .provider(new MainMenu())
                     .size(6, 9)
-                    .title("           §c§lГлавное Меню")
+                    .title("          §c§lГлавное Меню")
                     .build()
                     .open(p);
             }
@@ -366,7 +367,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 if (arg.length==2) {
-                    final SubServer ss = SubServer.parseSubServer(arg[1]);
+                    final SubServer ss = SubServer.parse(arg[1]);
                     if (!ApiOstrov.isLocalBuilder(cs)) {
                         p.sendMessage(Main.prefix + "§cМенять мир командой могут только билдеры!");
                         return true;

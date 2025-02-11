@@ -7,6 +7,7 @@ import java.util.Map;
 import com.destroystokyo.paper.entity.ai.Goal;
 import com.destroystokyo.paper.entity.ai.MobGoals;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -20,16 +21,16 @@ import ru.komiss77.Ostrov;
 import ru.komiss77.modules.entities.CustomEntity;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.world.AreaSpawner;
+import ru.komiss77.modules.world.BVec;
 import ru.komiss77.modules.world.LocFinder;
-import ru.komiss77.modules.world.WXYZ;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.NumUtil;
 import ru.komiss77.version.Nms;
-import ru.romindous.skills.SM;
-import ru.romindous.skills.Survivor;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.listeners.DeathLst;
 import ru.romindous.skills.listeners.DamageLst;
+import ru.romindous.skills.listeners.DeathLst;
 
 public abstract class SednaMob extends CustomEntity {
 
@@ -63,10 +64,11 @@ public abstract class SednaMob extends CustomEntity {
 
     public final int mana = mobConfig("mana", 1);
 
-    protected static boolean limit(final WXYZ loc) {
+    protected static boolean limit(final BVec loc) {
         final int encd = ((loc.x >> COORD_DEL) << LOC_ENCD) + (loc.z >> COORD_DEL);
         final int bfr = spawnLimiter.getOrDefault(encd, REM_SPAWN) - 1;
-        if (spawnLimiter.size() > loc.w.getPlayers().size() * PER_PLAYER) {
+        final World w = loc.w(); if (w == null) return false;
+        if (spawnLimiter.size() > w.getPlayers().size() * PER_PLAYER) {
             spawnLimiter.pollLastEntry();
         }
         if (bfr == 0) return false;
@@ -77,7 +79,7 @@ public abstract class SednaMob extends CustomEntity {
     @Override
     protected AreaSpawner spawner() {
         return spawn == null ? spawn = new Spawner() {
-            protected boolean extra(final WXYZ loc) {return limit(loc);}
+            protected boolean extra(final BVec loc) {return limit(loc);}
         } : spawn;
     }
 
@@ -210,13 +212,14 @@ public abstract class SednaMob extends CustomEntity {
             return LocFinder.DEFAULT_CHECKS;
         }
 
-        public final SpawnCondition condition(final WXYZ loc) {
-            if (!Nms.getBiomeKey(loc).equals(biome())) return NONE;
+        public final SpawnCondition condition(final BVec loc) {
+            final World w = loc.w(); if (w == null) return NONE;
+            if (!w.getBiome(loc.x, loc.y, loc.z).key().value().equals(biome())) return NONE;
             return LocUtil.getChEnts(loc, NumUtil.abs(radius - offset),
                     getEntClass(), e -> SednaMob.this.equals(CustomEntity.get(e)))
                 .isEmpty() && extra(loc) ? cond : NONE;
         }
 
-        protected abstract boolean extra(final WXYZ loc);
+        protected abstract boolean extra(final BVec loc);
     }
 }

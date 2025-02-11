@@ -6,7 +6,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import ru.romindous.skills.Survivor;
+import ru.romindous.skills.survs.Survivor;
 
 public interface Task {
 

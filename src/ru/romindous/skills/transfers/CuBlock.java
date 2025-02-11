@@ -18,9 +18,7 @@ import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.inventory.InventoryManager;
 import ru.komiss77.utils.inventory.SmartInventory;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.SM;
-import ru.romindous.skills.enums.CuBType;
-import ru.romindous.skills.enums.TransferType;
+import ru.romindous.skills.survs.SM;
 import ru.romindous.skills.menus.CuBlockMenu;
 
 public class CuBlock implements Transfer {

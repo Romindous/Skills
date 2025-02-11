@@ -1,13 +1,12 @@
 package ru.romindous.skills.utils.pets;
 
 import java.util.List;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.Survivor;
+import ru.romindous.skills.survs.Survivor;
 
 public class PetVanilla implements IPetManager {
 

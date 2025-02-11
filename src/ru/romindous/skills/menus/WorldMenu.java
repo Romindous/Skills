@@ -26,8 +26,8 @@ import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
 import ru.komiss77.utils.inventory.InventoryProvider;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.SubServer;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.SubServer;
 
 
 public class WorldMenu implements InventoryProvider {

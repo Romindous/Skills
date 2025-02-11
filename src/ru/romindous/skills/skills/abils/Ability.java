@@ -3,10 +3,11 @@ package ru.romindous.skills.skills.abils;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -14,26 +15,28 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import ru.komiss77.OStrap;
+import ru.komiss77.boot.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
+import ru.komiss77.modules.player.PM;
+import ru.komiss77.objects.IntHashMap;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.MainTask;
 import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.enums.Chastic;
-import ru.romindous.skills.enums.Rarity;
-import ru.romindous.skills.enums.Role;
 import ru.romindous.skills.listeners.DamageLst;
-import ru.romindous.skills.objects.Scroll;
-import ru.romindous.skills.skills.ChasMod;
+import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.Skill;
+import ru.romindous.skills.skills.chas.ChasMod;
+import ru.romindous.skills.skills.chas.Chastic;
+import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.survs.Survivor;
 
 public abstract class Ability implements Scroll {//способность
 
     public static final Map<String, Ability> VALUES = new HashMap<>();
-    public static final Map<Rarity, List<Ability>> RARITIES = new EnumMap<>(Rarity.class);
+    public static final IntHashMap<List<Ability>> RARITIES = new IntHashMap<>();
 
     public static final ArrayList<InterNext> nexts = new ArrayList<>();
     public record InterNext(Chain ch, int time, @Nullable Runnable rn) {
@@ -56,6 +59,7 @@ public abstract class Ability implements Scroll {//способность
     public static final int stepCd = ConfigVars.get(data + ".stepCd", 10);
     public static final double defKB = ConfigVars.get(data + ".defKb", 1d);
     public static final double defDY = ConfigVars.get(data + ".defY", 1d);
+    public static final double defDEL = ConfigVars.get(data + ".defDEL", 2d);
 
     public final ChasMod MANA = new ChasMod(this, "mana", Chastic.MANA);
     public final ChasMod CD = new ChasMod(this, "cd", Chastic.COOLDOWN);
@@ -65,10 +69,9 @@ public abstract class Ability implements Scroll {//способность
 
     protected Ability() {
         VALUES.put(id(), this);
-        final List<Ability> mds = RARITIES.get(rarity());
-        if (mds == null) {
-            RARITIES.put(rarity(), new ArrayList<>(Arrays.asList(this)));
-        } else mds.add(this);
+        final List<Ability> mds = RARITIES.get(sum());
+        if (mds != null) mds.add(this);
+        else RARITIES.put(sum(), new ArrayList<>(Arrays.asList(this)));
     }
 
 //    protected abstract Selector[] selectors();
@@ -79,8 +82,9 @@ public abstract class Ability implements Scroll {//способность
 
     public abstract boolean selfCast();
 
+    public static final String SIDE = "✵";
     public String side() {
-        return "✵";
+        return SIDE;
     }
 
     //    public int mana(final int level) {
@@ -111,13 +115,13 @@ public abstract class Ability implements Scroll {//способность
 
     public ItemType icon() {
         return switch (role()) {
-            case VAMPIRE -> ItemType.RIB_ARMOR_TRIM_SMITHING_TEMPLATE;
+//            case VAMPIRE -> ItemType.RIB_ARMOR_TRIM_SMITHING_TEMPLATE;
             case ASSASIN -> ItemType.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE;
             case ARCHER -> ItemType.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE;
             case WARRIOR -> ItemType.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE;
             case MAGE -> ItemType.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE;
             case PHANTOM -> ItemType.VEX_ARMOR_TRIM_SMITHING_TEMPLATE;
-            case NECROS -> ItemType.WILD_ARMOR_TRIM_SMITHING_TEMPLATE;
+//            case NECROS -> ItemType.WILD_ARMOR_TRIM_SMITHING_TEMPLATE;
             case STONER -> ItemType.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE;
             case null -> ItemType.COAST_ARMOR_TRIM_SMITHING_TEMPLATE;
         };
@@ -169,8 +173,8 @@ public abstract class Ability implements Scroll {//способность
             dscs.add(TCUtil.N + "- " + st.chs.disName());
         }
         dscs.add(" ");
-        dscs.add(TCUtil.N + "Стоимость: " + Main.manaClr + (int) MANA.calc(lvl) + " душ");
-        dscs.add(TCUtil.N + "Перезарядка: " + Main.cdClr + (int) CD.calc(lvl) + " сек");
+        dscs.add(TCUtil.N + "Стоимость: " + Main.manaClr + StringUtil.toSigFigs(MANA.calc(lvl), Skill.SIG_FIGS) + " душ");
+        dscs.add(TCUtil.N + "Перезарядка: " + Main.cdClr + StringUtil.toSigFigs(CD.calc(lvl), Skill.SIG_FIGS) + " сек");
         return dscs.toArray(new String[0]);
     }
 
@@ -308,6 +312,13 @@ public abstract class Ability implements Scroll {//способность
         return null;
     }*/
 
+    protected void inform(final Chain ch, final String msg) {
+        if ((selfCast() || ch.curr() == 1) && ch.caster() instanceof final Player pl) {
+            final Survivor sv = PM.getOplayer(pl, Survivor.class);
+            sv.inform(pl, "<red>" + msg);
+        }
+    }
+
     protected static Collection<LivingEntity> getChArcLents(final Location loc, final double dst, final double arc, final Predicate<LivingEntity> can) {
         final Vector dir = loc.getDirection();
         return LocUtil.getChEnts(loc, dst,
@@ -327,23 +338,13 @@ public abstract class Ability implements Scroll {//способность
     protected static void addEffect(final LivingEntity le, final PotionEffectType type, final double dur, final int amp, final boolean vis) {
         final PotionEffect pe = le.getPotionEffect(type);
         if (pe == null) {
-            le.addPotionEffect(new PotionEffect(type, (int) (dur * 20d), amp, !vis, vis, vis));
+            le.addPotionEffect(new PotionEffect(type, (int) (dur * 20d), amp, !vis, vis, true));
             return;
         }
 
         if (pe.getAmplifier() > amp) return;
         le.removePotionEffect(type);
-        le.addPotionEffect(new PotionEffect(type, (int) (dur * 20d) + pe.getDuration(), amp, !vis, vis, vis));
-    }
-
-    protected static <P extends Projectile> P shoot(final LivingEntity shtr, final Class<P> pcl) {
-        return shoot(shtr, pcl, shtr.getEyeLocation());
-    }
-
-    protected static <P extends Projectile> P shoot(final LivingEntity shtr, final Class<P> pcl, final Location loc) {
-        final P prj = shtr.getWorld().spawn(loc, pcl);
-        prj.setShooter(shtr);
-        return prj;
+        le.addPotionEffect(new PotionEffect(type, (int) (dur * 20d) + pe.getDuration(), amp, !vis, vis, true));
     }
 
     protected static EntityDamageByEntityEvent makeDamageEvent(final LivingEntity caster, final LivingEntity le) {
@@ -351,23 +352,34 @@ public abstract class Ability implements Scroll {//способность
     }
 
     protected static void defKBLe(final LivingEntity caster, final LivingEntity tgt, final boolean up) {
+        final Vector vel = tgt.getVelocity();
         final Vector kbv = tgt.getLocation().subtract(caster.getLocation()).toVector().normalize().multiply(defKB);
-        tgt.setVelocity(tgt.getVelocity().add(up ? kbv.setY(kbv.getY() + defDY) : kbv));
+        Bukkit.getConsoleSender().sendMessage("already-" + vel + " and " + balMul(vel));
+        tgt.setVelocity(vel.add((up ? kbv.setY(kbv.getY() + defDY) : kbv).multiply(balMul(vel))));
+    }
+
+    protected static void defKBLe(final LivingEntity caster, final LivingEntity tgt, final boolean up, final double mul) {
+        final Vector vel = tgt.getVelocity();
+        final Vector kbv = tgt.getLocation().subtract(caster.getLocation()).toVector().normalize().multiply(defKB * mul);
+        tgt.setVelocity(vel.add((up ? kbv.setY(kbv.getY() + defDY) : kbv).multiply(balMul(vel))));
     }
 
     protected static void defKBLe(final LivingEntity tgt, final boolean back, final boolean up) {
+        final Vector vel = tgt.getVelocity();
         final Vector kbv = tgt.getEyeLocation().getDirection().normalize().multiply(back ? defKB * -1 : defKB);
-        tgt.setVelocity(tgt.getVelocity().add(up ? kbv.setY(kbv.getY() + defDY) : kbv));
+        tgt.setVelocity(vel.add((up ? kbv.setY(kbv.getY() + defDY) : kbv).multiply(balMul(vel))));
     }
 
     protected static void defKBLe(final LivingEntity tgt) {
         final Vector kbv = tgt.getVelocity();
-        tgt.setVelocity(kbv.setY(kbv.getY() + defDY));
+        tgt.setVelocity(kbv.setY(kbv.getY() + defDY * balMul(kbv)));
+    }
+
+    protected static double balMul(final Vector vel) {
+        return Math.min(1d / vel.clone().multiply(defDEL).lengthSquared(), 1d);
     }
 
     public record AbilState(Ability abil, int lvl) {}
-
-    public interface AbilReg {void register();}
 
     @Override
     public int hashCode() {

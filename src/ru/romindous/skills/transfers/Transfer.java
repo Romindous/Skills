@@ -4,9 +4,8 @@ import java.lang.ref.WeakReference;
 import org.bukkit.Location;
 import org.bukkit.World;
 import ru.komiss77.modules.player.PM;
-import ru.romindous.skills.SM;
-import ru.romindous.skills.Survivor;
-import ru.romindous.skills.enums.TransferType;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Survivor;
 
 public interface Transfer {
 	

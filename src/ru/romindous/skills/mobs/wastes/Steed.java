@@ -14,17 +14,15 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.Nullable;
-import ru.komiss77.OStrap;
+import ru.komiss77.boot.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.items.ItemRoll;
 import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.modules.world.AreaSpawner;
+import ru.komiss77.modules.world.BVec;
 import ru.komiss77.modules.world.WXYZ;
-import ru.komiss77.utils.ClassUtil;
-import ru.komiss77.utils.EntityUtil;
-import ru.komiss77.utils.ItemUtil;
-import ru.komiss77.utils.LocUtil;
+import ru.komiss77.utils.*;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.mobs.SednaMob;
 
@@ -47,8 +45,9 @@ public class Steed extends SednaMob {
     @Override
     protected AreaSpawner spawner() {
         return spawn == null ? spawn = new Spawner() {
-            protected boolean extra(final WXYZ loc) {
-                return limit(loc) && loc.getBlock().getLightFromSky() > MIN_LIGHT;
+            protected boolean extra(final BVec loc) {
+                final World w = loc.w(); if (w == null) return false;
+                return limit(loc) && loc.block(w).getLightFromSky() > MIN_LIGHT;
             }
         } : spawn;
     }
@@ -96,8 +95,8 @@ public class Steed extends SednaMob {
 
         private static final GoalKey<Mob> key = GoalKey.of(Mob.class, OStrap.key("ride"));
         private static final EnumSet<GoalType> types = EnumSet.noneOf(GoalType.class);
-        private static final double RIDE_DST = 4d;
-        private static final double SCARE_DST = 10d;
+        private static final int RIDER_DST = 16;
+        private static final double SADDLE_DST_SQ = 16d;
 
         private final Mob mob;
 
@@ -112,20 +111,7 @@ public class Steed extends SednaMob {
         public void tick() {
             if (!mob.isValid()) return;
             if ((tick++ & 7) != 0) return;
-            final Location loc = mob.getLocation();
-            if (mob.getPassengers().isEmpty()) {
-                for (final LivingEntity rd : LocUtil.getChEnts(loc,
-                    RIDE_DST, RIDER.getEntClass(), e -> !e.isInsideVehicle())) {
-                    if (rd instanceof final Mob mb) {
-                        mob.addPassenger(mb);
-                        mob.setTarget(mb.getTarget());
-                        mob.setAggressive(true);
-                        EntityUtil.effect(mob, Sound.ITEM_ARMOR_EQUIP_LEATHER,
-                            0.8f, Particle.ANGRY_VILLAGER);
-                        break;
-                    }
-                }
-            }
+            final Location loc = mob.getEyeLocation();
 
             if (!mob.getPassengers().isEmpty()) {
                 if (mob.getPassengers().getFirst() instanceof final Mob mb) {
@@ -135,11 +121,36 @@ public class Steed extends SednaMob {
                 return;
             }
 
-            final Player p = LocUtil.getClsChEnt(loc, SCARE_DST, Player.class, null);
-            if (p == null) return;
-            final Pathfinder pf = mob.getPathfinder();
-            pf.moveTo(loc.add(loc.toVector().subtract(p.getLocation()
-                .toVector()).normalize().multiply(SCARE_DST)));
+            final LivingEntity rd = LocUtil.getClsChEnt(new WXYZ(loc),
+                RIDER_DST, RIDER.getEntClass(), e -> !e.isInsideVehicle());
+            if (rd instanceof final Mob mb) {
+                final Location mlc = mb.getEyeLocation();
+                if (!LocUtil.trace(loc, mlc.toVector().subtract(loc.toVector()),
+                    (bp, bd) -> bd.getMaterial().asBlockType().hasCollision()).endDst()) return;
+                if (mlc.distanceSquared(loc) < SADDLE_DST_SQ) {
+                    mob.addPassenger(mb);
+                    mob.setTarget(mb.getTarget());
+                    mob.setAggressive(true);
+                    EntityUtil.effect(mob, Sound.ITEM_ARMOR_EQUIP_LEATHER,
+                        0.8f, Particle.ANGRY_VILLAGER);
+                    return;
+                }
+
+                final Pathfinder pf = mob.getPathfinder();
+                pf.moveTo(rd.getLocation());
+            }
+
+            /*final Pathfinder pf = mob.getPathfinder();
+            final Player pl = LocUtil.getClsChEnt(loc, SCARE_DST,
+                Player.class, p -> p.getGameMode() == GameMode.SURVIVAL);
+            if (pl != null) {
+                pf.moveTo(loc.add(loc.toVector().subtract(pl.getLocation()
+                    .toVector()).normalize().multiply(SCARE_DST)));
+                return;
+            }
+            if (Main.srnd.nextInt(WALK_CH) == 0)
+                pf.moveTo(loc.add(NumUtil.rndSignNum(2, 8),
+                    0d, NumUtil.rndSignNum(2, 8)));*/
         }
 
         @Override

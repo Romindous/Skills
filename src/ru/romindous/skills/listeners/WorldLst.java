@@ -11,7 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.enums.SubServer;
+import ru.romindous.skills.SubServer;
 
 
 public class WorldLst implements Listener  {

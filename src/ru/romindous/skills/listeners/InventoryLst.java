@@ -1,27 +1,34 @@
 package ru.romindous.skills.listeners;
 
+import com.destroystokyo.paper.ParticleBuilder;
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockCookEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
-import ru.komiss77.events.BuilderMenuEvent;
+import org.bukkit.inventory.*;
+import org.bukkit.util.Vector;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.modules.quests.Quest;
+import ru.komiss77.modules.world.WXYZ;
+import ru.komiss77.utils.ItemUtil;
+import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.inventory.SmartInventory;
-import ru.romindous.skills.Survivor;
+import ru.romindous.skills.survs.Survivor;
+import ru.romindous.skills.guides.Entries;
+import ru.romindous.skills.items.SkillGroup;
 import ru.romindous.skills.menus.Enchanting;
 
 public class InventoryLst implements Listener {
-	
-    @EventHandler (priority = EventPriority.MONITOR)
-    public void onBuilderMenuClick(final BuilderMenuEvent e) {
-//Ostrov.log("onBuilderMenuClick "+e.getSetupMode().lastEdit);
-//        SkillCmd.openDebugMenu(e.getPlayer());
-    }
-    
     
     /*@EventHandler
 	public void onInv(final InventoryClickEvent e) {
@@ -76,15 +83,76 @@ public class InventoryLst implements Listener {
         sv.addXp(p, amt);
     }
 
+    @EventHandler
+    public void onClick(final InventoryClickEvent e) {
+        final Inventory inv = e.getClickedInventory();
+        if (inv == null) return;
+        final ItemStack cli = switch (inv) {
+            case final CraftingInventory in -> in.getResult();
+            case final StonecutterInventory in -> in.getResult();
+            case final FurnaceInventory in -> in.getResult();
+            case final SmithingInventory in -> in.getResult();
+            case final AnvilInventory in -> in.getResult();
+            case final EnchantingInventory in -> in.getItem();
+            case final GrindstoneInventory in -> in.getResult();
+            case final CartographyInventory in -> in.getResult();
+            default -> null;
+        };
+        if (cli == null) return;
+        final ItemStack rs = e.getCurrentItem();
+        if (!ItemUtil.compare(cli, rs, ItemUtil.Stat.TYPE,
+            ItemUtil.Stat.NAME, ItemUtil.Stat.AMOUNT)) {
+            return;
+        }
+        questIt((Player) e.getWhoClicked(), rs);
+
+    }
+
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onCls(final InventoryCloseEvent e) {
-    	/*final Inventory top = e.getView().getTopInventory();
-    	final Component ttl = e.getView().title();
-    	if (ttl instanceof TextComponent) {
-    		final ItemStack it;
-    		//e.getPlayer().sendMessage(((TextComponent) ttl).content());
-    		//e.getPlayer().sendMessage(Arrays.toString(top.getContents()));
-    	}*/
+    public void onCraft(final BlockCookEvent e) {
+        final Block bl = e.getBlock();
+        final BlockFace bf = bl.getBlockData() instanceof
+            final Directional dir ? dir.getFacing() : BlockFace.SELF;
+        final Location loc = bl.getLocation().toCenterLocation()
+            .add(bf.getModX() * 0.8d, bf.getModY() * 0.8d, bf.getModZ() * 0.8d);
+        final ItemStack rs = e.getResult();
+        bl.getWorld().dropItem(loc, rs, it -> {
+            it.setCanMobPickup(false);
+            it.setWillAge(false);
+        }).setVelocity(new Vector());
+        new ParticleBuilder(Particle.SMALL_FLAME).location(loc).count(20)
+            .offset(0.2d, 0.2d, 0.2d).extra(0d).receivers(20).spawn();
+        e.setResult(ItemUtil.air);
+        final Player pl = LocUtil.getNearPl(new WXYZ(loc), REC_DST, null);
+        if (pl == null) return;
+        questIt(pl, rs);
+    }
+
+    private static final int REC_DST = 100;
+    private static void questIt(final Player p, final ItemStack rs) {
+        final Survivor sv = PM.getOplayer(p, Survivor.class);
+        if (ItemUtil.is(rs, ItemType.IRON_INGOT)) {
+            Entries.iron.addProg(p, sv, rs.getAmount());
+            return;
+        }
+        if (ItemUtil.is(rs, ItemType.CRAFTING_TABLE)) {
+            Entries.table.addProg(p, sv, rs.getAmount());
+            return;
+        }
+        if (ItemUtil.is(rs, ItemType.SMITHING_TABLE)) {
+            Entries.smith.addProg(p, sv, rs.getAmount());
+            return;
+        }
+        if (ItemUtil.is(rs, ItemType.COPPER_INGOT)) {
+            Entries.copper.addProg(p, sv, rs.getAmount());
+            return;
+        }
+
+        final SkillGroup ig = SkillGroup.get(rs);
+        if (ig == null) return;
+        final Quest qs = ig.quest(rs.getType().asItemType());
+        if (qs == null) return;
+        qs.addProg(p, sv, rs.getAmount());
     }
 
     /*@EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
