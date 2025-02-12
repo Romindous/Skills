@@ -4,6 +4,7 @@ package ru.romindous.skills.skills.roled;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import com.destroystokyo.paper.ParticleBuilder;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -18,19 +19,18 @@ import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.skills.chas.Chastic;
-import ru.romindous.skills.skills.Rarity;
-import ru.romindous.skills.survs.Role;
-import ru.romindous.skills.skills.trigs.Trigger;
-import ru.romindous.skills.events.EntityCastEvent;
 import ru.romindous.skills.listeners.ShotLst;
+import ru.romindous.skills.skills.Rarity;
 import ru.romindous.skills.skills.Scroll;
-import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.abils.Chain;
 import ru.romindous.skills.skills.abils.InvCondition;
+import ru.romindous.skills.skills.chas.ChasMod;
+import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Role;
 
 public class Archer implements Scroll.Registerable {
     @Override
@@ -76,18 +76,17 @@ public class Archer implements Scroll.Registerable {
                 .withColor(Color.YELLOW).with(FireworkEffect.Type.BURST).build();
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final Firework fw = shoot(caster, Firework.class);
-                final Chain chn = ch.event(new ProjectileLaunchEvent(fw));
-//                fw.setVelocity(tgt.getLocation().subtract(caster.getEyeLocation())
-//                    .toVector().normalize().multiply(SPEED.modify(chn, lvl)));
-                final FireworkMeta fm = fw.getFireworkMeta();
-                final double dmg = POWER.modify(chn, lvl);
-                fm.addEffect(FW_EFF);
-                fw.setFireworkMeta(fm);
-                fw.setTicksToDetonate((int) (dmg * timeMul));
-                ShotLst.damage(fw, dmg);
 
-                next(chn);
+                final double dmg = POWER.modify(ch, lvl);
+                next(ch, () -> {
+                    final Firework fw = caster.launchProjectile(Firework.class);
+                    final FireworkMeta fm = fw.getFireworkMeta();
+                    fm.addEffect(FW_EFF);
+                    fw.setFireworkMeta(fm);
+                    fw.setShotAtAngle(true);
+                    fw.setTicksToDetonate((int) (dmg * timeMul));
+                    ShotLst.damage(fw, dmg);
+                });
                 return true;
             }
             public String id() {
@@ -118,8 +117,8 @@ public class Archer implements Scroll.Registerable {
                 return new ChasMod[] {SPEED};
             }
             public boolean cast(final Chain ch, final int lvl) {
-                if (!(ch.event() instanceof final ProjectileLaunchEvent ee)) {
-                    inform(ch, "Этой способности нужен тригер: "
+                if (!(ch.trig() instanceof final ProjectileLaunchEvent ee)) {
+                    inform(ch, name() + " должна следовать тригеру <u>"
                         + Trigger.PROJ_LAUNCH.disName());
                     return false;
                 }
@@ -128,15 +127,15 @@ public class Archer implements Scroll.Registerable {
                     return false;
                 }
                 final LivingEntity caster = ch.caster();
-                final SpectralArrow spa = shoot(caster, SpectralArrow.class);
-                spa.setShooter(caster);
-                final ItemStack wpn = ar.getWeapon();
-                if (wpn != null) spa.setWeapon(wpn);
-                final Chain chn = ch.event(new ProjectileLaunchEvent(spa));
-                spa.setVelocity(ar.getVelocity().multiply(SPEED.modify(chn, lvl)));
+
                 EntityUtil.effect(caster, Sound.ITEM_CROSSBOW_SHOOT, 1.4f, Particle.LANDING_HONEY);
 
-                next(ch.event(new ProjectileLaunchEvent(spa)));
+                final ItemStack wpn = ar.getWeapon();
+                final Vector vc = ar.getVelocity().multiply(SPEED.modify(ch, lvl));
+                next(ch, () -> {
+                    final SpectralArrow spa = caster.launchProjectile(SpectralArrow.class, vc);
+                    if (wpn != null) spa.setWeapon(wpn);
+                });
                 return true;
             }
             public String id() {
@@ -168,8 +167,8 @@ public class Archer implements Scroll.Registerable {
                 return new ChasMod[] {DIST, RATIO};
             }
             public boolean cast(final Chain ch, final int lvl) {
-                if (!(ch.event() instanceof final ProjectileHitEvent ee)) {
-                    inform(ch, "Этой способности нужен тригер: "
+                if (!(ch.trig() instanceof final ProjectileHitEvent ee)) {
+                    inform(ch, name() + " должна следовать тригеру <u>"
                         + Trigger.RANGED_HIT.disName());
                     return false;
                 }
@@ -186,14 +185,13 @@ public class Archer implements Scroll.Registerable {
                     return false;
                 }
                 if (ae.getPierceLevel() == 0) ae.setPierceLevel(1);
-                final EntityCastEvent ece = ch.on(this);
                 final Location tlc = EntityUtil.center(target);
                 final Vector dir = EntityUtil.center(tgt).subtract(tlc).toVector().normalize();
                 tlc.add(dir); tlc.setY(ae.getLocation().getY()); ae.teleport(tlc);
                 ae.setVelocity(getArrowVc(dir, ae.getVelocity().length() * RATIO.modify(ch, lvl)));
                 EntityUtil.effect(tgt, Sound.BLOCK_CALCITE_BREAK, 1.4f, Particle.ELECTRIC_SPARK);
 
-                next(ch.event(ece));
+                next(ch);
                 return true;
             }
             private Vector getArrowVc(final Vector dst, final double spd) {
@@ -235,10 +233,9 @@ public class Archer implements Scroll.Registerable {
                 final LivingEntity caster = ch.caster();
                 caster.teleport(tgt.getEyeLocation().add(caster.getEyeLocation().getDirection()));
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
-                final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl));
+                fe.setDamage(DAMAGE.modify(ch, lvl));
                 if (caster instanceof final HumanEntity he) {
-                    final int fdl = he.getFoodLevel() - (int) Math.round(HUNGER.modify(chn, lvl));
+                    final int fdl = he.getFoodLevel() - (int) Math.round(HUNGER.modify(ch, lvl));
                     if (fdl < 0) {
                         inform(ch, "Не хватает сытости для прыжка!");
                         return false;
@@ -248,7 +245,7 @@ public class Archer implements Scroll.Registerable {
 
                 EntityUtil.effect(tgt, Sound.ENTITY_FOX_TELEPORT, 0.8f, Particle.REVERSE_PORTAL);
 
-                next(chn, () -> {
+                next(ch, () -> {
                     tgt.damage(fe.getDamage(), fe.getDamageSource());
                     tgt.setNoDamageTicks(0);
                 });
@@ -290,16 +287,18 @@ public class Archer implements Scroll.Registerable {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
                 final Location start = caster.getEyeLocation().add(0d, height, 0d);
-                final Snowball sb = caster.getWorld().spawn(start, Snowball.class, s -> {
-                    s.setVelocity(EntityUtil.center(tgt).subtract(start)
-                        .toVector().normalize().multiply(speed));
-                    s.setItem(FWS); s.setGravity(false);
-                });
-                final Chain chn = ch.event(new ProjectileLaunchEvent(sb));
-                ShotLst.damage(sb, Math.sqrt(DAMAGE.modify(chn, lvl)));
-                EntityUtil.effect(sb, Sound.ENTITY_DROWNED_SHOOT, 1.4f, Particle.SQUID_INK);
+                new ParticleBuilder(Particle.SQUID_INK).location(start).count(8)
+                    .offset(0.4d, 0.4d, 0.4d).extra(0.0).allPlayers().spawn();
+                start.getWorld().playSound(start, Sound.ENTITY_DROWNED_SHOOT, 1f, 1.4f);
 
-                next(chn);
+                final double dmg = DAMAGE.modify(ch, lvl);
+                next(ch, () -> {
+                    final Snowball sb = caster.launchProjectile(Snowball.class, EntityUtil.center(tgt)
+                        .subtract(start).toVector().normalize().multiply(speed), s -> {
+                        s.setItem(FWS); s.setGravity(false);
+                    });
+                    ShotLst.damage(sb, dmg);
+                });
                 return true;
             }
             public String id() {

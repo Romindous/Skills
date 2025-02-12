@@ -47,11 +47,11 @@ public abstract class Ability implements Scroll {//способность
     }
 
     public void next(final Chain chain) {
-        nexts.add(new InterNext(chain, MainTask.tick, null));
+        nexts.add(new InterNext(chain.next(this), MainTask.tick, null));
     }
 
     public void next(final Chain chain, final Runnable run) {
-        nexts.add(new InterNext(chain, MainTask.tick, run));
+        nexts.add(new InterNext(chain.next(this), MainTask.tick, run));
     }
 
     public static final String data = "abil";

@@ -8,8 +8,9 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.entity.*;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.entity.AbstractSkeleton;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.SkeletonHorse;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.inventory.ItemType;
@@ -19,17 +20,17 @@ import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.skills.Rarity;
-import ru.romindous.skills.survs.Role;
-import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.skills.Scroll;
-import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.abils.Chain;
 import ru.romindous.skills.skills.abils.InvCondition;
+import ru.romindous.skills.skills.chas.ChasMod;
+import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Role;
 
 public class All implements Scroll.Registerable {
     @Override
@@ -186,19 +187,18 @@ public class All implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
                 final Vector vc = caster.getVelocity().add(caster.getEyeLocation()
                     .getDirection().multiply(0.2d)).setY(0d);
                 if (vc.isZero()) {
                     inform(ch, "Не удалось определить сторону рывка!");
                     return false;
                 }
-                final Vector vel = vc.normalize().setY(defDY).multiply(SPEED.modify(chn, lvl));
+                final Vector vel = vc.normalize().setY(defDY).multiply(SPEED.modify(ch, lvl));
                 caster.setVelocity(vel);
 
                 EntityUtil.moveffect(caster, Sound.BLOCK_VINE_STEP, 0.8f, Color.WHITE);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -233,11 +233,11 @@ public class All implements Scroll.Registerable {
                 final LivingEntity caster = ch.caster();
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl));
+                fe.setDamage(DAMAGE.modify(ch, lvl));
 
                 EntityUtil.effect(tgt, Sound.ITEM_DYE_USE, 1f, Particle.ENCHANTED_HIT);
 
-                next(chn, () -> {
+                next(ch, () -> {
                     tgt.damage(fe.getDamage(), fe.getDamageSource());
                     defKBLe(caster, tgt, false);
                 });
@@ -272,11 +272,10 @@ public class All implements Scroll.Registerable {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(makeDamageEvent(caster, tgt));
 
                 EntityUtil.effect(tgt, Sound.ENTITY_PLAYER_ATTACK_STRONG, 0.6f, Particle.DUST_PLUME);
 
-                next(chn, () -> {
+                next(ch, () -> {
                     defKBLe(caster, tgt, true);
                 });
                 return true;
@@ -310,19 +309,18 @@ public class All implements Scroll.Registerable {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
-                if (!(ch.event() instanceof final ProjectileLaunchEvent ee)) {
-                    inform(ch, "Этой способности нужен тригер: "
+                if (!(ch.trig() instanceof final ProjectileLaunchEvent ee)) {
+                    inform(ch, name() + " должна следовать тригеру <u>"
                         + Trigger.PROJ_LAUNCH.disName());
                     return false;
                 }
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
                 final Vector vel = caster.getVelocity();
                 caster.setVelocity(vel.add(ee.getEntity().getVelocity()
-                    .multiply(-1d * SPEED.modify(chn, lvl) * balMul(vel))));
+                    .multiply(-1d * SPEED.modify(ch, lvl) * balMul(vel))));
                 EntityUtil.effect(caster, Sound.ENTITY_BREEZE_SHOOT, 0.8f, Particle.SMALL_GUST);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -361,14 +359,13 @@ public class All implements Scroll.Registerable {
                     return false;
                 }
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
-                final double tm = TIME.modify(chn, lvl);
+                final double tm = TIME.modify(ch, lvl);
                 addEffect(caster, PotionEffectType.REGENERATION, tm, amp, true);
                 addEffect(caster, PotionEffectType.HUNGER, tm / del, amp, true);
 
                 EntityUtil.effect(tgt, Sound.ENTITY_GENERIC_EAT, 0.8f, Particle.EGG_CRACK);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -402,21 +399,20 @@ public class All implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                if (!(ch.event() instanceof final EntityDamageEvent e)
+                if (!(ch.trig() instanceof final EntityDamageEvent e)
                     || e.getEntity().getEntityId() != caster.getEntityId()) {
-                    inform(ch, "Этой способности нужен тригер: "
+                    inform(ch, name() + " должна следовать тригеру <u>"
                         + Trigger.USER_HURT.disName());
                     return false;
                 }
                 final double dmg = e.getDamage();
-                final Chain chn = ch.event(ch.on(this));
-                final double mod = HEALTH.modify(chn, lvl);
+                final double mod = HEALTH.modify(ch, lvl);
                 if (dmg < caster.getHealth() * mod) return false;
-                e.setDamage(dmg - HURT.modify(chn, lvl));
+                e.setDamage(dmg - HURT.modify(ch, lvl));
 
                 EntityUtil.effect(caster, Sound.BLOCK_DECORATED_POT_HIT, 0.8f, Particle.DAMAGE_INDICATOR);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -449,14 +445,10 @@ public class All implements Scroll.Registerable {
             private final int amp = value("amp", 1);
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
-                final LivingEntity caster = ch.caster();
-                caster.sendMessage("e-" + ch.event());
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
-                final Chain chn = ch.event(fe);
-                addEffect(tgt, PotionEffectType.SLOWNESS, TIME.modify(chn, lvl), amp, true);
+                addEffect(tgt, PotionEffectType.SLOWNESS, TIME.modify(ch, lvl), amp, true);
                 EntityUtil.effect(tgt, Sound.ENTITY_PLAYER_HURT_FREEZE, 0.8f, Particle.ENCHANTED_HIT);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {

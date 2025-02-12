@@ -107,13 +107,11 @@ public class Mage implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
-                final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(makeDamageEvent(caster, tgt));
-                tgt.setFireTicks(tgt.getFireTicks() + (int) (TIME.modify(chn, lvl) * 20d));
+                tgt.setFireTicks(tgt.getFireTicks() + (int) (TIME.modify(ch, lvl) * 20d));
 
                 EntityUtil.effect(tgt, Sound.ENTITY_BLAZE_SHOOT, 0.8f, Particle.LAVA);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -147,13 +145,12 @@ public class Mage implements Scroll.Registerable {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
-                final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl));
 
                 tgt.getWorld().strikeLightningEffect(tgt.getLocation());
 
-                next(chn, () -> {
+                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
+                fe.setDamage(DAMAGE.modify(ch, lvl));
+                next(ch, () -> {
                     tgt.damage(fe.getDamage(), fe.getDamageSource());
                     defKBLe(tgt);
                 });
@@ -195,15 +192,19 @@ public class Mage implements Scroll.Registerable {
                 final Location flc = tgt.getLocation();
                 final Vector vc = flc.toVector().subtract(elc.toVector()).multiply(0.8d);
                 vc.setY(vc.getY() - range);
-                final LargeFireball fb = flc.getWorld().spawn(flc.subtract(vc), LargeFireball.class, f -> {
-                    f.setShooter(caster); f.setDirection(vc); f.setVelocity(vc.normalize());
-                });
-                final Chain chn = ch.event(new ProjectileLaunchEvent(fb));
-                final double pwr = POWER.modify(chn, lvl);
-                fb.setYield((float) pwr * 0.25f); ShotLst.damage(fb, pwr);
-                EntityUtil.effect(fb, Sound.ENTITY_BREEZE_SHOOT, 0.8f, Particle.SQUID_INK);
+                final Location fin = flc.subtract(vc);
 
-                next(chn);
+                new ParticleBuilder(Particle.SQUID_INK).location(fin).count(8)
+                    .offset(0.4d, 0.4d, 0.4d).extra(0.0).allPlayers().spawn();
+                fin.getWorld().playSound(fin, Sound.ENTITY_BREEZE_SHOOT, 1f, 0.8f);
+
+                final double pwr = POWER.modify(ch, lvl);
+                next(ch, () -> {
+                    final LargeFireball fb = flc.getWorld().spawn(fin, LargeFireball.class, f -> {
+                        f.setShooter(caster); f.setDirection(vc); f.setVelocity(vc.normalize());
+                    });
+                    fb.setYield((float) pwr * 0.25f); ShotLst.damage(fb, pwr);
+                });
                 return true;
             }
             public String id() {
@@ -237,8 +238,7 @@ public class Mage implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
-                final int regen = (int) HEAL.modify(chn, lvl);
+                final int regen = (int) HEAL.modify(ch, lvl);
                 final double abs = caster.getAbsorptionAmount() + regen;
                 final AttributeInstance ain = caster.getAttribute(Attribute.MAX_ABSORPTION);
                 if (ain == null) {
@@ -246,11 +246,11 @@ public class Mage implements Scroll.Registerable {
                     return false;
                 }
                 if (ain.getBaseValue() < abs) ain.setBaseValue(abs); caster.setAbsorptionAmount(abs);
-                addEffect(caster, PotionEffectType.REGENERATION, TIME.modify(chn, lvl), regen, true);
+                addEffect(caster, PotionEffectType.REGENERATION, TIME.modify(ch, lvl), regen, true);
                 EntityUtil.effect(caster, Sound.BLOCK_SCULK_SENSOR_CLICKING, 1.6f, Particle.COMPOSTER);
                 new ParticleBuilder(Particle.SONIC_BOOM).count(1).location(EntityUtil.center(caster)).allPlayers().spawn();
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -294,7 +294,7 @@ public class Mage implements Scroll.Registerable {
                 }
                 final Chain chn = ch.event(ch.on(this));
                 final ShulkerBullet sb = loc.getWorld().spawn(loc, ShulkerBullet.class);
-                ShotLst.damage(sb, DAMAGE.modify(chn, lvl));
+                ShotLst.damage(sb, DAMAGE.modify(ch, lvl));
                 sb.setShooter(caster);
                 sb.setTarget(le);
                 sb.setTargetDelta(le.getLocation().subtract(loc).toVector());
@@ -334,8 +334,8 @@ public class Mage implements Scroll.Registerable {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
-                if (!(ch.event() instanceof final ProjectileLaunchEvent ee)) {
-                    inform(ch, "Этой способности нужен тригер: "
+                if (!(ch.trig() instanceof final ProjectileLaunchEvent ee)) {
+                    inform(ch, name() + " должна следовать тригеру <u>"
                         + Trigger.PROJ_LAUNCH.disName());
                     return false;
                 }
@@ -348,22 +348,22 @@ public class Mage implements Scroll.Registerable {
                 final Location loc = sb.getLocation();
                 final Vector dir = sb.getVelocity();
                 loc.setDirection(dir);
-                final float yw = loc.getYaw();
-                final double spd = dir.length();
-                final List<Chain> chs = new ArrayList<>(4);
-                for (int i = (int) AMOUNT.modify(ch, lvl); i != 0; i--) {
-                    loc.setYaw(((i & 1) == 0 ? 5 : -5) * i + yw);
-                    final Snowball nsb = shoot(caster, Snowball.class, loc);
-                    final Chain chn = ch.event(new ProjectileLaunchEvent(nsb));
-                    nsb.setVelocity(loc.getDirection().multiply(spd * SPEED.modify(chn, lvl)));
-                    nsb.setShooter(caster);
-                    nsb.setGravity(false);
-                    nsb.setItem(sb.getItem());
-                    chs.add(chn);
-                }
+
                 loc.getWorld().playSound(caster, Sound.ENTITY_EVOKER_CAST_SPELL, 1f, 1.4f);
 
-                for (final Chain c : chs) next(c);
+                final float yw = loc.getYaw();
+                final double spd = dir.length() * SPEED.modify(ch, lvl);
+                final int amt = (int) AMOUNT.modify(ch, lvl);
+                for (int i = amt; i != 0; i--) {
+                    final float yaw = ((i & 1) == 0 ? 5 : -5) * i + yw;
+                    next(ch, () -> {
+                        loc.setYaw(yaw);
+                        caster.launchProjectile(Snowball.class, loc.getDirection().multiply(spd), s -> {
+                            s.setItem(sb.getItem());
+                            s.setGravity(false);
+                        });
+                    });
+                }
                 return true;
             }
             public String id() {

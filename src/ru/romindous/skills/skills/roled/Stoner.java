@@ -89,9 +89,6 @@ public class Stoner implements Scroll.Registerable {
                     return false;
                 }
                 final LivingEntity caster = ch.caster();
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
-                final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl));
 
                 new ParticleBuilder(Particle.BLOCK_CRUMBLE).count(20).offset(0.4d, 0.4d, 0.4d)
                     .location(fin).allPlayers().extra(0.1d).data(bd).spawn();
@@ -108,7 +105,9 @@ public class Stoner implements Scroll.Registerable {
                     }, 12);
                 }, 2);
 
-                next(chn, () -> {
+                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
+                fe.setDamage(DAMAGE.modify(ch, lvl));
+                next(ch, () -> {
                     tgt.damage(fe.getDamage(), fe.getDamageSource());
                     defKBLe(caster, tgt, true);
                 });
@@ -148,8 +147,7 @@ public class Stoner implements Scroll.Registerable {
             private static final BlockData bd = BlockType.SPONGE.createBlockData();
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
-                final double abs = caster.getAbsorptionAmount() + HEAL.modify(chn, lvl);
+                final double abs = caster.getAbsorptionAmount() + HEAL.modify(ch, lvl);
                 final AttributeInstance ain = caster.getAttribute(Attribute.MAX_ABSORPTION);
                 if (ain == null) {
                     inform(ch, "Нет атрибута абзорбции!");
@@ -157,10 +155,10 @@ public class Stoner implements Scroll.Registerable {
                 }
                 if (ain.getBaseValue() < abs) ain.setBaseValue(abs);
                 caster.setAbsorptionAmount(Math.min(abs, ain.getValue()));
-                addEffect(caster, PotionEffectType.RESISTANCE, TIME.modify(chn, lvl), amp, true);
+                addEffect(caster, PotionEffectType.RESISTANCE, TIME.modify(ch, lvl), amp, true);
                 EntityUtil.effect(caster, Sound.BLOCK_GILDED_BLACKSTONE_BREAK, 0.6f, Particle.DUST_PILLAR, bd);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -194,12 +192,11 @@ public class Stoner implements Scroll.Registerable {
             private final double defY = value("defY", 1d);
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
                 caster.setVelocity(caster.getEyeLocation().getDirection().setY(0d)
-                    .normalize().setY(defY).multiply(SPEED.modify(chn, lvl)));
+                    .normalize().setY(defY).multiply(SPEED.modify(ch, lvl)));
                 EntityUtil.effect(caster, Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, Particle.GUST);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -240,26 +237,24 @@ public class Stoner implements Scroll.Registerable {
                     inform(ch, "Цель должна быть на земле!");
                     return false;
                 }
-                final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(makeDamageEvent(caster, tgt));
-                addEffect(tgt, PotionEffectType.SLOWNESS, TIME.modify(chn, lvl),
-                    (int) Math.round(EFFECT.modify(chn, lvl)), true);
+                addEffect(tgt, PotionEffectType.SLOWNESS, TIME.modify(ch, lvl),
+                    (int) Math.round(EFFECT.modify(ch, lvl)), true);
                 tgt.teleport(fin);
                 EntityUtil.effect(tgt, bd.getSoundGroup().getHitSound(),
                     0.8f, Particle.DUST_PILLAR, bd);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
                 return "pinch";
             }
             public String name() {
-                return "Прищемление";
+                return "Щемление";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Замщемляет цель в " + CLR + "окружающей " + TCUtil.N + "среде,",
-                TCUtil.N + "погребая ее и давая замедление " + EFFECT.id + " ур.",
+                TCUtil.N + "Погребает цель в " + CLR + "окружающей ",
+                TCUtil.N + "среде, давая замедление " + EFFECT.id + " ур.",
                 TCUtil.N + "(округляемо), на " + TIME.id + " сек.",
                 TCUtil.N + "<red>Цель должна быть на земле!"};
             public String[] descs() {
@@ -282,20 +277,19 @@ public class Stoner implements Scroll.Registerable {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
-                if (!(ch.event() instanceof EntityDamageEvent)) {
-                    inform(ch, "Этой способности нужен тригер: "
+                if (!(ch.trig() instanceof EntityDamageEvent)) {
+                    inform(ch, name() + " должна следовать тригеру <u>"
                         + Trigger.USER_HURT.disName());
                     return false;
                 }
                 final LivingEntity caster = ch.caster();
                 final LivingEntity tgt = ch.target();
-                final EntityDamageEvent fe = makeDamageEvent(caster, tgt);
-                final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl));
 
                 EntityUtil.effect(caster, Sound.ENCHANT_THORNS_HIT, 0.8f, Particle.ENCHANTED_HIT);
 
-                next(chn, () -> {
+                final EntityDamageEvent fe = makeDamageEvent(caster, tgt);
+                fe.setDamage(DAMAGE.modify(ch, lvl));
+                next(ch, () -> {
                     tgt.damage(fe.getDamage(), fe.getDamageSource());
                     defKBLe(caster, tgt, false);
                 });

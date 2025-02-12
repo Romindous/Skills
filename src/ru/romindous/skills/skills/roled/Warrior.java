@@ -103,12 +103,11 @@ public class Warrior implements Scroll.Registerable {
 
                 EntityUtil.moveffect(caster, Sound.ENTITY_BREEZE_SHOOT, 1.2f, CLR);
 
+                final double dmg = DAMAGE.modify(ch, lvl);
                 for (final LivingEntity le : getChArcLents(fin, dst, arc, ent -> Main.canAttack(caster, ent, false))) {
                     final EntityDamageByEntityEvent fe = makeDamageEvent(caster, le);
-                    final Chain chn = ch.event(fe);
-                    fe.setDamage(DAMAGE.modify(chn, lvl));
-
-                    next(chn, () -> {
+                    fe.setDamage(dmg);
+                    next(ch, () -> {
                         le.damage(fe.getDamage(), fe.getDamageSource());
                         defKBLe(caster, le, false);
                     });
@@ -150,12 +149,12 @@ public class Warrior implements Scroll.Registerable {
                 final int light = EffectUtil.getLight(tlc.getBlock());
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl) * light);
+                fe.setDamage(DAMAGE.modify(ch, lvl) * light);
 
                 new ParticleBuilder(Particle.WHITE_ASH).location(tlc).offset(0.4d, 0.8d, 0.4d).extra(0).count(light << 4);
                 tlc.getWorld().playSound(tlc, Sound.BLOCK_LARGE_AMETHYST_BUD_BREAK, 1f, light * 0.1f);
 
-                next(chn, () -> {
+                next(ch, () -> {
                     tgt.damage(fe.getDamage(), fe.getDamageSource());
                 });
                 return true;
@@ -193,6 +192,7 @@ public class Warrior implements Scroll.Registerable {
             private final int amp = value("amp", 1);
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
+                final LivingEntity tgt = ch.target();
                 if (caster instanceof final Player pl) {
                     if (!pl.isBlocking()) {
                         inform(ch, "Нужно держать поднятым щит!");
@@ -200,14 +200,13 @@ public class Warrior implements Scroll.Registerable {
                     }
                 }
 
-                final LivingEntity tgt = ch.target();
-                final Chain chn = ch.event(makeDamageEvent(caster, tgt));
-                addEffect(tgt, PotionEffectType.SLOWNESS, TIME.modify(ch, lvl), amp, false);
-
                 EntityUtil.effect(tgt, Sound.ITEM_WOLF_ARMOR_DAMAGE, 0.8f, Particle.CRIT);
 
-                next(chn, () -> {
-                    defKBLe(caster, tgt, true, SPEED.modify(ch, lvl));
+                final double time = TIME.modify(ch, lvl);
+                final double speed = SPEED.modify(ch, lvl);
+                next(ch, () -> {
+                    addEffect(tgt, PotionEffectType.SLOWNESS, time, amp, false);
+                    defKBLe(caster, tgt, true, speed);
                 });
                 return true;
             }
@@ -244,17 +243,16 @@ public class Warrior implements Scroll.Registerable {
                 final LivingEntity caster = ch.caster();
                 final PotionEffect pe = caster.getPotionEffect(PotionEffectType.HASTE);
                 final int amp;
-                final Chain chn = ch.event(ch.on(this));
                 if (pe != null) {
                     final int mx = pe.getAmplifier() + 1;
-                    amp = mx > EFFECT.modify(chn, lvl) ?
+                    amp = mx > EFFECT.modify(ch, lvl) ?
                         pe.getAmplifier() : pe.getAmplifier() + 1;
                     caster.removePotionEffect(PotionEffectType.HASTE);
                 } else amp = 0;
-                caster.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, (int) (TIME.modify(chn, lvl) * 20d), amp));
+                caster.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, (int) (TIME.modify(ch, lvl) * 20d), amp));
                 EntityUtil.effect(caster, Sound.BLOCK_CONDUIT_AMBIENT, amp * 0.5f, Particle.DRIPPING_LAVA);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -287,25 +285,25 @@ public class Warrior implements Scroll.Registerable {
                 return stats;
             }
             public boolean cast(final Chain ch, final int lvl) {
+                final LivingEntity caster = ch.caster();
                 final LivingEntity tgt = ch.target();
-                if (!(ch.event() instanceof EntityDamageEvent)) {
-                    inform(ch, "Этой способности нужен тригер: "
+                if (!(ch.trig() instanceof final EntityDamageEvent e)
+                    || e.getEntity().getEntityId() != caster.getEntityId()) {
+                    inform(ch, name() + " должна следовать тригеру <u>"
                         + Trigger.USER_HURT.disName());
                     return false;
                 }
-                if (!(ch.event() instanceof final EntityDamageByEntityEvent ee)) {
+                if (!(e instanceof EntityDamageByEntityEvent)) {
                     inform(ch, "Урон должен быть получен от сущности!");
                     return false;
                 }
-                final LivingEntity caster = ch.caster();
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
-                final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl) * ee.getDamage());
 
                 Nms.swing(caster, EquipmentSlot.HAND);
                 EntityUtil.effect(caster, Sound.ITEM_SHIELD_BREAK, 0.6f, Particle.SCRAPE);
 
-                next(chn, () -> {
+                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
+                fe.setDamage(DAMAGE.modify(ch, lvl) * e.getDamage());
+                next(ch, () -> {
                     tgt.damage(fe.getDamage(), fe.getDamageSource());
                     defKBLe(caster, tgt, false);
                 });
@@ -341,17 +339,16 @@ public class Warrior implements Scroll.Registerable {
             }
             private final int amp = value("amp", 1);
             public boolean cast(final Chain ch, final int lvl) {
-                if (!(ch.event() instanceof PlayerKillEntityEvent)) {
-                    inform(ch, "Этой способности нужен тригер: "
+                if (!(ch.trig() instanceof PlayerKillEntityEvent)) {
+                    inform(ch, name() + " должна следовать тригеру <u>"
                         + Trigger.KILL_ENTITY.disName());
                     return false;
                 }
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
-                addEffect(caster, PotionEffectType.STRENGTH, TIME.modify(chn, lvl), amp, true);
+                addEffect(caster, PotionEffectType.STRENGTH, TIME.modify(ch, lvl), amp, true);
                 EntityUtil.effect(tgt, Sound.BLOCK_MUDDY_MANGROVE_ROOTS_BREAK, 0.6f, Particle.TRIAL_SPAWNER_DETECTION);
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {

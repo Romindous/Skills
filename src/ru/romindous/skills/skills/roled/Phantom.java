@@ -77,9 +77,9 @@ public class Phantom implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                if (!(ch.event() instanceof final EntityDamageEvent e)
+                if (!(ch.trig() instanceof final EntityDamageEvent e)
                     || e.getEntity().getEntityId() != caster.getEntityId()) {
-                    inform(ch, "Этой способности нужен тригер: "
+                    inform(ch, name() + " должна следовать тригеру <u>"
                         + Trigger.USER_HURT.disName());
                     return false;
                 }
@@ -89,14 +89,13 @@ public class Phantom implements Scroll.Registerable {
                     inform(ch, "Не найдено следующей цели в радиусе!");
                     return false;
                 }
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, cls);
-                final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl) * e.getDamage());
                 e.setDamage(0d);
 
                 EntityUtil.effect(caster, Sound.ENCHANT_THORNS_HIT, 0.8f, Particle.ENCHANTED_HIT);
 
-                next(chn, () -> {
+                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, cls);
+                fe.setDamage(DAMAGE.modify(ch, lvl) * e.getDamage());
+                next(ch, () -> {
                     cls.damage(fe.getDamage(), fe.getDamageSource());
                     defKBLe(caster, cls, false);
                 });
@@ -134,15 +133,14 @@ public class Phantom implements Scroll.Registerable {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
                 final Vector vc = caster.getVelocity();
-                final Chain chn = ch.event(ch.on(this));
-                final double dY = SPEED.modify(chn, lvl);
+                final double dY = SPEED.modify(ch, lvl);
                 caster.setVelocity(vc.setY(vc.getY() + dY));
 
                 caster.getWorld().playSound(caster, Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, 1.4f);
                 new ParticleBuilder(Particle.CLOUD).count((int) (dY * 16d)).offset(0.2d, 0.1d, 0.2d)
                     .location(caster.getLocation()).allPlayers().extra(0d).spawn();
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -182,10 +180,9 @@ public class Phantom implements Scroll.Registerable {
                 }
                 final GameMode gm = pl.getGameMode();
                 pl.setGameMode(GameMode.SPECTATOR);
-                final Chain chn = ch.event(ch.on(this));
 
                 new BukkitRunnable() {
-                    int i = (int) (TIME.modify(chn, lvl) / secMul);
+                    int i = (int) (TIME.modify(ch, lvl) / secMul);
                     @Override
                     public void run() {
                         new ParticleBuilder(Particle.NAUTILUS).count(8).offset(0.2d, 0.2d, 0.2d)
@@ -195,7 +192,7 @@ public class Phantom implements Scroll.Registerable {
                         if (i == 0) {
                             if (pl.isValid()) {
                                 pl.setGameMode(gm);
-                                next(chn);
+                                next(ch);
                             }
                             cancel();
                         }
@@ -238,14 +235,13 @@ public class Phantom implements Scroll.Registerable {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(makeDamageEvent(caster, tgt));
-                final double time = TIME.modify(chn, lvl);
-                addEffect(tgt, PotionEffectType.WEAKNESS, time, amp, true);
-                addEffect(tgt, PotionEffectType.SLOW_FALLING, time, amp, true);
 
                 EntityUtil.effect(caster, Sound.ENTITY_WITCH_HURT, 0.6f, Particle.ANGRY_VILLAGER);
 
-                next(chn, () -> {
+                final double time = TIME.modify(ch, lvl);
+                next(ch, () -> {
+                    addEffect(tgt, PotionEffectType.WEAKNESS, time, amp, true);
+                    addEffect(tgt, PotionEffectType.SLOW_FALLING, time, amp, true);
                     defKBLe(caster, tgt, true);
                 });
                 return true;
@@ -291,12 +287,11 @@ public class Phantom implements Scroll.Registerable {
                     inform(ch, "Не найдено следующей цели в радиусе!");
                     return false;
                 }
-                final Chain chn = ch.event(ch.on(this));
                 tgt.setTarget(le);
 
                 EntityUtil.effect(caster, Sound.ENTITY_ILLUSIONER_CAST_SPELL, 0.8f, Particle.CAMPFIRE_COSY_SMOKE);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -331,17 +326,16 @@ public class Phantom implements Scroll.Registerable {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
-                final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl));
+
                 final Location loc = EntityUtil.center(tgt);
                 new ParticleBuilder(Particle.SWEEP_ATTACK).extra(0d)
                     .allPlayers().location(loc).count(1).spawn();
                 Bleeding.effect(tgt);
 
-                next(chn, () -> {
-                    Bleeding.bleed(tgt, fe.getDamage(),
-                        TIME.modify(chn, lvl), caster);
+                final double dmg = DAMAGE.modify(ch, lvl);
+                next(ch, () -> {
+                    Bleeding.bleed(tgt, dmg,
+                        TIME.modify(ch, lvl), caster);
                 });
                 return true;
             }

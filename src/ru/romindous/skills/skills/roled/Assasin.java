@@ -11,7 +11,6 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionEffectType;
 import ru.komiss77.utils.EntityUtil;
@@ -82,10 +81,9 @@ public class Assasin implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
-                addEffect(caster, PotionEffectType.SPEED, TIME.modify(chn, lvl), (int) Math.round(EFFECT.modify(chn, lvl)), true);
+                addEffect(caster, PotionEffectType.SPEED, TIME.modify(ch, lvl), (int) Math.round(EFFECT.modify(ch, lvl)), true);
                 EntityUtil.effect(caster, Sound.ITEM_CHORUS_FRUIT_TELEPORT, 0.8f, Particle.REVERSE_PORTAL);
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -126,12 +124,13 @@ public class Assasin implements Scroll.Registerable {
                 }
                 EntityUtil.effect(caster, Sound.ITEM_CHORUS_FRUIT_TELEPORT, 0.8f, Particle.PORTAL);
 //                addEffect(caster, PotionEffectType.HASTE, TIME.modify(ch, lvl), amp, true);
-                caster.teleport(tlc.subtract(target.getEyeLocation().getDirection().multiply(2d)));
-                if (target instanceof Mob) ((Mob) target).setTarget(null);
 
                 EntityUtil.effect(caster, Sound.ITEM_CHORUS_FRUIT_TELEPORT, 0.8f, Particle.REVERSE_PORTAL);
 
-                next(ch.event(makeDamageEvent(caster, ch.target())));
+                next(ch, () -> {
+                    caster.teleport(tlc.subtract(target.getEyeLocation().getDirection().multiply(2d)));
+                    if (target instanceof Mob) ((Mob) target).setTarget(null);
+                });
                 return true;
             }
             public String id() {
@@ -170,13 +169,12 @@ public class Assasin implements Scroll.Registerable {
                     return false;
                 }
                 caster.removePotionEffect(PotionEffectType.INVISIBILITY);
-                final Chain chn = ch.event(ch.on(this));
-                addEffect(caster, PotionEffectType.HASTE, TIME.modify(chn, lvl),
-                    (int) Math.round(EFFECT.modify(chn, lvl)), false);
+                addEffect(caster, PotionEffectType.HASTE, TIME.modify(ch, lvl),
+                    (int) Math.round(EFFECT.modify(ch, lvl)), false);
 
                 EntityUtil.effect(caster, Sound.ENTITY_PLAYER_ATTACK_WEAK, 0.6f, Particle.CAMPFIRE_COSY_SMOKE);
 
-                next(chn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -203,18 +201,25 @@ public class Assasin implements Scroll.Registerable {
 
         new Ability() {//Занавес
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
-            final ChasMod[] stats = new ChasMod[] {TIME};
+            final ChasMod DIST = new ChasMod(this, "dist", Chastic.DISTANCE);
+            final ChasMod[] stats = new ChasMod[] {TIME, DIST};
             public ChasMod[] stats() {
                 return stats;
             }
             private final int amp = value("amp", 1);
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final Chain chn = ch.event(ch.on(this));
-                addEffect(caster, PotionEffectType.INVISIBILITY, TIME.modify(chn, lvl), amp, false);
+                addEffect(caster, PotionEffectType.INVISIBILITY, TIME.modify(ch, lvl), amp, false);
+
                 EntityUtil.effect(caster, Sound.ENTITY_WIND_CHARGE_WIND_BURST, 0.6f, Particle.CAMPFIRE_COSY_SMOKE);
 
-                next(chn);
+                final double dst = DIST.modify(ch, lvl);
+                next(ch, () -> {
+                    for (final Mob mb : LocUtil.getChEnts(caster.getLocation(), dst, Mob.class, m -> {
+                        final LivingEntity tgt = m.getTarget();
+                        return tgt != null && tgt.getEntityId() == caster.getEntityId();
+                    })) mb.setTarget(null);
+                });
                 return true;
             }
             public String id() {
@@ -249,15 +254,12 @@ public class Assasin implements Scroll.Registerable {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
-                final Chain chn = ch.event(fe);
-                fe.setDamage(DAMAGE.modify(chn, lvl));
 
                 Bleeding.effect(tgt);
 
-                next(chn, () -> {
-                    Bleeding.bleed(tgt, fe.getDamage(),
-                        TIME.modify(chn, lvl), caster);
+                final double dmg = DAMAGE.modify(ch, lvl);
+                next(ch, () -> {
+                    Bleeding.bleed(tgt, dmg, TIME.modify(ch, lvl), caster);
                 });
                 return true;
             }

@@ -11,18 +11,17 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
-import ru.komiss77.modules.world.WXYZ;
 import ru.komiss77.utils.EntityUtil;
 import ru.romindous.skills.events.EntityCastEvent;
 import ru.romindous.skills.events.PlayerKillEntityEvent;
 import ru.romindous.skills.mobs.Minion;
 import ru.romindous.skills.skills.Skill;
 
-public record Chain(Skill sk, LivingEntity caster, LivingEntity target, Event event, Location at, int curr) {
-    public Chain event(final Event e) {return new Chain(sk, caster, tgtOf(e, caster), e, at, curr);}
-    public Chain target(final LivingEntity tgt) {return new Chain(sk, caster, tgt, event, at, curr);}
-    public Chain curr(final int step) {return new Chain(sk, caster, target, event, at, step);}
-    public EntityCastEvent on(final Ability ab) {return new EntityCastEvent(this, ab);}
+public record Chain(Skill sk, LivingEntity caster, LivingEntity target, Event trig, Location at, int curr) {
+    public Chain next(final Ability ab) {return new Chain(sk, caster, target, new EntityCastEvent(this, ab), at, curr);}
+    public Chain target(final LivingEntity tgt) {return new Chain(sk, caster, tgt, trig, at, curr);}
+    public Chain curr(final int step) {return new Chain(sk, caster, target, trig, at, step);}
+//    public EntityCastEvent on(final Ability ab) {return new EntityCastEvent(this, ab);}
     public static Chain of(final Skill sk, final LivingEntity caster,
         final Event ev, final Location at, final int curr) {
         return new Chain(sk, caster, caster, ev, at, curr);
@@ -55,7 +54,7 @@ public record Chain(Skill sk, LivingEntity caster, LivingEntity target, Event ev
                 if (ee.getInteractionPoint() == null) {
                     final Block b = ee.getPlayer().getTargetBlockExact(TGT_DST);
                     if (b == null) yield null;
-                    yield new WXYZ(b).getCenterLoc();
+                    yield b.getLocation().toCenterLocation();
                 }
                 yield ee.getInteractionPoint();
             case final PlayerJumpEvent ee:
