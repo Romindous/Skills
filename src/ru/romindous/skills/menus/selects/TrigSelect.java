@@ -8,6 +8,7 @@ import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
+import ru.romindous.skills.Main;
 import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.guides.Entries;
@@ -68,6 +69,20 @@ public class TrigSelect extends SvSelect {
                         return;
                     }
 
+                    if (sk.abils.length != 0) {
+                        final Trigger rt = sk.abils[0].abil().trig();
+                        if (rt != null && rt != tr) {
+                            for (final Ability.AbilState as : sk.abils) sv.change(as, 1);
+                            for (final Modifier.ModState ms : sk.mods) sv.change(ms, 1);
+                            for (final Selector.SelState ss : sk.sels) sv.change(ss, 1);
+                            sv.setSkill(skIx, new Skill(sk.name, tr, new Selector.SelState[0],
+                                new Ability.AbilState[0], new Modifier.ModState[0]));
+                            p.sendMessage(TCUtil.form(Main.prefix
+                                + "<red>Навык распался из за несовпадения тригеров!"));
+                            openLast(p);
+                            return;
+                        }
+                    }
                     sv.setSkill(skIx, new Skill(sk.name, tr, sk.sels, sk.abils, sk.mods));
                     openLast(p);
                 }

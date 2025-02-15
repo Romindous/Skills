@@ -5,6 +5,7 @@ import java.util.Set;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
+import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
@@ -30,7 +31,7 @@ public class DamageLst implements Listener {
 
     public static final Set<DamageType> DIRECT = Set.of(DamageType.PLAYER_ATTACK, DamageType.GENERIC, DamageType.STING,
         DamageType.MOB_ATTACK, DamageType.MOB_ATTACK_NO_AGGRO, DamageType.PLAYER_EXPLOSION, DamageType.EXPLOSION, DamageType.MACE_SMASH);
-    public static final Set<DamageType> RANGED = Set.of(DamageType.ARROW, DamageType.FIREWORKS, DamageType.TRIDENT,
+    public static final Set<DamageType> RANGED = Set.of(DamageType.THROWN, DamageType.ARROW, DamageType.FIREWORKS, DamageType.TRIDENT,
         DamageType.SPIT, DamageType.WITHER_SKULL, DamageType.UNATTRIBUTED_FIREBALL, DamageType.MOB_PROJECTILE);
     public static final Set<DamageType> MAGIC = Set.of(DamageType.MAGIC, DamageType.INDIRECT_MAGIC);
 

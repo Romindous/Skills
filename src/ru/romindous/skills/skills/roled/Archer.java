@@ -104,9 +104,6 @@ public class Archer implements Scroll.Registerable {
             public Rarity rarity() {
                 return Rarity.COMMON;
             }
-            public InvCondition equip() {
-                return InvCondition.NONE;
-            }
             public boolean selfCast() {return true;}
             public Role role() {return Role.ARCHER;}
         };
@@ -115,6 +112,9 @@ public class Archer implements Scroll.Registerable {
             final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
             public ChasMod[] stats() {
                 return new ChasMod[] {SPEED};
+            }
+            public Trigger trig() {
+                return Trigger.PROJ_LAUNCH;
             }
             public boolean cast(final Chain ch, final int lvl) {
                 if (!(ch.trig() instanceof final ProjectileLaunchEvent ee)) {
@@ -166,6 +166,9 @@ public class Archer implements Scroll.Registerable {
             public ChasMod[] stats() {
                 return new ChasMod[] {DIST, RATIO};
             }
+            public Trigger trig() {
+                return Trigger.RANGED_HIT;
+            }
             public boolean cast(final Chain ch, final int lvl) {
                 if (!(ch.trig() instanceof final ProjectileHitEvent ee)) {
                     inform(ch, name() + " должна следовать тригеру <u>"
@@ -176,6 +179,7 @@ public class Archer implements Scroll.Registerable {
                     inform(ch, "Снаряд должен быть стрелой!");
                     return false;
                 }
+                if (ae.getPierceLevel() != 0) return false;
                 final LivingEntity target = ch.target();
                 final LivingEntity tgt = LocUtil.getClsChEnt(ae.getLocation(), DIST.modify(ch, lvl),
                     LivingEntity.class, ent -> ent.getEntityId() != target.getEntityId()
@@ -184,7 +188,7 @@ public class Archer implements Scroll.Registerable {
                     inform(ch, "Не найдено следующей цели в радиусе!");
                     return false;
                 }
-                if (ae.getPierceLevel() == 0) ae.setPierceLevel(1);
+                ae.setPierceLevel(1);
                 final Location tlc = EntityUtil.center(target);
                 final Vector dir = EntityUtil.center(tgt).subtract(tlc).toVector().normalize();
                 tlc.add(dir); tlc.setY(ae.getLocation().getY()); ae.teleport(tlc);
@@ -215,39 +219,35 @@ public class Archer implements Scroll.Registerable {
             public Rarity rarity() {
                 return Rarity.COMMON;
             }
-            public InvCondition equip() {
-                return InvCondition.NONE;
-            }
             public boolean selfCast() {return false;}
             public Role role() {return Role.ARCHER;}
         };
 
         new Ability() {//Жаунт
-            final ChasMod HUNGER = new ChasMod(this, "hunger", Chastic.NUTRITION);
+            final ChasMod HUNGER = new ChasMod(this, "hunger", Chastic.HUNGER);
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
             public ChasMod[] stats() {
-                return new ChasMod[] {DAMAGE};
+                return new ChasMod[] {HUNGER, DAMAGE};
             }
             public boolean cast(final Chain ch, final int lvl) {
-                final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                caster.teleport(tgt.getEyeLocation().add(caster.getEyeLocation().getDirection()));
-                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
-                fe.setDamage(DAMAGE.modify(ch, lvl));
+                final LivingEntity tgt = ch.target();
+                final Location elc = tgt.getEyeLocation();
+                caster.teleport(elc.add(elc.getDirection().multiply(-2d)));
                 if (caster instanceof final HumanEntity he) {
-                    final int fdl = he.getFoodLevel() - (int) Math.round(HUNGER.modify(ch, lvl));
-                    if (fdl < 0) {
+                    if (!EntityUtil.food(he, (float) HUNGER.modify(ch, lvl))) {
                         inform(ch, "Не хватает сытости для прыжка!");
                         return false;
                     }
-                    he.setFoodLevel(fdl);
                 }
 
+                final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
+                fe.setDamage(DAMAGE.modify(ch, lvl));
                 EntityUtil.effect(tgt, Sound.ENTITY_FOX_TELEPORT, 0.8f, Particle.REVERSE_PORTAL);
 
                 next(ch, () -> {
                     tgt.damage(fe.getDamage(), fe.getDamageSource());
-                    tgt.setNoDamageTicks(0);
+                    if (tgt instanceof Mob) ((Mob) tgt).setTarget(null);
                 });
                 return true;
             }
@@ -258,9 +258,10 @@ public class Archer implements Scroll.Registerable {
                 return "Жаунт";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Использует " + HUNGER.id + " ед. " + TCUtil.N + " сытости (округляемо),",
-                TCUtil.N + "пользователя, телепортируя его за " + CLR + "спину ",
-                TCUtil.N + "цели, и нанося " + DAMAGE.id + " ед. " + TCUtil.N + "урона"};
+                TCUtil.N + "Использует " + HUNGER.id + " ед. " + TCUtil.N + "сытости,",
+                TCUtil.N + "пользователя, телепортируя его за",
+                TCUtil.N + CLR + "спину" + TCUtil.N + "цели, и нанося "
+                    + DAMAGE.id + " ед. " + TCUtil.N + "урона"};
             public String[] descs() {
                 return desc;
             }
@@ -293,10 +294,11 @@ public class Archer implements Scroll.Registerable {
 
                 final double dmg = DAMAGE.modify(ch, lvl);
                 next(ch, () -> {
-                    final Snowball sb = caster.launchProjectile(Snowball.class, EntityUtil.center(tgt)
-                        .subtract(start).toVector().normalize().multiply(speed), s -> {
-                        s.setItem(FWS); s.setGravity(false);
+                    final Snowball sb = caster.launchProjectile(Snowball.class, EntityUtil.center(tgt).subtract(start)
+                        .toVector().normalize().multiply(speed).add(tgt.getVelocity().multiply(0.5d)), s -> {
+                        s.setItem(FWS); s.setGravity(false); s.setGlowing(true);
                     });
+                    sb.teleport(start);
                     ShotLst.damage(sb, dmg);
                 });
                 return true;

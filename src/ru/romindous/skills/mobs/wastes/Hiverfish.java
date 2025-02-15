@@ -74,7 +74,7 @@ public class Hiverfish extends SednaMob {
 
     private final RollTree drop = RollTree.of(key().value())
         .add(new ItemRoll(key().value() + "_bone", new ItemBuilder(ItemType.BONE).build(), 1, 0), 2)
-        .add(new ItemRoll(key().value() + "_scales", Groups.SILVER.item(ItemType.PHANTOM_MEMBRANE), 1, 1), 1)
+        .add(new ItemRoll(key().value() + "_scales", Groups.SILVER.item(ItemType.PHANTOM_MEMBRANE), 1, 0), 1)
         .add(new ItemRoll(key().value() + "_meal", new ItemBuilder(ItemType.BONE_MEAL).build(), 1, 1), 4)
         .add(new NARoll(), 4).build(1, 1);
 

@@ -22,7 +22,7 @@ public enum Trigger {//тригер
     USER_DEATH("Смертельный Урон", null, ItemType.SKELETON_SKULL, "Срабатывает при получении", "смертельного урона пользователем"), //EntityDeathEvent -
     USER_HURT("Получение Урона", null, ItemType.FERMENTED_SPIDER_EYE, "Срабатывает при получении", "физического урона пользователем"), //EntityDamageEvent -
     SPAWN_MINION("Спавн Приспешника", null, ItemType.GLOW_SQUID_SPAWN_EGG, "Срабатывает при спавне", "мобов-пресмешников пользователя"), //MinionSpawnEvent -
-    CAST_SELF("Прокаст Способности", null, ItemType.ENDER_EYE, "Срабатывает при использовании", "предыдущей способности в списке"), //EntityCastEvent -
+    ABIL_CAST("Прокаст Способности", null, ItemType.ENDER_EYE, "Срабатывает при использовании", "предыдущей способности в списке"), //EntityCastEvent -
     UNKNOWN("Неизвестный", null, ItemType.SCULK_SENSOR, "Срабатывает при", "неописуемых обстоятельствах"); //Event -
 
     private static final String prefix = "trigs.";
@@ -75,5 +75,9 @@ public enum Trigger {//тригер
         } catch (IllegalArgumentException e) {
             return UNKNOWN;
         }
+    }
+
+    public String describe() {
+        return TCUtil.N + "Тригер " + TCUtil.sided(disName(), SIDE);
     }
 }

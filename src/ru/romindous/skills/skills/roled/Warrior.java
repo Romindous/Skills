@@ -284,6 +284,9 @@ public class Warrior implements Scroll.Registerable {
             public ChasMod[] stats() {
                 return stats;
             }
+            public Trigger trig() {
+                return Trigger.USER_HURT;
+            }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
                 final LivingEntity tgt = ch.target();

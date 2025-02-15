@@ -59,7 +59,7 @@ public enum SubServer {
         w.setGameRule(GameRule.PLAYERS_SLEEPING_PERCENTAGE, 0);
         switch (Main.subServer) {
             case WASTES:
-                w.setTime(18000l);
+                w.setTime(4000l);
                 w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
                 w.setGameRule(GameRule.RANDOM_TICK_SPEED, 2);
                 w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);

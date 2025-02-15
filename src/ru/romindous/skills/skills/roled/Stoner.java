@@ -310,9 +310,6 @@ public class Stoner implements Scroll.Registerable {
             public Rarity rarity() {
                 return Rarity.COMMON;
             }
-            public InvCondition equip() {
-                return InvCondition.NONE;
-            }
             public boolean selfCast() {return false;}
             public Role role() {return Role.STONER;}
         };

@@ -11,6 +11,7 @@ import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
+import ru.romindous.skills.Main;
 import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.skills.chas.ChasMod;
@@ -52,6 +53,10 @@ public class ModSelect extends SvSelect {
 
     @Override
     public void init(final Player p, final InventoryContent its) {
+        if (sk == null) {
+            openLast(p);
+            return;
+        }
         p.playSound(p.getLocation(), Sound.BLOCK_COMPARATOR_CLICK, 1f, 0.8f);
         final Inventory inv = its.getInventory();
         if (inv != null) inv.setContents(empty);
@@ -63,27 +68,42 @@ public class ModSelect extends SvSelect {
             while (switch (slot % 9) {case 0, 8 -> true; default -> false;}) slot++;
             final Modifier.ModState md = en.getKey();
             if (!sv.canUse(md.mod())) continue;
-            its.set(slot, ClickableItem.from(new ItemBuilder(md.mod().display(md.lvl()))
-                .amount(en.getValue()).lore("<dark_gray>(клик - выбор)").lore(relate(md.mod(), chs))
-                .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
-                    switch (e.getClick()) {
-                        case DROP, CONTROL_DROP:
-                            if (sv.change(md, -1) < 0) return;
-                            ItemUtil.giveItemsTo(p, md.mod().drop(md.lvl()));
-                            reopen(p, its);
-                            return;
-                    }
-                    if (sk == null) {
-                        openLast(p);
-                        return;
-                    }
-
-                    final Modifier.ModState ms = mdSlot < sk.mods.length ? sk.mods[mdSlot] : null;
-                    if (ms != null) sv.remSkillMod(p, mdSlot, skIx);
-                    sv.addSkillMod(p, md, skIx);
-                    openLast(p);
+            final List<String> fnd = new ArrayList<>();
+            if (chs.length != 0) {
+                for (final Chastic ch : md.mod().chastics()) {
+                    if (Arrays.binarySearch(chs, ch) < 0) continue;
+                    fnd.add(ch.disName());
                 }
-            ));
+            }
+            its.set(slot, fnd.isEmpty() ? ClickableItem.from(new ItemBuilder(md.mod().display(md.lvl())).amount(en.getValue())
+                .lore(relate(fnd)).lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
+                switch (e.getClick()) {
+                    case DROP, CONTROL_DROP:
+                        if (sv.change(md, -1) < 0) return;
+                        ItemUtil.giveItemsTo(p, md.mod().drop(md.lvl()));
+                        reopen(p, its);
+                        return;
+                }
+                p.sendMessage(TCUtil.form(Main.prefix + "<red>Навык не использует:"));
+                for (final Chastic ch : md.mod().chastics()) fnd.add(ch.disName());
+                p.sendMessage(TCUtil.form(String.join(TCUtil.N + ", ", fnd)));
+                reopen(p, its);
+            }) : ClickableItem.from(new ItemBuilder(md.mod().display(md.lvl()))
+                .amount(en.getValue()).lore("<dark_gray>(клик - выбор)").lore(relate(fnd))
+                .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
+                switch (e.getClick()) {
+                    case DROP, CONTROL_DROP:
+                        if (sv.change(md, -1) < 0) return;
+                        ItemUtil.giveItemsTo(p, md.mod().drop(md.lvl()));
+                        reopen(p, its);
+                        return;
+                }
+
+                final Modifier.ModState ms = mdSlot < sk.mods.length ? sk.mods[mdSlot] : null;
+                if (ms != null) sv.remSkillMod(p, mdSlot, skIx);
+                sv.addSkillMod(p, md, skIx);
+                openLast(p);
+            }));
             slot++;
         }
 
@@ -112,13 +132,7 @@ public class ModSelect extends SvSelect {
 
     private static final String[] UNRELATED = {"<red>Этот " + TCUtil.P + "модификатор " + "<red>не имеет общих статов",
         "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями " + "<red>навыка!"};
-    private static String[] relate(final Modifier md, final Chastic[] chs) {
-        if (chs.length == 0) return UNRELATED;
-        final List<String> fnd = new ArrayList<>();
-        for (final Chastic ch : md.chastics()) {
-            if (Arrays.binarySearch(chs, ch) < 0) continue;
-            fnd.add(ch.disName());
-        }
+    private static String[] relate(final List<String> fnd) {
         if (fnd.isEmpty()) return UNRELATED;
         return new String[]{"<apple>Общие " + TCUtil.P + "статы " + "<apple>с навыком:",
             String.join(TCUtil.N + ", ", fnd)};

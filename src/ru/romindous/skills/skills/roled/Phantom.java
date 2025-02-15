@@ -75,6 +75,9 @@ public class Phantom implements Scroll.Registerable {
             public ChasMod[] stats() {
                 return stats;
             }
+            public Trigger trig() {
+                return Trigger.USER_HURT;
+            }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
                 if (!(ch.trig() instanceof final EntityDamageEvent e)
@@ -117,9 +120,6 @@ public class Phantom implements Scroll.Registerable {
             public Rarity rarity() {
                 return Rarity.COMMON;
             }
-            public InvCondition equip() {
-                return InvCondition.NONE;
-            }
             public boolean selfCast() {return true;}
             public Role role() {return Role.PHANTOM;}
         };
@@ -157,9 +157,6 @@ public class Phantom implements Scroll.Registerable {
             }
             public Rarity rarity() {
                 return Rarity.COMMON;
-            }
-            public InvCondition equip() {
-                return InvCondition.NONE;
             }
             public boolean selfCast() {return true;}
             public Role role() {return Role.PHANTOM;}
@@ -260,9 +257,6 @@ public class Phantom implements Scroll.Registerable {
             }
             public Rarity rarity() {
                 return Rarity.COMMON;
-            }
-            public InvCondition equip() {
-                return InvCondition.NONE;
             }
             public boolean selfCast() {return false;}
             public Role role() {return Role.PHANTOM;}

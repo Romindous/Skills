@@ -216,9 +216,6 @@ public class All implements Scroll.Registerable {
             public Rarity rarity() {
                 return Rarity.COMMON;
             }
-            public InvCondition equip() {
-                return InvCondition.NONE;
-            }
             public boolean selfCast() {return true;}
             public Role role() {return null;}
         };
@@ -308,6 +305,9 @@ public class All implements Scroll.Registerable {
             public ChasMod[] stats() {
                 return stats;
             }
+            public Trigger trig() {
+                return Trigger.PROJ_LAUNCH;
+            }
             public boolean cast(final Chain ch, final int lvl) {
                 if (!(ch.trig() instanceof final ProjectileLaunchEvent ee)) {
                     inform(ch, name() + " должна следовать тригеру <u>"
@@ -346,12 +346,12 @@ public class All implements Scroll.Registerable {
         };
 
         new Ability() {//Поедание
-            final ChasMod TIME = new ChasMod(this, "time", Chastic.NUTRITION);
+            final ChasMod REGEN = new ChasMod(this, "regen", Chastic.TIME);
+            final ChasMod HUNGER = new ChasMod(this, "hunger", Chastic.HUNGER);
             public ChasMod[] stats() {
-                return new ChasMod[] {TIME};
+                return new ChasMod[] {REGEN, HUNGER};
             }
             private final int amp = value("amp", 1);
-            private final double del = value("del", 0.5d);
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 if (tgt instanceof AbstractSkeleton || tgt instanceof SkeletonHorse) {
@@ -359,9 +359,8 @@ public class All implements Scroll.Registerable {
                     return false;
                 }
                 final LivingEntity caster = ch.caster();
-                final double tm = TIME.modify(ch, lvl);
-                addEffect(caster, PotionEffectType.REGENERATION, tm, amp, true);
-                addEffect(caster, PotionEffectType.HUNGER, tm / del, amp, true);
+                addEffect(caster, PotionEffectType.REGENERATION, REGEN.modify(ch, lvl), amp, true);
+                addEffect(caster, PotionEffectType.HUNGER, HUNGER.modify(ch, lvl), amp, true);
 
                 EntityUtil.effect(tgt, Sound.ENTITY_GENERIC_EAT, 0.8f, Particle.EGG_CRACK);
 
@@ -377,7 +376,8 @@ public class All implements Scroll.Registerable {
             private final String[] desc = new String[] {
                 TCUtil.N + "Позволяет заживо поедать " + CLR + "сущность",
                 TCUtil.N + "имеющую " + CLR + "плоть" + TCUtil.N + ", получая регенерацию",
-                TCUtil.N + "и голод на " + TIME.id + " сек." + TCUtil.N + ", при ударе"};
+                TCUtil.N + "на " + REGEN.id + " сек." + TCUtil.N + " и голод на "
+                    + HUNGER.id + " сек." + TCUtil.N + ", при ее ударе"};
             public String[] descs() {
                 return desc;
             }
@@ -396,6 +396,9 @@ public class All implements Scroll.Registerable {
             final ChasMod HURT = new ChasMod(this, "hurt", Chastic.DAMAGE_TAKEN);
             public ChasMod[] stats() {
                 return new ChasMod[] {HEALTH, HURT};
+            }
+            public Trigger trig() {
+                return Trigger.USER_HURT;
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
@@ -591,7 +594,7 @@ public class All implements Scroll.Registerable {
 
         new Modifier() {
             public Chastic[] chastics() {
-                return new Chastic[] {Chastic.NUTRITION};
+                return new Chastic[] {Chastic.HUNGER};
             }
             public String id() {
                 return "food";

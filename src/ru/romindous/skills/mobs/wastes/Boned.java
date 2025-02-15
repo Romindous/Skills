@@ -2,7 +2,9 @@ package ru.romindous.skills.mobs.wastes;
 
 import java.util.Map;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -34,7 +36,7 @@ public class Boned extends SednaMob {
 
     @Override
     public Map<EquipmentSlot, ItemStack> equipment() {
-        return Map.of();
+        return Map.of(EquipmentSlot.HEAD, ItemType.CONDUIT.createItemStack());
     }
 
     private final RollTree drop = RollTree.of(key().value())

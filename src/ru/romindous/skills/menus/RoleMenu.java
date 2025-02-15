@@ -16,11 +16,11 @@ import ru.komiss77.utils.inventory.SmartInventory;
 import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.survs.Role;
 
-public class RoleSelectMenu implements InventoryProvider {
+public class RoleMenu implements InventoryProvider {
 
     public static final SmartInventory skillSelect = SmartInventory.builder()
         .id("SkillSelect")
-        .provider(new RoleSelectMenu())
+        .provider(new RoleMenu())
         .size(3, 9)
         .title("§9§lВыбери Роль")
         .build();
@@ -35,10 +35,10 @@ public class RoleSelectMenu implements InventoryProvider {
 
         final Inventory inv = content.getInventory();
         int i = 0;
-        for (; i < 27; i++) {
+        for (; i != 9; i++) {
             inv.setItem(i, i < 9 ? cyan : gray);
         }
-        i = 9;
+        i = 0;
 
         final Survivor sv = PM.getOplayer(p, Survivor.class);
         if (sv == null) {
@@ -51,22 +51,20 @@ public class RoleSelectMenu implements InventoryProvider {
 
         if (timeLeft > 0 && !ApiOstrov.isLocalBuilder(p)) {
             for (final Role rl : Role.values()) {
-                content.set((i & 1) == 1 ? i : i + 9,
-                    ClickableItem.empty(new ItemBuilder(rl.getIcon()).lore(sv.role == rl ? "§fТвой класс сейчас" : "")
-                        .lore("§cДо смены: " + TimeUtil.secondToTime(timeLeft)).build()));
-                i += i == 12 ? 2 : 1;
+                content.set(i, ClickableItem.empty(new ItemBuilder(rl.getIcon()).lore(sv.role == rl ? "§fТвой класс сейчас" : "")
+                    .lore("§cДо смены: " + TimeUtil.secondToTime(timeLeft)).build()));
+                i += i == 2 ? 4 : 1;
             }
         } else {
             for (final Role rl : Role.values()) {
                 final boolean eq = sv.role == rl;
-                content.set((i & 1) == 1 ? i : i + 9,
-                    ClickableItem.from(new ItemBuilder(rl.getIcon()).lore(eq ? "§fТвой класс сейчас" : "")
-                        .lore(!eq || sv.role == null ? "" : "§7Перевыбор класса - §cполный сброс §7характеристик!")
-                        .build(), e -> {
-                        p.closeInventory();
-                        p.performCommand("skill select " + rl.name());
-                    }));
-                i += i == 12 ? 2 : 1;
+                content.set(i, ClickableItem.from(new ItemBuilder(rl.getIcon()).lore(eq ? "§fТвой класс сейчас" : "")
+                    .lore(!eq || sv.role == null ? "" : "§7Перевыбор класса - §cполный сброс §7характеристик!")
+                    .build(), e -> {
+                    p.closeInventory();
+                    p.performCommand("skill select " + rl.name());
+                }));
+                i += i == 2 ? 4 : 1;
             }
 
         }

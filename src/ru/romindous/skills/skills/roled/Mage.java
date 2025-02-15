@@ -319,9 +319,6 @@ public class Mage implements Scroll.Registerable {
             public Rarity rarity() {
                 return Rarity.UNCOM;
             }
-            public InvCondition equip() {
-                return InvCondition.NONE;
-            }
             public boolean selfCast() {return false;}
             public Role role() {return Role.MAGE;}
         };*/
@@ -332,6 +329,9 @@ public class Mage implements Scroll.Registerable {
             final ChasMod[] stats = new ChasMod[] {SPEED};
             public ChasMod[] stats() {
                 return stats;
+            }
+            public Trigger trig() {
+                return Trigger.PROJ_LAUNCH;
             }
             public boolean cast(final Chain ch, final int lvl) {
                 if (!(ch.trig() instanceof final ProjectileLaunchEvent ee)) {
@@ -380,9 +380,6 @@ public class Mage implements Scroll.Registerable {
             }
             public Rarity rarity() {
                 return Rarity.COMMON;
-            }
-            public InvCondition equip() {
-                return InvCondition.NONE;
             }
             public boolean selfCast() {return true;}
             public Role role() {return Role.MAGE;}

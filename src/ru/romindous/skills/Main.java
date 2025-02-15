@@ -91,7 +91,8 @@ public class Main extends JavaPlugin {
         for (final Class<?> clazz : ClassUtil.getClasses(main.getFile(), "ru.romindous.skills.listeners")) {
             try {
                 getServer().getPluginManager().registerEvents((Listener) clazz.getDeclaredConstructor().newInstance(), this);
-            } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
+            } catch (IllegalAccessException | IllegalArgumentException | InstantiationException
+                     | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
                 Ostrov.log_err("Инициализация listener " + clazz.getName() + " -> " + ex.getMessage());
             }
         }

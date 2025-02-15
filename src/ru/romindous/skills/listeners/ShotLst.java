@@ -1,5 +1,6 @@
 package ru.romindous.skills.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.enchantments.Enchantment;
@@ -49,13 +50,8 @@ public class ShotLst implements Listener {
                 yield d;
             }
             case final AbstractArrow pr -> {
-                d = pr.getDamage() * pr.getVelocity().length();
+                d = pr.getDamage() + pr.getVelocity().length();
                 if (pr.isCritical()) d += ((int) d >> 1) + 1;
-                it = pr.getWeapon();
-                if (it != null) {
-                    lvl = it.getEnchantmentLevel(Enchantment.POWER);
-                    if (lvl != 0) d += lvl * 0.5d + 0.5d;
-                }
                 yield d;
             }
             case final Snowball pr -> {
@@ -86,44 +82,44 @@ public class ShotLst implements Listener {
     //урон от снарядов модифицируется в EntityDamageByEntityEvent
     public void onProjectileHit(final ProjectileHitEvent e) {
         final Projectile prj = e.getEntity();
-        if (prj.getShooter() instanceof final LivingEntity shoter) { //стреляющий живчик
+        //стреляющий живчик
+        if (!(prj.getShooter() instanceof final LivingEntity shoter)) return;
+        if (e.getHitEntity() instanceof final LivingEntity target) { //попадание было в живчика
+            target.setNoDamageTicks(0);
 
-            if (e.getHitEntity() instanceof final LivingEntity target) { //попадание было в живчика
-                target.setNoDamageTicks(0);
-
-                switch (shoter) {
-                    case final Player pl -> {
-                        final Survivor sv = PM.getOplayer(pl, Survivor.class);
-                        if (sv == null) return;
-                        sv.trigger(Trigger.RANGED_HIT, e, pl);
-                    }
-                    case final Mob mb -> {
-                        final Vector vec = prj.getVelocity();
-                        final AttributeInstance dmg = mb.getAttribute(Attribute.ATTACK_DAMAGE);
-                        if (dmg == null) return;
-                        vec.multiply(dmg.getBaseValue() * 0.1d + 1d);
-                        prj.setVelocity(vec);
-                    }
-                    default -> {}
+            switch (shoter) {
+                case final Player pl -> {
+                    final Survivor sv = PM.getOplayer(pl, Survivor.class);
+                    if (sv == null) return;
+                    sv.trigger(Trigger.RANGED_HIT, e, pl);
                 }
+                case final Mob mb -> {
+                    final Vector vec = prj.getVelocity();
+                    final AttributeInstance dmg = mb.getAttribute(Attribute.ATTACK_DAMAGE);
+                    if (dmg == null) return;
+                    vec.multiply(dmg.getBaseValue() * 0.1d + 1d);
+                    prj.setVelocity(vec);
+                }
+                default -> {}
+            }
+            return;
+        }
+        // --- конец попадание было в живчика ---
+
+        switch (prj.getType()) {
+        case SMALL_FIREBALL:
+            if (Main.subServer == SubServer.INFERNAL) {
+                prj.getWorld().createExplosion(prj, 0.6f, true, false);
                 return;
             }
-            // --- конец попадание было в живчика ---
-            
-            switch (prj.getType()) {
-			case SMALL_FIREBALL:
-                if (Main.subServer == SubServer.INFERNAL) {
-                    prj.getWorld().createExplosion(prj, 0.6f, true, false);
-                    return;
-                }
-				break;
-            case EXPERIENCE_BOTTLE:
-				((ExpBottleEvent) e).setExperience(Main.srnd.nextInt(16) + 16);
-				break;
-			default:
-				break;
-			}
-            
+            break;
+        case EXPERIENCE_BOTTLE:
+            ((ExpBottleEvent) e).setExperience(Main.srnd.nextInt(16) + 16);
+            break;
+        default:
+            break;
+        }
+
             /*//попадание в блок
             if (e.getHitBlock() != null) {
                 // *** зачары на блок ***
@@ -142,7 +138,6 @@ public class ShotLst implements Listener {
             		}
             	}
             }*/
-        }
         // --- конец стреляющий живчик ---
     }
 }

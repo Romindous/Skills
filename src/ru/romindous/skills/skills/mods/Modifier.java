@@ -106,6 +106,7 @@ public abstract class Modifier implements Scroll {//модификатор
             dscs.add("<dark_gray>Требования:");
             dscs.add(nds.replace(CLR, rarity().color()));
         }
+        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }
 

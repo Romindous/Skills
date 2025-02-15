@@ -1,31 +1,22 @@
 package ru.romindous.skills.listeners;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import com.destroystokyo.paper.ParticleBuilder;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Spellcaster.Spell;
+import org.bukkit.entity.WanderingTrader;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
+import org.bukkit.inventory.ItemType;
+import org.bukkit.inventory.MerchantRecipe;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import ru.komiss77.Ostrov;
 import ru.komiss77.modules.entities.CustomEntity;
-import ru.komiss77.modules.world.WXYZ;
-import ru.komiss77.utils.BlockUtil;
-import ru.komiss77.utils.ClassUtil;
-import ru.komiss77.utils.EntityUtil;
-import ru.komiss77.version.Nms;
+import ru.komiss77.modules.items.ItemBuilder;
+import ru.komiss77.modules.world.BVec;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.SubServer;
 import ru.romindous.skills.mobs.wastes.Crawler;
@@ -47,14 +38,22 @@ public class EntityLst implements Listener {
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onTgt(final EntityTargetLivingEntityEvent e) {
         final LivingEntity tgt = e.getTarget();
-        if (tgt == null) {
-            return;
+        if (tgt == null) return;
+
+        final PotionEffect ipe = tgt.getPotionEffect(PotionEffectType.INVISIBILITY);
+        if (ipe != null) {
+            if (Main.srnd.nextInt(BVec.of(tgt.getLocation())
+                .dist(e.getEntity().getLocation()) + ipe.getAmplifier()) != 0) {
+                e.setCancelled(true);
+                return;
+            }
         }
 
         if (e.getEntity() instanceof final Mob mb) {
             if (mb.hasPotionEffect(PotionEffectType.BLINDNESS)
                 || mb.hasPotionEffect(PotionEffectType.NAUSEA)) {
                 e.setCancelled(true);
+                return;
             }
         }
     }
@@ -68,40 +67,23 @@ public class EntityLst implements Listener {
     }
 
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
-    protected void onExtra(final EntityExplodeEvent e) {
-        if (!(e.getEntity() instanceof final Mob mb)
-            || !(CustomEntity.get(mb) instanceof Spored)) return;
-        final double dmg = mb.getAttribute(Attribute.ATTACK_DAMAGE).getBaseValue();
-        e.setYield((float) dmg);
-        new ParticleBuilder(Particle.COMPOSTER).location(mb.getLocation())
-            .count((int) (dmg * 20d)).offset(dmg, dmg, dmg).allPlayers().spawn();
-        final List<Block> bls = e.blockList();
-        final Set<WXYZ> bps = bls.stream().map(WXYZ::new).collect(Collectors.toSet());
-        final WXYZ[] sbls = ClassUtil.shuffle(bps.toArray(new WXYZ[0]));
-        final List<WXYZ> finLocs = new LinkedList<>();
-        for (int i = sbls.length >> 2; i != 0; i--) {
-            final WXYZ bl = sbls[i];
-            final WXYZ below = new WXYZ(bl.w, bl.x, bl.y - 1, bl.z);
-            if (bps.contains(below) || !Spored.DIRT.contains(Nms.fastType(below))) continue;
-            bls.removeIf(bb -> bl.distAbs(bb.getLocation()) == 0);
-            final Block b = bl.getBlock();
-            b.setBlockData(Spored.MOSS_DATA, false);
-            Ostrov.sync(() -> {
-                final Block b2 = bl.getBlock();
-                if (b2.getType() == Spored.MOSS.getType()) {
-                    b2.setBlockData(BlockUtil.air, false);
-                    EntityUtil.effect(Main.mobs.SPORED.spawn(bl.getCenterLoc()),
-                        Sound.BLOCK_BIG_DRIPLEAF_BREAK, 0.6f, Particle.HAPPY_VILLAGER);
-                }
-            }, Spored.SPORE_TICKS);
+    protected void onExplode(final CreatureSpawnEvent e) {
+        if (e.getEntity() instanceof final WanderingTrader wt) {
+            final MerchantRecipe mr = new MerchantRecipe(new ItemBuilder(ItemType.BEDROCK)
+                .name("<gray>Загляни в меня попожже...").build(), 0);
+            mr.setIngredients(List.of(new ItemBuilder(ItemType.BARRIER)
+                .name("<gray>Торговля еще в разработке!").build()));
+            wt.setRecipes(List.of(mr));
         }
-
     }
     
     @EventHandler
     public void onExpld(final EntityExplodeEvent e) {
-    	final Entity ent = e.getEntity();
-        if (ent instanceof Mob) return;
+        if (!(e.getEntity() instanceof final Mob mb)) return;
+        if (CustomEntity.get(mb) instanceof final Spored sp) {
+            sp.onExplode(e);
+            return;
+        }
         switch (e.getEntityType()) {
             case FIREBALL, SMALL_FIREBALL, TNT, WITHER_SKULL:
                 if (Main.subServer != SubServer.INFERNAL) {

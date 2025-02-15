@@ -37,10 +37,10 @@ public class Serebrite extends SkillGroup {
     }
 
     public void before() {
-        chance = SkillGroup.itemConfig(this, "chance", 4);
-        arm_tough = SkillGroup.itemConfig(this, "arm_tough", 1);
-        iron_dur_mul = (float) SkillGroup.itemConfig(this, "iron_dur_mul", 0.8d);
-        iron_speed_mul = (float) SkillGroup.itemConfig(this, "iron_speed_mul", 1.2d);
+        chance = itemConfig("chance", 4);
+        arm_tough = itemConfig("arm_tough", 1);
+        iron_dur_mul = (float) itemConfig("iron_dur_mul", 0.8d);
+        iron_speed_mul = (float) itemConfig("iron_speed_mul", 1.2d);
     }
 
     public List<Data<?>> data() {

@@ -1,7 +1,12 @@
 package ru.romindous.skills.items;
 
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
+import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.guides.Entries;
 import ru.romindous.skills.items.groups.Crawler;
 import ru.romindous.skills.items.groups.Medaline;
@@ -39,7 +44,40 @@ public class Groups {
         new ItemBuilder(ItemType.CHAINMAIL_BOOTS).name("§fСеребритовые ботинки").glint(true).build(),
         new ItemBuilder(ItemType.PHANTOM_MEMBRANE).name("§fСеребритовая чешуя").glint(true).build());
 
+
+    private static final Map<ItemType, StaffType> STF_TPS = new HashMap<>();
+    public static class StaffType {
+        private static final String STF_DATA = "staff.";
+        public final ItemType shell;
+        public final double spd;
+        public final double dmg;
+        private StaffType(final ItemType type) {
+            shell = getShell(type);
+            String tp = type.key().asMinimalString();
+            if (tp.length() > 4) tp = tp.substring(0, 4);
+            spd = ConfigVars.get(SkillGroup.prefix + STF_DATA + "speed." + tp, 1d);
+            dmg = ConfigVars.get(SkillGroup.prefix + STF_DATA + "damage." + tp, 1d);
+            STF_TPS.put(type, this);
+        }
+
+        private static ItemType getShell(final ItemType ht) {
+            if (ht == ItemType.WOODEN_HOE) return ItemType.CONDUIT;
+            if (ht == ItemType.STONE_HOE) return ItemType.SKELETON_SKULL;
+            if (ht == ItemType.GOLDEN_HOE) return ItemType.HONEY_BLOCK;
+            if (ht == ItemType.IRON_HOE) return ItemType.SPAWNER;
+            if (ht == ItemType.DIAMOND_HOE) return ItemType.SLIME_BLOCK;
+            if (ht == ItemType.NETHERITE_HOE) return ItemType.CHORUS_PLANT;
+            return ItemType.DRAGON_EGG;
+        }
+    }
+    public static @Nullable StaffType staff(final ItemStack stf) {
+        return STF_TPS.get(stf.getType().asItemType());
+    }
+
     public static void init() {
         SILVER.conQuest(Entries.silver, ItemType.RAW_IRON);
+        for (final ItemType it : ItemTags.STAFFS) {
+            new StaffType(it);
+        }
     }
 }

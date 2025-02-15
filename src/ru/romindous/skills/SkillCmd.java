@@ -17,7 +17,7 @@ import ru.romindous.skills.survs.Role;
 import ru.romindous.skills.survs.SM;
 import ru.romindous.skills.survs.Stat;
 import ru.romindous.skills.menus.MainMenu;
-import ru.romindous.skills.menus.RoleSelectMenu;
+import ru.romindous.skills.menus.RoleMenu;
 import ru.romindous.skills.menus.StatsMenu;
 import ru.romindous.skills.menus.WorldMenu;
 import ru.romindous.skills.skills.Scroll;
@@ -338,7 +338,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
         if (arg.length==0 || arg[0].equalsIgnoreCase("menu")) {
 //p.sendMessage("open main menu");
             if (sv.role ==null) {
-                RoleSelectMenu.skillSelect.open(p);
+                RoleMenu.skillSelect.open(p);
             } else {
 //p.sendMessage("открыть меню соотв.классу");
                 SmartInventory.builder()
@@ -393,7 +393,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
 
             case "select" -> {
                 if (arg.length==1) {
-                    RoleSelectMenu.skillSelect.open(p);  //меню должно парсить команду /skill select <скилл>
+                    RoleMenu.skillSelect.open(p);  //меню должно парсить команду /skill select <скилл>
                 } else if (arg.length==2) {
                     final Role role = Role.get(arg[1]);
                     if (role==null) {
@@ -441,7 +441,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
 
             case "stats" -> {
                 if (sv.role ==null) {
-                    RoleSelectMenu.skillSelect.open(p);
+                    RoleMenu.skillSelect.open(p);
                     return true;
                 }
                 SmartInventory.builder()
@@ -456,7 +456,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
 
             case "ability" -> {
                 if (sv.role ==null) {
-                    RoleSelectMenu.skillSelect.open(p);
+                    RoleMenu.skillSelect.open(p);
                     return true;
                 }
                 sv.skillInv.open(p);

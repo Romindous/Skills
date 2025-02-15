@@ -1,13 +1,13 @@
 package ru.romindous.skills.skills.chas;
 
 public enum Chastic {
-    REGENERATION("Реген Здоровья", "§к", false),
+    REGENERATION("Регенерация", "§к", false),
     AMOUNT("Кол-во Созданий", "§6", false),
     REWARD("Полученая Награда", "§с", false),
     DAMAGE_DEALT("Нанесенный Урон", "§4", false),
     DAMAGE_TAKEN("Принятый Урон", "§c", true),
     VELOCITY("Скорость Движения", "§м", false),
-    NUTRITION("Восполнение Голода", "§2", false),
+    HUNGER("Потребность Голода", "§2", true),
     MANA("Потребность Душ", "§9", true),
     COOLDOWN("Время Перезарядки", "§т", true),
     DISTANCE("Дистанция Действия", "§b", false),

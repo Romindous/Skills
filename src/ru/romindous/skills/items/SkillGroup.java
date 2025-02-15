@@ -14,7 +14,7 @@ import ru.romindous.skills.config.ConfigVars;
 
 public abstract class SkillGroup extends ItemGroup {
 
-    private static final String prefix = "item.";
+    protected static final String prefix = "item.";
 
     private final Map<ItemType, Quest> quested = new HashMap<>();
 
@@ -46,12 +46,12 @@ public abstract class SkillGroup extends ItemGroup {
         return false;
     }
 
-    protected static int itemConfig(final ItemGroup cm, final String id, final int val) {
-        return ConfigVars.get(prefix + cm.key().value() + "." + id, val);
+    protected int itemConfig(final String id, final int val) {
+        return ConfigVars.get(prefix + key().value() + "." + id, val);
     }
 
-    protected static double itemConfig(final ItemGroup cm, final String id, final double val) {
-        return ConfigVars.get(prefix + cm.key().value() + "." + id, val);
+    protected double itemConfig(final String id, final double val) {
+        return ConfigVars.get(prefix + key().value() + "." + id, val);
     }
 
     /*DEFAULT(),//10

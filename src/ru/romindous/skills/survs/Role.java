@@ -18,7 +18,7 @@ public enum Role {
         TCUtil.N + "Древний класс " + Scroll.CLR + "убийц" + TCUtil.N + ". Ловкость позволяет им уклоняться от атак.",
         TCUtil.N + "Их основная способность - быть " + Scroll.CLR + "незаметными " + TCUtil.N + "при нападении."),
     ARCHER("Стрелок", "§c", ItemType.CROSSBOW, Stat.ACCURACY, new Archer(),
-        TCUtil.N + "Воин средних веков, вооруженный " + Scroll.CLR + "луком " + TCUtil.N + "или" + Scroll.CLR + "арбалетом" + TCUtil.N + ",",
+        TCUtil.N + "Воин средних веков, вооруженный " + Scroll.CLR + "луком " + TCUtil.N + "или " + Scroll.CLR + "арбалетом" + TCUtil.N + ",",
         TCUtil.N + "Может развить большую скорость полета " + Scroll.CLR + "снарядов" + TCUtil.N + "."),
     WARRIOR("Паладин", "§e", ItemType.IRON_SWORD, Stat.STRENGTH, new Warrior(),
         TCUtil.N + "Боец древнего " + Scroll.CLR + "ордена " + TCUtil.N + "по борьбе с нечистью. Хороший",

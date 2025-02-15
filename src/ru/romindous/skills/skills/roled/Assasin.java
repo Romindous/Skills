@@ -148,9 +148,6 @@ public class Assasin implements Scroll.Registerable {
             public Rarity rarity() {
                 return Rarity.UNCOM;
             }
-            public InvCondition equip() {
-                return InvCondition.NONE;
-            }
             public boolean selfCast() {return false;}
             public Role role() {return Role.ASSASIN;}
         };
@@ -192,9 +189,6 @@ public class Assasin implements Scroll.Registerable {
             public Rarity rarity() {
                 return Rarity.COMMON;
             }
-            public InvCondition equip() {
-                return InvCondition.NONE;
-            }
             public boolean selfCast() {return true;}
             public Role role() {return Role.ASSASIN;}
         };
@@ -223,7 +217,7 @@ public class Assasin implements Scroll.Registerable {
                 return true;
             }
             public String id() {
-                return "hide";
+                return "cloak";
             }
             public String name() {
                 return "Занавес";
@@ -236,9 +230,6 @@ public class Assasin implements Scroll.Registerable {
             }
             public Rarity rarity() {
                 return Rarity.COMMON;
-            }
-            public InvCondition equip() {
-                return InvCondition.NONE;
             }
             public boolean selfCast() {return true;}
             public Role role() {return Role.ASSASIN;}
@@ -278,9 +269,6 @@ public class Assasin implements Scroll.Registerable {
             }
             public Rarity rarity() {
                 return Rarity.COMMON;
-            }
-            public InvCondition equip() {
-                return InvCondition.NONE;
             }
             public boolean selfCast() {return false;}
             public Role role() {return Role.ASSASIN;}

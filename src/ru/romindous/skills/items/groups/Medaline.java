@@ -31,10 +31,10 @@ public class Medaline extends SkillGroup {
     }
 
     public void before() {
-        chance = SkillGroup.itemConfig(this, "chance", 2);
-        gold_speed_mul = (float) SkillGroup.itemConfig(this, "gold_speed_mul", 0.8d);
-        gold_dur_mul = (float) SkillGroup.itemConfig(this, "gold_dur_mul", 1.4d);
-        thorns = SkillGroup.itemConfig(this, "thorn_dmg", 1.2d);
+        chance = itemConfig("chance", 2);
+        gold_speed_mul = (float) itemConfig("gold_speed_mul", 0.8d);
+        gold_dur_mul = (float) itemConfig("gold_dur_mul", 1.4d);
+        thorns = itemConfig("thorn_dmg", 1.2d);
     }
 
     public List<Data<?>> data() {

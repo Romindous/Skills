@@ -15,6 +15,7 @@ import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
+import ru.romindous.skills.skills.abils.InvCondition;
 import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.survs.Stat;
 import ru.romindous.skills.guides.Entries;
@@ -151,7 +152,9 @@ public class Skill {//скилл
         final float useMana = (float) Stat.skillMana(modifyAll(Chastic.MANA, abs.abil().MANA.calc(abs.lvl())
             * sls.sel().manaMul.calc(sls.lvl())), cst.getStat(Stat.SPIRIT));
         final Ability ab = abs.abil();
-        final EquipmentSlot swing = ab.equip().result(link.caster().getEquipment());
+        final InvCondition ic = ab.equip();
+        final EquipmentSlot swing = ic == null ? EquipmentSlot.BODY
+            : ic.result(link.caster().getEquipment());
         if (swing == null) return false;
         final Selector.SelState ss = sels[curr];
         final Chain ch = link.curr(curr + 1);

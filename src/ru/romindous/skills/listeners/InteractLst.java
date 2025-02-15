@@ -31,6 +31,7 @@ import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
+import ru.romindous.skills.items.Groups;
 import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.survs.Role;
 import ru.romindous.skills.survs.Stat;
@@ -105,36 +106,23 @@ public class InteractLst implements Listener {
             case RIGHT_CLICK_AIR:
                 if (p.isSneaking()) sv.trigger(Trigger.SHIFT_RIGHT, e, p);
                 if (hand != null) {
-                    final Material hm = hand.getType();
-                    if (p.hasCooldown(hm)) {
+                    if (p.hasCooldown(hand)) {
                         e.setUseItemInHand(Result.DENY);
                         return;
                     }
 
-                    if (ItemTags.STAFFS.contains(hm.asItemType())) {
+                    final Groups.StaffType st = Groups.staff(hand);
+                    if (st != null) {
                         p.getWorld().playSound(p, Sound.ENTITY_SHULKER_SHOOT, 1f, 1.4f);
                         final Snowball prj = p.launchProjectile(Snowball.class,
-                            p.getEyeLocation().getDirection().multiply(getHoeFactor(hm)), pr -> {
-                                pr.setItem(new ItemBuilder(switch (hm) {
-                                    case STONE_HOE -> ItemType.CLAY_BALL;
-                                    case IRON_HOE -> ItemType.IRON_NUGGET;
-                                    case GOLDEN_HOE -> ItemType.GOLD_NUGGET;
-                                    case DIAMOND_HOE -> ItemType.ENDER_EYE;
-                                    case NETHERITE_HOE -> ItemType.NETHER_WART;
-                                    default -> ItemType.EGG;
-                                }).build());
+                            p.getEyeLocation().getDirection().multiply(st.spd), pr -> {
+                                pr.setItem(new ItemBuilder(st.shell).build());
                                 pr.setGravity(false);
                             });
                         p.setCooldown(hand.getType(), 8);
                         p.damageItemStack(e.getHand(), 1);
-                        ShotLst.damage(prj, Stat.ranged(STAFF_DMG * switch (hm) {
-                            case STONE_HOE -> 1.2d;
-                            case IRON_HOE -> 1.5d;
-                            case GOLDEN_HOE -> 2.0d;
-                            case DIAMOND_HOE -> 2.5d;
-                            case NETHERITE_HOE -> 4.0d;
-                            default -> 1.0d;
-                        }, sv.getStat(Stat.ACCURACY)));
+                        ShotLst.damage(prj, Stat.ranged(STAFF_DMG * st.dmg, sv.getStat(Stat.ACCURACY)));
+                        break;
                     }
 
                     claim(hand, p, sv, e.getHand());
@@ -269,18 +257,6 @@ public class InteractLst implements Listener {
             hand.setAmount(hand.getAmount() - 1);
             p.getInventory().setItem(slot, hand);
         }
-    }
-
-    public static float getHoeFactor(final Material hoe) {
-        return switch (hoe) {
-            case WOODEN_HOE -> 1f;
-            case STONE_HOE -> 1.15f;
-            case IRON_HOE -> 1.2f;
-            case GOLDEN_HOE -> 1.25f;
-            case DIAMOND_HOE -> 1.4f;
-            case NETHERITE_HOE -> 1.5f;
-            default -> 0f;
-        };
     }
 
     @EventHandler

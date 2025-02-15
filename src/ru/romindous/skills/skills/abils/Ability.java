@@ -30,6 +30,7 @@ import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.chas.Chastic;
+import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.survs.Role;
 import ru.romindous.skills.survs.Survivor;
 
@@ -161,9 +162,10 @@ public abstract class Ability implements Scroll {//способность
             }
             dscs.add(ed);
         }
-        if (!InvCondition.NONE.equals(equip())) {
-            dscs.add("<dark_gray>Нужно иметь:");
-            dscs.add(equip().describe());
+        if (equip() != null || trig() != null) {
+            dscs.add("<dark_gray>Требует:");
+            if (trig() != null) dscs.add(trig().describe());
+            if (equip() != null) dscs.add(equip().describe());
         }
         dscs.add(" ");
         dscs.add(TCUtil.N + "Влияющие Модификаторы:");
@@ -175,12 +177,17 @@ public abstract class Ability implements Scroll {//способность
         dscs.add(" ");
         dscs.add(TCUtil.N + "Стоимость: " + Main.manaClr + StringUtil.toSigFigs(MANA.calc(lvl), Skill.SIG_FIGS) + " душ");
         dscs.add(TCUtil.N + "Перезарядка: " + Main.cdClr + StringUtil.toSigFigs(CD.calc(lvl), Skill.SIG_FIGS) + " сек");
+        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }
 
-//    public abstract Trigger finish();
+    public @Nullable Trigger trig() {
+        return null;
+    }
 
-    public abstract InvCondition equip();
+    public @Nullable InvCondition equip() {
+        return null;
+    }
 
     /*public interface Cast {boolean single();}
     public interface SingleCast {

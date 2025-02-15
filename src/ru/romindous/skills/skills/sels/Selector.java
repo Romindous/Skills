@@ -124,6 +124,7 @@ public abstract class Selector implements Scroll {//подборник
         final int cdMul = (int) ((this.cdMul.calc(lvl) - 1d) * 100d);
         if (cdMul != 0) dscs.add(TCUtil.N + "Эффект на перезарядку: "
             + Main.cdClr + cdMul + "%");
+        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }
 

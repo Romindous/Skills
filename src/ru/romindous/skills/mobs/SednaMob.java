@@ -95,33 +95,33 @@ public abstract class SednaMob extends CustomEntity {
 
     @Override
     protected void modify(final Entity ent) {
-        if (ent instanceof final Mob mb) {
-            final Survivor sv = SM.getNearestSurvivor(mb.getLocation(), 240);
-            if (sv == null) { //спавн далеко от игроков не нужен
-                mb.remove();
-                return;
-            }
-            for (final Map.Entry<Attribute, Double> en : attributes().entrySet()) {
-                final Attribute at = en.getKey();
-                if (mb.getAttribute(at) == null) mb.registerAttribute(at);
-                mb.getAttribute(at).setBaseValue(en.getValue());
-            }
-            final EntityEquipment eq = mb.getEquipment();
-            for (final Map.Entry<EquipmentSlot, ItemStack> en : equipment().entrySet()) {
-                eq.setItem(en.getKey(), en.getValue());
-                eq.setDropChance(en.getKey(), 0f);
-            }
-            sv.setMobChars(mb);
-
-            final Goal<Mob> gl = goal(mb);
-            if (gl != null) {
-//                for (final GoalType gt : gl.getTypes())
-//                    MOB_GOALS.removeAllGoals(mb, gt);
-                MOB_GOALS.addGoal(mb, 1, gl);
-            }
+        if (!(ent instanceof final Mob mb)) {
+            ent.remove();
             return;
         }
-        ent.remove();
+        final Survivor sv = SM.getNearestSurvivor(mb.getLocation(), 240);
+        if (sv == null) { //спавн далеко от игроков не нужен
+            mb.remove();
+            return;
+        }
+        for (final Map.Entry<Attribute, Double> en : attributes().entrySet()) {
+            final Attribute at = en.getKey();
+            if (mb.getAttribute(at) == null) mb.registerAttribute(at);
+            mb.getAttribute(at).setBaseValue(en.getValue());
+        }
+        final EntityEquipment eq = mb.getEquipment();
+        for (final Map.Entry<EquipmentSlot, ItemStack> en : equipment().entrySet()) {
+            eq.setItem(en.getKey(), en.getValue());
+            eq.setDropChance(en.getKey(), 0f);
+        }
+        sv.setMobChars(mb);
+
+        final Goal<Mob> gl = goal(mb);
+        if (gl != null) {
+//                for (final GoalType gt : gl.getTypes())
+//                    MOB_GOALS.removeAllGoals(mb, gt);
+            MOB_GOALS.addGoal(mb, 1, gl);
+        }
     }
 
     public abstract String biome();
