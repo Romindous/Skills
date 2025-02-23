@@ -2,7 +2,10 @@ package ru.romindous.skills.survs;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import org.bukkit.*;
+import org.bukkit.GameMode;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.HumanEntity;
@@ -19,33 +22,32 @@ import ru.komiss77.utils.inventory.SmartInventory;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.SubServer;
-import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.guides.Entry;
+import ru.romindous.skills.guides.Section;
 import ru.romindous.skills.menus.SkillMenu;
 import ru.romindous.skills.skills.Caster;
 import ru.romindous.skills.skills.Scroll;
-import ru.romindous.skills.guides.Entry;
-import ru.romindous.skills.guides.Section;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.tasks.Task;
 
-import static ru.romindous.skills.listeners.MySqlLst.*;
+import static ru.romindous.skills.listeners.MySqlLst.eq;
 
 public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
     //сохраняемое-загружаемое
     public Role role;
-    public int exp, mobKills, deaths, roleStamp, statsPoints, worldOpen;
+    public int exp, roleStamp, statsPoints, worldOpen;
     public boolean showScoreBoard, showActionBar; //показывать - не показывать
     public final int transId; //transfer id
 
     //динамические
-    public int tickAsync; //тики с момента входа. p.getTicksLived() не подходит, выхватывает числа не по порядку
+    /*public int tickAsync; //тики с момента входа. p.getTicksLived() не подходит, выхватывает числа не по порядку
     public int currentPlyTime; //игровое время в секундах с момента входа
-    public int currentLiveSec; //секунды текущей жизни
-    public int acBarPause; //секунды текущей жизни
+    public int currentLiveSec; //секунды текущей жизни*/
+    public int acBarPause; //пауза ActionBar
     public int maxMana = 10, maxHP = 20;
     private float mana = 0f;
     public final StringBuffer abBuffer = new StringBuffer(); //для построения строки актионбар
@@ -56,7 +58,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
     public final HashMap<Ability.AbilState, Integer> abils = new HashMap<>();
     public final HashMap<Modifier.ModState, Integer> mods = new HashMap<>();
     public final SmartInventory skillInv;
-    public final SkillMenu abMenu;
+    public final SkillMenu skillMenu;
     //private WeakReference<Transfer>[] to;
     public Task miniQuestTask;
     public @Nullable Section section;
@@ -67,15 +69,15 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
             stats.put(st, 0);
         }
         transId = SM.tId++;
-        abMenu = new SkillMenu(this);
+        skillMenu = new SkillMenu(this);
         skillInv = SmartInventory.builder()
             .id("Skill "+pl.getName())
-            .provider(abMenu)
+            .provider(skillMenu)
             .size(3, 9)
             .title("         §5§lНавыки Класса")
             .build();
-        sels.put(SAME_ST, 1);
-        sels.put(CASTER_ST, 1);
+        sels.put(Selector.SAME_ST, 1);
+        sels.put(Selector.CASTER_ST, 1);
     }
 
     //===================== ТАБЛОИДЫ =====================
@@ -86,9 +88,9 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         abBuffer.setLength(0);
         //❤ : 50(100)   🔥 : 10(100)
         abBuffer.append(getHeartIcon((int) Math.round(p.getHealth())))
-            .append(TCUtil.N).append("/").append(SM.HEART_CLR).append(maxHP)
+            .append(TCUtil.N).append("<dark_gray>/").append(maxHP)
         .append(Stat.MAGIC.color()).append("   🔥 ").append((int) mana)
-            .append(TCUtil.N).append("/").append(Stat.MAGIC.color()).append(maxMana);
+            .append(TCUtil.N).append("<dark_gray>/").append(maxMana);
 
         if (role == null) {
             abBuffer.append(TCUtil.N).append("   Роль не выбрана!");
@@ -120,10 +122,10 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         score.getSideBar().reset().title(role == null ? "§8Не Выбран" : role.disName())
             .add("<dark_gray>🢗🢗🢗🢗🢗🢗🢗🢗🢗🢗🢗🢗")
             .add(BOARD_LVL, TCUtil.N + "Уровень: " + TCUtil.A + getLevel())
-            .add(BOARD_HP, TCUtil.N + "ХП: " + getHeartIcon((int) pl.getHealth())
-                + TCUtil.N + "/" + SM.HEART_CLR + maxHP)
-            .add(BOARD_MANA, TCUtil.N + "Душ: " + Stat.MAGIC.color() + "🔥 " + (int) mana
-                + TCUtil.N + "/" + Stat.MAGIC.color() + maxMana)
+            .add(BOARD_HP, TCUtil.N + "ХП: "
+                + getHeartIcon((int) pl.getHealth()) + "<dark_gray>/" + maxHP)
+            .add(BOARD_MANA, TCUtil.N + "Душ: " + Stat.MAGIC.color()
+                + "🔥 " + (int) mana + "<dark_gray>/" + maxMana)
             .add("<dark_gray>🢕🢕🢕🢕🢕🢕🢕🢕🢕🢕🢕🢕")
             .add("§e ostrov77.ru").build();
     }
@@ -141,61 +143,88 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
             case HEALTH:
                 score.getSideBar().update(BOARD_HP, TCUtil.N + "ХП: "
                     + getHeartIcon((int) Math.round(p.getHealth()))
-                    + TCUtil.N + "/" + SM.HEART_CLR + maxHP);
+                    + "<dark_gray>/" + maxHP);
                 break;
             case MANA:
                 score.getSideBar().update(BOARD_MANA, TCUtil.N + "Душ: " + Stat.MAGIC.color()
-                    + "🔥 " + (int) mana + TCUtil.N + "/" + Stat.MAGIC.color() + maxMana);
+                    + "🔥 " + (int) mana + "<dark_gray>/" + maxMana);
                 break;
         }
     }
     //======================================================
 
-    public int change(final Selector.SelState as, final int inc) {
-        if (Selector.DEFAULT.contains(as.sel())) return 1;
-        final Integer amt = sels.remove(as);
+    public int count(final Scroll.State as) {
+        final Map<? extends Scroll.State, Integer> stm = stateMap(as);
+        if (stm == null) return 0;
+        return stm.getOrDefault(as, 0);
+    }
+
+    public int change(final Scroll.State as, final int inc) {
+//        new IllegalArgumentException().printStackTrace();
+        final Map<? extends Scroll.State, Integer> stm = stateMap(as);
+        if (stm == null) return 0;
+        if (Scroll.DEFAULT.contains(as.val())) return 1;
+        final Integer amt = stm.remove(as);
         if (amt == null) {
             if (inc <= 0) return 0;
-            sels.put(as, inc);
+            set(stm, as, inc);
             return inc;
         } else {
             final int fam = amt + inc;
             if (fam <= 0) return 0;
-            sels.put(as, fam);
+            set(stm, as, fam);
             return fam;
         }
     }
 
-    public int change(final Ability.AbilState as, final int inc) {
-        final Integer amt = abils.remove(as);
-        if (amt == null) {
-            if (inc <= 0) return 0;
-            abils.put(as, inc);
-            return inc;
-        } else {
-            final int fam = amt + inc;
-            if (fam <= 0) return 0;
-            abils.put(as, fam);
-            return fam;
-        }
+    public @Nullable Map<? extends Scroll.State, Integer> stateMap(final Scroll.State as) {
+        return switch (as) {
+            case final Selector.SelState ignored -> sels;
+            case final Ability.AbilState ignored -> abils;
+            case final Modifier.ModState ignored -> mods;
+            default -> null;
+        };
     }
 
-    public int change(final Modifier.ModState as, final int inc) {
-        final Integer amt = mods.remove(as);
-        if (amt == null) {
-            if (inc <= 0) return 0;
-            mods.put(as, inc);
-            return inc;
-        } else {
-            final int fam = amt + inc;
-            if (fam <= 0) return 0;
-            mods.put(as, fam);
-            return fam;
-        }
+    @SuppressWarnings("unchecked")
+    private static <S extends Scroll.State>
+    void set(final Map<S, Integer> stm, final Object st, final int n) {
+        stm.put((S) st, n);
     }
 
-    private static final Selector.SelState SAME_ST = new Selector.SelState(Selector.SAME, 0);
-    private static final Selector.SelState CASTER_ST = new Selector.SelState(Selector.CASTER, 0);
+    public boolean owns(final Scroll sc) {
+        return switch (sc) {
+            case final Selector sl -> {
+                for (final Selector.SelState ss : sels.keySet())
+                    if (ss.val().equals(sl)) yield true;
+                for (final Skill sk : skills)
+                    for (final Selector.SelState ss : sk.sels)
+                        if (ss.val().equals(sl)) yield true;
+                yield false;
+            }
+            case final Ability ab -> {
+                for (final Ability.AbilState as : abils.keySet())
+                    if (as.val().equals(ab)) yield true;
+                for (final Skill sk : skills)
+                    for (final Ability.AbilState as : sk.abils)
+                        if (as.val().equals(ab)) yield true;
+                yield false;
+            }
+            case final Modifier md -> {
+                for (final Modifier.ModState ms : mods.keySet())
+                    if (ms.val().equals(md)) yield true;
+                for (final Skill sk : skills)
+                    for (final Modifier.ModState ms : sk.mods)
+                        if (ms.val().equals(md)) yield true;
+                yield false;
+            }
+            default -> false;
+        };
+    }
+
+    public boolean canUse(final Scroll sc) {
+        return sc.role() == null || sc.role() == role;
+    }
 
     public void setSkillAbil(final Player p, final @Nullable Ability.AbilState nas, final int abPos, final int skPos) {
         final Skill skill = skills.get(skPos);
@@ -219,13 +248,15 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
                     return;
                 }
                 nasl.set(abPos, nas);
-                if (nas.abil().selfCast()) nssl.set(abPos, CASTER_ST);
-                else if (Selector.CASTER.equals(nssl.get(abPos).sel()))
-                    nssl.set(abPos, SAME_ST);
+                if (nas.val().selfCast()) {
+                    change(nssl.get(abPos), 1);
+                    nssl.set(abPos, Selector.CASTER_ST);
+                } else if (Selector.CASTER.equals(nssl.get(abPos).val()))
+                    nssl.set(abPos, Selector.SAME_ST);
             }
             change(curr, 1);
         } else {
-            //new abil
+            //new val
             if (nas == null) {
                 Ostrov.log_warn("Tried setting null ability at pos " + abPos
                     + ", skill only has " + (skill.abils.length - 1));
@@ -237,10 +268,10 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
                 return;
             }
             nasl.add(nas);
-            nssl.add(nas.abil().selfCast() ? CASTER_ST : SAME_ST);
+            nssl.add(nas.val().selfCast() ? Selector.CASTER_ST : Selector.SAME_ST);
         }
 
-        setSkill(skPos, new Skill(skill.name, skill.trig, nssl.toArray(new Selector.SelState[0]),
+        setSkill(p, skPos, new Skill(skill.name, skill.trig, nssl.toArray(new Selector.SelState[0]),
             nasl.toArray(new Ability.AbilState[0]), skill.mods));
     }
 
@@ -255,9 +286,9 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
 
         final Selector.SelState curr = skill.sels[abPos];
         if (nss == null) {
-            nmsl.set(abPos, SAME_ST);
+            nmsl.set(abPos, Selector.SAME_ST);
         } else {
-            if (!nss.sel().equals(Selector.SAME) && change(nss, -1) < 0) {
+            if (!nss.val().equals(Selector.SAME) && change(nss, -1) < 0) {
                 p.sendMessage("<red>У тебя нет такого подборника!");
                 return;
             }
@@ -265,7 +296,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         }
         change(curr, 1);
 
-        setSkill(skPos, new Skill(skill.name, skill.trig, nmsl.toArray(new Selector.SelState[0]),
+        setSkill(p, skPos, new Skill(skill.name, skill.trig, nmsl.toArray(new Selector.SelState[0]),
             skill.abils, skill.mods));
     }
 
@@ -277,30 +308,31 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
             return;
         }
         nmsl.add(nms);
-        setSkill(skPos, new Skill(skill.name, skill.trig, skill.sels,
+        setSkill(p, skPos, new Skill(skill.name, skill.trig, skill.sels,
             skill.abils, nmsl.toArray(new Modifier.ModState[0])));
     }
 
     public void remSkillMod(final Player p, final int mdPos, final int skPos) {
         final Skill skill = skills.get(skPos);
         if (mdPos >= skill.mods.length) {
-            Ostrov.log_warn("Tried setting null mod at pos " + mdPos
+            Ostrov.log_warn("Tried setting null val at pos " + mdPos
                 + ", skill only has " + skill.abils.length);
             return;
         }
         final List<Modifier.ModState> nmsl = new ArrayList<>(Arrays.asList(skill.mods));
         change(nmsl.remove(mdPos), 1);
-        setSkill(skPos, new Skill(skill.name, skill.trig, skill.sels,
+        setSkill(p, skPos, new Skill(skill.name, skill.trig, skill.sels,
             skill.abils, nmsl.toArray(new Modifier.ModState[0])));
     }
 
-    public void setSkill(final int skPos, final @Nullable Skill nsk) {
+    public void setSkill(final Player p, final int skPos, final @Nullable Skill nsk) {
         if (skPos < skills.size()) {
             if (nsk == null) {
                 skills.remove(skPos);
                 return;
             }
             final Skill skill = skills.get(skPos);
+            p.hideBossBar(skill.cdBar);
             nsk.setCD(skill.currCD());
             skills.set(skPos, nsk);
         } else {
@@ -310,7 +342,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
     }
 
     public void giveScroll(final Player p, final Scroll sc, final int lvl) {
-        final boolean first = !hasScroll(sc, lvl) && p.getGameMode() == GameMode.SURVIVAL;
+        final boolean first = !owns(sc) && p.getGameMode() == GameMode.SURVIVAL;
         if (first) {
             ScreenUtil.sendTitle(p, "", TCUtil.sided(sc.name(lvl), sc.side()), 4, 20, 16);
             Nms.totemPop(p, sc.icon().createItemStack());
@@ -361,19 +393,6 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         }
     }
 
-    public boolean hasScroll(final Scroll sc, final int lvl) {
-        return switch (sc) {
-            case final Selector sl -> sels.containsKey(new Selector.SelState(sl, lvl));
-            case final Ability ab -> abils.containsKey(new Ability.AbilState(ab, lvl));
-            case final Modifier md -> mods.containsKey(new Modifier.ModState(md, lvl));
-            default -> false;
-        };
-    }
-
-    public boolean canUse(final Scroll sc) {
-        return sc.role() == null || sc.role() == role;
-    }
-
     //===================== СТАТА =====================
 
     public void setStat(final Stat st, final int num) {
@@ -407,7 +426,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         updateBoard(p, SM.Info.ALL);
     }
 
-    public static final float EXP_DEL = (float) ConfigVars.get("exp.delimit", 6d);
+    public static final float EXP_DEL = (float) SM.value("delimit", 6d);
     public static final double LVL_DEL = 1d / EXP_DEL;
 
     public void setXp(final Player p, final int ammount) {
@@ -415,6 +434,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         if (exp == 0) {
             p.setLevel(0);
             p.setExp(0f);
+            updateBoard(p, SM.Info.LEVEL);
             return;
         }
 
@@ -443,14 +463,20 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
             statsPoints += lvlAdd;
             p.sendMessage(TCUtil.form(Main.prefix + "Достигнут уровень " + role.color() + currLvl));
             ScreenUtil.sendTitle(p, TCUtil.N + "Новый Уровень " + role.color() + currLvl,
-                TCUtil.N + ClassUtil.rndElmt(SM.COONGRATS));
+                TCUtil.N + ClassUtil.rndElmt(SM.CONGRATS));
             p.playSound(p.getEyeLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 0.6f);
             updateBoard(p, SM.Info.LEVEL);
+        }
+        if (currLvl > SM.NEW_ABIL_LVL) {
+            //TODO entry
+        }
+        if (currLvl > SM.NEW_SKILL_LVL) {
+            //TODO entry
         }
     }
 
     public int getLevel() {
-        return (int) Math.sqrt(exp * LVL_DEL);
+        return NumUtil.sqrt((int) (exp * LVL_DEL));
     }
 
     public int nextLevelXp() {
@@ -505,10 +531,6 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         worldOpen = worldOpen | (1 << (ss.ordinal() + 1));
     }
 
-    public float getMobCoof() {
-        return getLevel() * lvlFactor * Main.subServer.bfr;
-    }
-
     public void trigger(final Trigger tr, final Event e, final LivingEntity caster) {
         for (final Skill sk : skills) sk.attempt(tr, e, caster, this);
     }
@@ -532,22 +554,30 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         return nik + ", skill=" + role.disName() + ", lvl=" + getLevel() + ", souls=" + mana;
     }
 
-    private static final float lvlFactor = (float) ConfigVars.get("surv.lvlFactor", 0.04d);
-    private static final double mobSpeed = ConfigVars.get("surv.mobSpeed", 0.2d);
-    private static final double mobKbRes = ConfigVars.get("surv.mobKbRes", 0.5d);
-    private static final double mobFollow = ConfigVars.get("surv.mobFollow", 1d);
-    private static final double mobDamage = ConfigVars.get("surv.mobDamage", 0.4d);
-    private static final double mobHealth = ConfigVars.get("surv.mobHealth", 0.6d);
+    private static final float lvlFactor = (float) SM.value("lvlFactor", 0.05d);
+    private static final double mobSpeed = SM.value("mobSpeed", 0.2d);
+    private static final double mobKbRes = SM.value("mobKbRes", 0.5d);
+    private static final double mobFollow = SM.value("mobFollow", 1d);
+    private static final double mobDamage = SM.value("mobDamage", 0.6d);
+    private static final double mobHealth = SM.value("mobHealth", 1.2d);
+
+    public float getMobCoof() {
+        return getLevel() * lvlFactor * Main.subServer.bfr;
+    }
 
     public void setMobChars(final Mob mob) {
         //прокачка характеристик в зависимости от мира
         final float cf = getMobCoof();
         scaleAtr(mob.getAttribute(Attribute.MOVEMENT_SPEED), cf * mobSpeed);
+        scaleAtr(mob.getAttribute(Attribute.WATER_MOVEMENT_EFFICIENCY), cf * mobSpeed);
+        scaleAtr(mob.getAttribute(Attribute.SNEAKING_SPEED), cf * mobSpeed);
         scaleAtr(mob.getAttribute(Attribute.FLYING_SPEED), cf * mobSpeed);
         scaleAtr(mob.getAttribute(Attribute.KNOCKBACK_RESISTANCE), cf * mobKbRes);
         scaleAtr(mob.getAttribute(Attribute.FOLLOW_RANGE), cf * mobFollow);
+        scaleAtr(mob.getAttribute(Attribute.TEMPT_RANGE), cf * mobFollow);
         scaleAtr(mob.getAttribute(Attribute.ATTACK_DAMAGE), cf * mobDamage);
         scaleAtr(mob.getAttribute(Attribute.MAX_HEALTH), cf * mobHealth);
+        scaleAtr(mob.getAttribute(Attribute.MAX_ABSORPTION), cf * mobHealth);
         mob.setHealth(mob.getAttribute(Attribute.MAX_HEALTH).getBaseValue());
 
         Stat.modMob(mob, getStat(Stat.CONTROL));
@@ -555,7 +585,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
 
     public static boolean scaleAtr(final AttributeInstance ais, final double vl) {
         if (ais != null) {
-            ais.setBaseValue(Math.max(ais.getBaseValue() * (1d + vl), 0d));
+            ais.setBaseValue(Math.max((ais.getBaseValue() + 0.1d * vl) * (1d + vl), 0d));
             return true;
         }
         return false;
@@ -584,23 +614,23 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
                 .append(sk.trig.name().toLowerCase(Locale.ROOT)).append(eq);
 
             sb2.setLength(0);
-            for (final Modifier.ModState md : sk.mods) {
-                sb2.append(StringUtil.SPLIT_1).append(md.mod().id())
-                    .append(StringUtil.SPLIT_2).append(md.lvl());
+            for (final Selector.SelState sl : sk.sels) {
+                sb2.append(StringUtil.SPLIT_1).append(sl.val().id())
+                    .append(StringUtil.SPLIT_2).append(sl.lvl());
             }
             sb.append(sb2.length() == 0 ? "" : sb2.substring(StringUtil.SPLIT_1.length())).append(eq);
 
             sb2.setLength(0);
             for (final Ability.AbilState ab : sk.abils) {
-                sb2.append(StringUtil.SPLIT_1).append(ab.abil().id())
+                sb2.append(StringUtil.SPLIT_1).append(ab.val().id())
                     .append(StringUtil.SPLIT_2).append(ab.lvl());
             }
             sb.append(sb2.length() == 0 ? "" : sb2.substring(StringUtil.SPLIT_1.length())).append(eq);
 
             sb2.setLength(0);
-            for (final Selector.SelState sl : sk.sels) {
-                sb2.append(StringUtil.SPLIT_1).append(sl.sel().id())
-                    .append(StringUtil.SPLIT_2).append(sl.lvl());
+            for (final Modifier.ModState md : sk.mods) {
+                sb2.append(StringUtil.SPLIT_1).append(md.val().id())
+                    .append(StringUtil.SPLIT_2).append(md.lvl());
             }
             sb.append(sb2.length() == 0 ? "" : sb2.substring(StringUtil.SPLIT_1.length())).append(eq)
                 .append(Math.max(sk.currCD(), 0d));
@@ -610,36 +640,37 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         sb.setLength(0);
         for (final Map.Entry<Selector.SelState, Integer> en : sels.entrySet()) {
             final Selector.SelState ss = en.getKey();
+            if (Scroll.DEFAULT.contains(ss.val())) continue;
             sb.append(StringUtil.SPLIT_0).append((int) en.getValue()).append(eq)
-                .append(ss.sel().id()).append(eq).append(ss.lvl());
+                .append(ss.val().id()).append(eq).append(ss.lvl());
         }
         mysqlData.put("sels", sb.length() == 0 ? "" : sb.substring(StringUtil.SPLIT_0.length()));
 
         sb.setLength(0);
         for (final Map.Entry<Ability.AbilState, Integer> en : abils.entrySet()) {
             final Ability.AbilState as = en.getKey();
+            if (Scroll.DEFAULT.contains(as.val())) continue;
             sb.append(StringUtil.SPLIT_0).append((int) en.getValue()).append(eq)
-                .append(as.abil().id()).append(eq).append(as.lvl());
+                .append(as.val().id()).append(eq).append(as.lvl());
         }
         mysqlData.put("abils", sb.length() == 0 ? "" : sb.substring(StringUtil.SPLIT_0.length()));
 
         sb.setLength(0);
         for (final Map.Entry<Modifier.ModState, Integer> en : mods.entrySet()) {
-            final Modifier.ModState as = en.getKey();
+            final Modifier.ModState ms = en.getKey();
+            if (Scroll.DEFAULT.contains(ms.val())) continue;
             sb.append(StringUtil.SPLIT_0).append((int) en.getValue()).append(eq)
-                .append(as.mod().id()).append(eq).append(as.lvl());
+                .append(ms.val().id()).append(eq).append(ms.lvl());
         }
         mysqlData.put("mods", sb.length() == 0 ? "" : sb.substring(StringUtil.SPLIT_0.length()));
 
-        sb.setLength(0);
+        /*sb.setLength(0);
         for (final Entry en : unread) sb.append(StringUtil.SPLIT_0).append(en.parent.code);
-        mysqlData.put("unread", sb.length() == 0 ? "" : sb.substring(StringUtil.SPLIT_0.length()));
+        mysqlData.put("unread", sb.length() == 0 ? "" : sb.substring(StringUtil.SPLIT_0.length()));*/
 
         sb.setLength(0);
         sb.append("exp").append(eq).append(exp).append(StringUtil.SPLIT_0)
             .append("mana").append(eq).append((int) mana).append(StringUtil.SPLIT_0)
-            .append("mobKills").append(eq).append(mobKills).append(StringUtil.SPLIT_0)
-            .append("deaths").append(eq).append(deaths).append(StringUtil.SPLIT_0)
             .append("statPoints").append(eq).append(statsPoints).append(StringUtil.SPLIT_0)
             .append("worldOpen").append(eq).append(worldOpen).append(StringUtil.SPLIT_0)
             .append("roleStamp").append(eq).append(roleStamp).append(StringUtil.SPLIT_0)
@@ -658,7 +689,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
 
         final ArrayList<Transfer> real = new ArrayList<>();
         for (int i = 0; i < to.length; i++) {
-            final Transfer tr = to[i].get();
+            final Transfer tr = to[i].val();
             if (Transfer.validate(tr)
                     && tr.getSouls() < tr.getMaxSouls()) {
                 real.add(tr);
@@ -760,7 +791,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
             return false;
         }
         for (int i = 0; i < to.length; i++) {
-            final Transfer t = to[i].get();
+            final Transfer t = to[i].val();
             if (Transfer.validate(t)) {
                 if (t.getTId() == id) {
                     return false;
@@ -783,7 +814,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
             return false;
         }
         for (int i = 0; i < to.length; i++) {
-            final Transfer t = to[i].get();
+            final Transfer t = to[i].val();
             if (Transfer.validate(t) && t.getTId() == id) {
                 return true;
             }
@@ -799,7 +830,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
             return false;
         }
         for (int i = 0; i < to.length; i++) {
-            final Transfer t = to[i].get();
+            final Transfer t = to[i].val();
             if (Transfer.validate(t) && t.getTId() == id) {
                 to[i] = etr;
                 fnd = true;
@@ -818,7 +849,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         int slots = 0;
         final Location loc = getPlayer().getLocation();
         for (int i = 0; i < to.length; i++) {
-            final Transfer tr = to[i].get();
+            final Transfer tr = to[i].val();
             if (Transfer.validate(tr)) {
                 if (tr.getLoc(in).distanceSquared(loc) < distSQ) {
                     continue;

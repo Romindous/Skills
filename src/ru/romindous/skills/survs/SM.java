@@ -9,7 +9,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionEffect;
@@ -25,40 +24,43 @@ import ru.komiss77.modules.world.XYZ;
 import ru.komiss77.utils.ScreenUtil;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
-import ru.komiss77.utils.inventory.ConfirmationGUI;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.MainTask;
-import ru.romindous.skills.transfers.TransferType;
+import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.transfers.CuBlock;
+import ru.romindous.skills.transfers.TransferType;
 
 
 
 
 public class SM {
-
     private static BukkitTask mainTask;
 //    private static BukkitTask mainAsyncTask;
-    protected static final String[] COONGRATS;
+    public static final String[] CONGRATS;
 
 //    public static final int LEVEL_XP_MULTIPLER = 50;
 //    public static final int MAX_ABILITY_LEVEL = 4;
     public static final int HP_PER_HEART = 4;
 //    public static final float DJ_FALL_DST = 10000f;
+    public static final String PREFIX = "surv";
     public static final String HEART_MAX = "§2❤ ";
     public static final String HEART_FULL = "§a❤ ";
     public static final String HEART_HALF = "§e❤ ";
     public static final String HEART_LESS = "§6❤ ";
     public static final String HEART_LOW = "§c❤ ";
     public static final String HEART_CLR = "<red>";
-    private static final Location JOIN_LOC;
+    public static final Location JOIN_LOC;
     
     //на переделку
 	public static int tId = 0;
     public static final HashMap<Integer, CuBlock> cublocks = new HashMap<>();
+    public static final int NEW_SKILL_LVL = value("new_skill_lvl", 14);
+    public static final int NEW_ABIL_LVL = value("new_abil_lvl", 8);
+    public static final int NEW_MOD_LVL = value("new_mod_lvl", 2);
     //public static final ArrayList<LentJob> jobs = new ArrayList<>();
     
     static {
-        COONGRATS = new String[]{"поздравляем!", "хорошая игра!", "так держать!", "замечательно!"};
+        CONGRATS = new String[]{"поздравляем!", "хорошая игра!", "так держать!", "замечательно!"};
         JOIN_LOC = Bukkit.getWorlds().getFirst().getSpawnLocation().clone().add(0, 1000, 0);
     }
 
@@ -123,29 +125,15 @@ public class SM {
     }
 
     public static void resetPlayer(final CommandSender cs, final Player p) {
-        if (cs instanceof ConsoleCommandSender) {
-            resetPlayer(p);
-            cs.sendMessage("§6Данные " + p.getName() + " сброшены");
-        } else {
-            ConfirmationGUI.open(p, "§4Сбросить игровые данные?", confirm -> {
-                if (confirm) {
-                    resetPlayer(p);
-                } else {
-                    p.closeInventory();
-                    p.playSound(p.getLocation(), Sound.ENTITY_LEASH_KNOT_PLACE, 0.5f, 0.85f);
-                }
-            });
-        }
-
-    }
-
-    private static void resetPlayer(final Player p) {
+        p.closeInventory();
         final String name = p.getName();
-        p.sendMessage("§6Игровые данные сброшены");
-        Main.petMgr.removePet(p);
+        p.sendMessage(TCUtil.form(Main.prefix + "§6Игровые данные сброшены, перезайди на сервер"));
         ApiOstrov.sendToServer(p, "lobby0", "");
+        cs.sendMessage("§6Данные " + p.getName() + " сброшены!");
+        p.playSound(p.getLocation(), Sound.ENTITY_LEASH_KNOT_PLACE, 0.5f, 0.85f);
         //нужно удалять запись, или сохраняются точки выхода, инвентарь и тд!
-        Ostrov.async( ()-> LocalDB.executePstAsync(Bukkit.getConsoleSender(), "DELETE FROM `playerData` WHERE `name` = '"+name+"';"), 20);
+        Ostrov.async( ()-> LocalDB.executePstAsync(Bukkit.getConsoleSender(),
+            "DELETE FROM `playerData` WHERE `name` = '"+name+"';"), 20);
     }
 
     public enum Info {
@@ -189,7 +177,7 @@ public class SM {
 			for (final String s : spa) {
 				sb.append(StringUtil.SPLIT_0).append(s);
 			}
-			sv.mysqlData.put("resps", sb.isEmpty() ? null : sb.substring(1));
+			sv.mysqlData.put("resps", sb.isEmpty() ? null : sb.substring(StringUtil.SPLIT_0.length()));
 		}
 		
 		p.setRespawnLocation(loc, false);
@@ -201,5 +189,11 @@ public class SM {
 		}
 	}
 
-    
+    public static int value(final String id, final int val) {
+        return ConfigVars.get(SM.PREFIX + "." + id, val);
+    }
+
+    public static double value(final String id, final double val) {
+        return ConfigVars.get(SM.PREFIX + "." + id, val);
+    }
 }

@@ -2,9 +2,7 @@ package ru.romindous.skills.mobs.wastes;
 
 import java.util.Map;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Mob;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -26,8 +24,8 @@ public class Boned extends SednaMob {
         return Skeleton.class;
     }
 
-    private final double scale = mobConfig("scale", 1d);
-    private final double min_scl = mobConfig("min_scl", 0.6d);
+    private final double scale = value("scale", 1d);
+    private final double min_scl = value("min_scl", 0.6d);
     @Override
     public Map<Attribute, Double> attributes() {
         atts.put(Attribute.SCALE, (min_scl - scale) * Main.srnd.nextDouble() + scale);

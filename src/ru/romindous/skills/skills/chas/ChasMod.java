@@ -4,19 +4,11 @@ import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Chain;
 
-public class ChasMod {
-    public final String id;
-    public final Chastic chs;
-    private final double base;
-    private final double scale;
-//    private final boolean dec;
+public record ChasMod(String id, Chastic chs, double base, double scale) {
 
     public ChasMod(final Scroll ability, final String id, final Chastic chs) {
-        this.id = id;
-        this.chs = chs;
-        this.base = ability.value(id + "_base", 1d);
-        this.scale = ability.value(id + "_scale", 0d);
-//        dec = scale < 0;
+        this(id, chs, ability.value(id + "_base", 1d),
+            ability.value(id + "_scale", 0d));
     }
 
     public double modify(final Skill sk, final int lvl) {

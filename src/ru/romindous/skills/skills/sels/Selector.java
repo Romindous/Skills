@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import ru.komiss77.objects.IntHashMap;
+import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
@@ -20,6 +21,7 @@ import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Chain;
+import ru.romindous.skills.survs.Stat;
 
 public abstract class Selector implements Scroll {//подборник
 
@@ -43,16 +45,7 @@ public abstract class Selector implements Scroll {//подборник
     }
 
     public ItemType icon() {
-        return switch (rarity()) {
-            case COMMON -> ItemType.LIGHT_GRAY_DYE;
-            case UNCOM -> ItemType.LIME_DYE;
-            case RARE -> ItemType.LIGHT_BLUE_DYE;
-            case EPIC -> ItemType.PURPLE_DYE;
-            case MYTHIC -> ItemType.CYAN_DYE;
-            case LEGEND -> ItemType.ORANGE_DYE;
-            case ABNORMAL -> ItemType.BLUE_DYE;
-            case ERROR -> ItemType.RED_DYE;
-        };
+        return rarity().icon();
     }
 
     public String data() {
@@ -73,14 +66,12 @@ public abstract class Selector implements Scroll {//подборник
     public int avgAmount(final int lvl) {
         int amt = 2;
         for (final ChasMod cm : stats())
-            if (cm.chs == Chastic.AMOUNT)
+            if (cm.chs() == Chastic.AMOUNT)
                 amt += (int) cm.calc(lvl);
         return amt >> 1;
     }
 
-    public record SelState(Selector sel, int lvl) {}
-
-    private static final byte SIG_FIGS = 2;
+    public record SelState(Selector val, int lvl) implements State {}
 
     public List<String> context(final Skill sk, final int lvl) {
         final List<String> dscs = new ArrayList<>();
@@ -88,8 +79,8 @@ public abstract class Selector implements Scroll {//подборник
         for (final String d : descs()) {
             String ed = d.replace(CLR, rarity().color());
             for (final ChasMod st : stats) {
-                ed = ed.replace(st.id, st.chs.color()
-                    + StringUtil.toSigFigs(st.modify(sk, lvl), SIG_FIGS));
+                ed = ed.replace(st.id(), st.chs().color()
+                    + StringUtil.toSigFigs(st.modify(sk, lvl), Stat.SIG_FIGS_NUM));
             }
             dscs.add(ed);
         }
@@ -105,8 +96,8 @@ public abstract class Selector implements Scroll {//подборник
         for (final String d : descs()) {
             String ed = d.replace(CLR, rarity().color());
             for (final ChasMod st : stats) {
-                ed = ed.replace(st.id, st.chs.color()
-                    + StringUtil.toSigFigs(st.calc(lvl), SIG_FIGS));
+                ed = ed.replace(st.id(), st.chs().color()
+                    + StringUtil.toSigFigs(st.calc(lvl), Stat.SIG_FIGS_NUM));
             }
             dscs.add(ed);
         }
@@ -114,7 +105,7 @@ public abstract class Selector implements Scroll {//подборник
         if (stats.length != 0) {
             dscs.add(TCUtil.N + "Влияющие Модификаторы:");
             for (final ChasMod st : stats) {
-                dscs.add(TCUtil.N + "- " + st.chs.disName());
+                dscs.add(TCUtil.N + "- " + st.chs().disName());
             }
             dscs.add(" ");
         }
@@ -124,7 +115,39 @@ public abstract class Selector implements Scroll {//подборник
         final int cdMul = (int) ((this.cdMul.calc(lvl) - 1d) * 100d);
         if (cdMul != 0) dscs.add(TCUtil.N + "Эффект на перезарядку: "
             + Main.cdClr + cdMul + "%");
+//        dscs.add(" ");
+        return dscs.toArray(new String[0]);
+    }
+
+    public String[] next(final int lvl) {
+        final List<String> dscs = new ArrayList<>();
+        dscs.add(TCUtil.N + "Применимая роль: " + (role() == null ? Role.ANY : role().disName()));
+        if (CASTER.equals(this)) dscs.add(TCUtil.P + "Не может быть изменен!");
+        dscs.add("<dark_gray>Выбирает:");
+        final ChasMod[] stats = stats();
+        for (final String d : descs()) {
+            String ed = d.replace(CLR, rarity().color());
+            for (final ChasMod st : stats) {
+                ed = ed.replace(st.id(), st.chs().color() + StringUtil.toSigFigs(st.calc(lvl), Stat.SIG_FIGS_NUM) + TCUtil.P
+                    + (st.scale() > 0 ? " (+" : " (") + StringUtil.toSigFigs(st.scale(), Stat.SIG_FIGS_PER) + ")" + st.chs().color());
+            }
+            dscs.add(ed);
+        }
         dscs.add(" ");
+        if (stats.length != 0) {
+            dscs.add(TCUtil.N + "Влияющие Модификаторы:");
+            for (final ChasMod st : stats) {
+                dscs.add(TCUtil.N + "- " + st.chs().disName());
+            }
+            dscs.add(" ");
+        }
+        final int manaMul = (int) ((this.manaMul.calc(lvl) - 1d) * 100d);
+        if (manaMul != 0) dscs.add(TCUtil.N + "Эффект на затрату душ: "
+            + Main.manaClr + manaMul + "%");
+        final int cdMul = (int) ((this.cdMul.calc(lvl) - 1d) * 100d);
+        if (cdMul != 0) dscs.add(TCUtil.N + "Эффект на перезарядку: "
+            + Main.cdClr + cdMul + "%");
+//        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }
 
@@ -141,7 +164,7 @@ public abstract class Selector implements Scroll {//подборник
         final double dArc = arc * arc;
         return LocUtil.getChEnts(loc, dst,
             LivingEntity.class, ent -> can.test(ent)
-                && ent.getEyeLocation().subtract(loc).toVector()
+                && EntityUtil.center(ent).subtract(loc).toVector()
                 .normalize().subtract(dir).lengthSquared() < dArc);
     }
 
@@ -150,7 +173,7 @@ public abstract class Selector implements Scroll {//подборник
         final double dArc = arc * arc;
         return LocUtil.getClsChEnt(loc, dst,
             LivingEntity.class, ent -> can.test(ent)
-                && ent.getEyeLocation().subtract(loc).toVector()
+                && EntityUtil.center(ent).subtract(loc).toVector()
                 .normalize().subtract(dir).lengthSquared() < dArc);
     }
 
@@ -170,8 +193,9 @@ public abstract class Selector implements Scroll {//подборник
     }
 
     public static final Selector SAME;
+    public static final SelState SAME_ST;
     public static final Selector CASTER;
-    public static final Set<Selector> DEFAULT;
+    public static final SelState CASTER_ST;
 
     static {
         SAME = new Selector() {
@@ -197,6 +221,7 @@ public abstract class Selector implements Scroll {//подборник
                 return Main.canAttack(ch.caster(), ch.target(), true) ? List.of(ch.target()) : List.of();
             }
         };
+        SAME_ST = new SelState(SAME, 0);
 
         CASTER = new Selector() {
             public String id() {
@@ -221,8 +246,9 @@ public abstract class Selector implements Scroll {//подборник
                 return List.of(ch.caster());
             }
         };
+        CASTER_ST = new SelState(CASTER, 0);
 
-        DEFAULT = Set.of(SAME, CASTER);
+        DEFAULT.add(SAME); DEFAULT.add(CASTER);
         final List<Selector> def = RARITIES.get(SAME.sum());
         def.remove(SAME.sum()); def.remove(CASTER.sum());
     }

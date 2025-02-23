@@ -1,10 +1,13 @@
 package ru.romindous.skills.mobs;
 
 import javax.annotation.Nullable;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import com.destroystokyo.paper.entity.ai.Goal;
+import com.destroystokyo.paper.entity.ai.GoalKey;
+import com.destroystokyo.paper.entity.ai.GoalType;
 import com.destroystokyo.paper.entity.ai.MobGoals;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -17,6 +20,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.entities.CustomEntity;
 import ru.komiss77.modules.rolls.RollTree;
@@ -26,11 +30,11 @@ import ru.komiss77.modules.world.LocFinder;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.NumUtil;
 import ru.komiss77.version.Nms;
-import ru.romindous.skills.survs.SM;
-import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.listeners.DamageLst;
 import ru.romindous.skills.listeners.DeathLst;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Survivor;
 
 public abstract class SednaMob extends CustomEntity {
 
@@ -49,7 +53,7 @@ public abstract class SednaMob extends CustomEntity {
     protected AreaSpawner spawn;
     protected SednaMob() {
         super();
-        cond = new AreaSpawner.SpawnCondition(mobConfig("amount", 1),
+        cond = new AreaSpawner.SpawnCondition(value("amount", 1),
             CreatureSpawnEvent.SpawnReason.NATURAL);
         Ostrov.log("Registered mob " + key().value());
     }
@@ -62,7 +66,7 @@ public abstract class SednaMob extends CustomEntity {
         return cond;
     }
 
-    public final int mana = mobConfig("mana", 1);
+    public final int mana = value("mana", 1);
 
     protected static boolean limit(final BVec loc) {
         final int encd = ((loc.x >> COORD_DEL) << LOC_ENCD) + (loc.z >> COORD_DEL);
@@ -85,7 +89,7 @@ public abstract class SednaMob extends CustomEntity {
 
     @Override
     protected int spawnCd() {
-        return mobConfig("tick_cd", 40);
+        return value("tick_cd", 40);
     }
 
     @Override
@@ -143,7 +147,7 @@ public abstract class SednaMob extends CustomEntity {
 
     public abstract Map<EquipmentSlot, ItemStack> equipment();
 
-    public @Nullable Goal<Mob> goal(final Mob mb) {
+    public @Nullable MobGoal goal(final Mob mb) {
         return null;
     }
 
@@ -170,11 +174,11 @@ public abstract class SednaMob extends CustomEntity {
     @Override
     protected void onShoot(final ProjectileLaunchEvent e) {}
 
-    public int mobConfig(final String id, final int val) {
+    public int value(final String id, final int val) {
         return ConfigVars.get(prefix() + key().value() + "." + id, val);
     }
 
-    public double mobConfig(final String id, final double val) {
+    public double value(final String id, final double val) {
         return ConfigVars.get(prefix() + key().value() + "." + id, val);
     }
 
@@ -183,14 +187,14 @@ public abstract class SednaMob extends CustomEntity {
         atts.forEach((at, nm) -> {
             final AttributeInstance ai = DEFAULT_ATTS.getAttribute(at);
             if (ai == null) return;
-            map.put(at, mobConfig(nm, ai.getBaseValue()));
+            map.put(at, value(nm, ai.getBaseValue()));
         });
         return map;
     }
 
     protected abstract class Spawner extends AreaSpawner {
-        public final int radius = mobConfig("radius", 40);
-        public final int offset = mobConfig("offset", 16);
+        public final int radius = value("radius", 40);
+        public final int offset = value("offset", 16);
 
         @Override
         protected int radius() {
@@ -221,5 +225,13 @@ public abstract class SednaMob extends CustomEntity {
         }
 
         protected abstract boolean extra(final BVec loc);
+    }
+
+    public abstract class MobGoal implements Goal<Mob> {
+        private final GoalKey<Mob> key = GoalKey.of(Mob.class, SednaMob.this.getKey());
+        private static final EnumSet<GoalType> types = EnumSet.noneOf(GoalType.class);
+        public boolean shouldActivate() {return true;}
+        public @NotNull GoalKey<Mob> getKey() {return key;}
+        public @NotNull EnumSet<GoalType> getTypes() {return types;}
     }
 }

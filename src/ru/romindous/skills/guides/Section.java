@@ -13,6 +13,7 @@ import ru.komiss77.modules.quests.Quest;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.SmartInventory;
+import ru.romindous.skills.menus.MainMenu;
 import ru.romindous.skills.survs.Survivor;
 
 public enum Section {
@@ -86,12 +87,12 @@ public enum Section {
         for (final Entry en : sv.unread)
             if (en.sec != null) unops.add(en.sec);
         SmartInventory.builder().id("Journal " + p.getName())
-            .title(TCUtil.A + "        <stale><b>Твои Заметки")
+            .title(TCUtil.A + "          <stale><b>Твои Заметки")
             .type(InventoryType.HOPPER).provider((pl, its) -> {
                 pl.playSound(pl, Sound.ITEM_ARMOR_EQUIP_LEATHER, 2f, 0.6f);
                 its.set(2, ClickableItem.from(new ItemBuilder(sv.role.getIcon())
                     .name(TCUtil.sided(TCUtil.P + "Главное Меню", "🢙")).deLore().build(), e -> {
-                    pl.performCommand("skill");
+                    MainMenu.open(p);
                 }));
                 for (final Section sc : Section.values()) {
                     if (sc.parent().isComplete(sv)) {

@@ -27,8 +27,9 @@ public enum Stat {
     private static final String plus = "<dark_green>(+) " + TCUtil.N;
     private static final String minus = "<dark_red>(-) " + TCUtil.N;
     private static final String split = ":";
-    private static final byte SIG_FIGS_NUM = 2;
-    private static final byte SIG_FIGS_PER = 1;
+
+    public static final byte SIG_FIGS_NUM = 2;
+    public static final byte SIG_FIGS_PER = 1;
 
     private final String name;
     private final String clr;

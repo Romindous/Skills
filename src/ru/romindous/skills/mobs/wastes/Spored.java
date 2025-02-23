@@ -1,10 +1,7 @@
 package ru.romindous.skills.mobs.wastes;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import com.destroystokyo.paper.ParticleBuilder;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -66,30 +63,36 @@ public class Spored extends SednaMob {
         final double dmg = mb.getAttribute(Attribute.ATTACK_DAMAGE).getBaseValue();
         final AttributeInstance sca = mb.getAttribute(Attribute.SCALE);
         final double scl = sca == null ? 1d : sca.getValue();
-        e.setYield((float) (dmg * scl)); if (scl < 1d) return;
+        e.setYield((float) (dmg * scl));
+        if (scl < 1d) {e.blockList().clear(); return;}
         new ParticleBuilder(Particle.COMPOSTER).location(mb.getLocation())
-            .count((int) (dmg * 20d)).offset(dmg, dmg, dmg).allPlayers().spawn();
-        final List<Block> bls = e.blockList();
+            .count((int) (dmg * 20d)).offset(dmg, dmg, dmg).receivers(40).spawn();
         final World w = e.getEntity().getWorld();
-        final Set<BVec> bps = bls.stream().map(BVec::of).collect(Collectors.toSet());
-        final BVec[] sbls = ClassUtil.shuffle(bps.toArray(new BVec[0]));
-        final List<BVec> finLocs = new LinkedList<>();
+        final BVec[] sbls = ClassUtil.shuffle(e.blockList().stream().map(BVec::of).toArray(BVec[]::new));
         for (int i = sbls.length >> 2; i != 0; i--) {
             final BVec bl = sbls[i];
-            final BVec below = BVec.of(bl.x, bl.y - 1, bl.z);
-            if (bps.contains(below) || !DIRT.contains(Nms.fastType(w, below))) continue;
-            bls.removeIf(bb -> bl.distAbs(bb.getLocation()) == 0);
-            final Block b = bl.block(w);
+            final BVec above = BVec.of(bl.x, bl.y + 1, bl.z);
+            if (!DIRT.contains(Nms.fastType(w, bl))
+                || !Nms.fastType(w, above).isAir()) {
+                sbls[i] = null;
+                continue;
+            }
+            sbls[i] = above;
+            final Block b = above.block(w);
             b.setBlockData(MOSS_DATA, false);
-            Ostrov.sync(() -> {
-                final Block b2 = bl.block(w);
-                if (b2.getType() == MOSS.getType()) {
-                    b2.setBlockData(BlockUtil.air, false);
-                    EntityUtil.effect(spawn(bl.center(w), MINI_SCALE),
-                        Sound.BLOCK_BIG_DRIPLEAF_BREAK, 0.6f, Particle.HAPPY_VILLAGER);
-                }
-            }, SPORE_TICKS);
         }
+        e.blockList().clear();
+        Ostrov.sync(() -> {
+            for (int i = sbls.length >> 2; i != 0; i--) {
+                final BVec bl = sbls[i];
+                if (bl == null) continue;
+                final Block b = bl.block(w);
+                if (b.getType() != MOSS.getType()) continue;
+                b.setBlockData(BlockUtil.air, false);
+                EntityUtil.effect(spawn(bl.center(w), MINI_SCALE),
+                    Sound.BLOCK_BIG_DRIPLEAF_BREAK, 0.6f, Particle.HAPPY_VILLAGER);
+            }
+        }, SPORE_TICKS);
     }
 
     @Override

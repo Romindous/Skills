@@ -24,20 +24,20 @@ import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.skills.chas.Chastic;
-import ru.romindous.skills.skills.Rarity;
-import ru.romindous.skills.survs.Role;
-import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.events.PlayerKillEntityEvent;
+import ru.romindous.skills.skills.Rarity;
 import ru.romindous.skills.skills.Scroll;
-import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.abils.Chain;
 import ru.romindous.skills.skills.abils.InvCondition;
+import ru.romindous.skills.skills.chas.ChasMod;
+import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Role;
 
-public class Warrior implements Scroll.Registerable {
+public class Warrior implements Scroll.Regable {
     @Override
     public void register() {
 
@@ -54,7 +54,7 @@ public class Warrior implements Scroll.Registerable {
             }
             private final String[] desc = new String[]{
                 TCUtil.N + "Сущности вокруг, с " + CLR + "броней" + TCUtil.N + " на любой",
-                TCUtil.N + "части " + CLR + "тела" + TCUtil.N + ", не далее " + DIST.id + " бл."};
+                TCUtil.N + "части " + CLR + "тела" + TCUtil.N + ", не далее " + DIST.id() + " бл."};
             public String[] descs() {
                 return desc;
             }
@@ -95,22 +95,23 @@ public class Warrior implements Scroll.Registerable {
                 final Location start = caster.getEyeLocation();
                 final Vector dir = start.getDirection();
                 final double dst = DIST.modify(ch, lvl);
-                caster.setVelocity(caster.getVelocity().add(dir.multiply(dst * vel)));
+                final Vector vl = caster.getVelocity();
+                caster.setVelocity(vl.add(dir.clone().multiply(dst * vel * balMul(vl))));
+                caster.setNoDamageTicks(20);
 
                 final Location fin = start.add(dir.multiply(dst));
-                fin.setYaw(-fin.getYaw());
+                fin.setYaw(180 + fin.getYaw());
                 fin.setPitch(-fin.getPitch());
 
                 EntityUtil.moveffect(caster, Sound.ENTITY_BREEZE_SHOOT, 1.2f, CLR);
-
+//                new ParticleBuilder(Particle.SQUID_INK).location(fin).count(20).extra(0d).allPlayers().spawn();
                 final double dmg = DAMAGE.modify(ch, lvl);
                 for (final LivingEntity le : getChArcLents(fin, dst, arc, ent -> Main.canAttack(caster, ent, false))) {
                     final EntityDamageByEntityEvent fe = makeDamageEvent(caster, le);
                     fe.setDamage(dmg);
-                    next(ch, () -> {
-                        le.damage(fe.getDamage(), fe.getDamageSource());
-                        defKBLe(caster, le, false);
-                    });
+                    le.damage(fe.getDamage(), fe.getDamageSource());
+                    defKBLe(caster, le, false);
+                    next(ch);
                 }
                 return true;
             }
@@ -121,13 +122,13 @@ public class Warrior implements Scroll.Registerable {
                 return "Пронзание";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Продвигает чародея на " + DIST.id + " бл. " + TCUtil.N + "вперед,",
-                TCUtil.N + "нанося " + DAMAGE.id + " ед. " + TCUtil.N + "урона задетым целям"};
+                TCUtil.N + "Продвигает чародея на " + DIST.id() + " бл. " + TCUtil.N + "вперед,",
+                TCUtil.N + "нанося " + DAMAGE.id() + " ед. " + TCUtil.N + "урона задетым целям"};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
-                return Rarity.COMMON;
+                return Rarity.UNCOM;
             }
             public InvCondition equip() {
                 return InvCondition.SWORD_FIST;
@@ -167,7 +168,7 @@ public class Warrior implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Взывает к " + CLR + "святости  " + TCUtil.N + "оружия пользователя,",
-                TCUtil.N + "нанося (" + DAMAGE.id + " ед. " + TCUtil.N + "макс.) урон, завися",
+                TCUtil.N + "нанося (" + DAMAGE.id() + " ед. " + TCUtil.N + "макс.) урон, завися",
                 TCUtil.N + "от уровня " + CLR + "света " + TCUtil.N + "в точке удара"};
             public String[] descs() {
                 return desc;
@@ -185,14 +186,23 @@ public class Warrior implements Scroll.Registerable {
         new Ability() {//Отражение
             final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
-            final ChasMod[] stats = new ChasMod[] {SPEED};
+            final ChasMod[] stats = new ChasMod[] {SPEED, TIME};
             public ChasMod[] stats() {
                 return stats;
             }
             private final int amp = value("amp", 1);
+            public Trigger trig() {
+                return Trigger.USER_HURT;
+            }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
                 final LivingEntity tgt = ch.target();
+                if (!(ch.trig() instanceof final EntityDamageEvent e)
+                    || e.getEntity().getEntityId() != caster.getEntityId()) {
+                    inform(ch, name() + " <red>должна следовать тригеру <u>"
+                        + Trigger.USER_HURT.disName());
+                    return false;
+                }
                 if (caster instanceof final Player pl) {
                     if (!pl.isBlocking()) {
                         inform(ch, "Нужно держать поднятым щит!");
@@ -204,10 +214,9 @@ public class Warrior implements Scroll.Registerable {
 
                 final double time = TIME.modify(ch, lvl);
                 final double speed = SPEED.modify(ch, lvl);
-                next(ch, () -> {
-                    addEffect(tgt, PotionEffectType.SLOWNESS, time, amp, false);
-                    defKBLe(caster, tgt, true, speed);
-                });
+                addEffect(tgt, PotionEffectType.SLOWNESS, time, amp, false);
+                defKBLe(caster, tgt, true, speed);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -217,18 +226,18 @@ public class Warrior implements Scroll.Registerable {
                 return "Отражение";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Отталкивает цель со скоростью " + SPEED.id + " бл./сек. " + TCUtil.N + ",",
-                TCUtil.N + "при поднятом " + CLR + "щите" + TCUtil.N + ", замедляя ее на " + TIME.id + " сек."};
+                TCUtil.N + "Отталкивает цель со скоростью " + SPEED.id() + " бл./сек.",
+                TCUtil.N + "при поднятом " + CLR + "щите" + TCUtil.N + ", замедляя ее на " + TIME.id() + " сек."};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
-                return Rarity.COMMON;
+                return Rarity.UNCOM;
             }
             public InvCondition equip() {
                 return InvCondition.SHIELD_OFF;
             }
-            public boolean selfCast() {return true;}
+            public boolean selfCast() {return false;}
             public Role role() {return Role.WARRIOR;}
         };
 
@@ -250,7 +259,7 @@ public class Warrior implements Scroll.Registerable {
                     caster.removePotionEffect(PotionEffectType.HASTE);
                 } else amp = 0;
                 caster.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, (int) (TIME.modify(ch, lvl) * 20d), amp));
-                EntityUtil.effect(caster, Sound.BLOCK_CONDUIT_AMBIENT, amp * 0.5f, Particle.DRIPPING_LAVA);
+                EntityUtil.effect(ch.target(), Sound.BLOCK_CONDUIT_AMBIENT, amp * 0.5f, Particle.DRIPPING_LAVA);
 
                 next(ch);
                 return true;
@@ -264,15 +273,12 @@ public class Warrior implements Scroll.Registerable {
             private final String[] desc = new String[] {
                 TCUtil.N + "Концентрирует аттаки пользователя, " + CLR + "ускоряя",
                 TCUtil.N + "их " + CLR + "еффектом " + TCUtil.N + "с макс. силой в",
-                TCUtil.N + EFFECT.id + TCUtil.N + " и длительностью " + TIME.id + " сек."};
+                TCUtil.N + EFFECT.id() + TCUtil.N + " и длительностью " + TIME.id() + " сек."};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
                 return Rarity.COMMON;
-            }
-            public InvCondition equip() {
-                return InvCondition.SWORD;
             }
             public boolean selfCast() {return false;}
             public Role role() {return Role.WARRIOR;}
@@ -292,7 +298,7 @@ public class Warrior implements Scroll.Registerable {
                 final LivingEntity tgt = ch.target();
                 if (!(ch.trig() instanceof final EntityDamageEvent e)
                     || e.getEntity().getEntityId() != caster.getEntityId()) {
-                    inform(ch, name() + " должна следовать тригеру <u>"
+                    inform(ch, name() + " <red>должна следовать тригеру <u>"
                         + Trigger.USER_HURT.disName());
                     return false;
                 }
@@ -303,13 +309,11 @@ public class Warrior implements Scroll.Registerable {
 
                 Nms.swing(caster, EquipmentSlot.HAND);
                 EntityUtil.effect(caster, Sound.ITEM_SHIELD_BREAK, 0.6f, Particle.SCRAPE);
-
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 fe.setDamage(DAMAGE.modify(ch, lvl) * e.getDamage());
-                next(ch, () -> {
-                    tgt.damage(fe.getDamage(), fe.getDamageSource());
-                    defKBLe(caster, tgt, false);
-                });
+                tgt.damage(fe.getDamage(), fe.getDamageSource());
+                defKBLe(caster, tgt, false);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -320,7 +324,7 @@ public class Warrior implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Реагиует на " + CLR + "аттаку " + TCUtil.N + "по пользователю",
-                TCUtil.N + "нанося " + DAMAGE.id + "x " + TCUtil.N + "урона цели, в ответ"};
+                TCUtil.N + "нанося " + DAMAGE.id() + "x " + TCUtil.N + "урона цели, в ответ"};
             public String[] descs() {
                 return desc;
             }
@@ -328,22 +332,25 @@ public class Warrior implements Scroll.Registerable {
                 return Rarity.COMMON;
             }
             public InvCondition equip() {
-                return InvCondition.SWORD_SHIELD;
+                return InvCondition.MELEE;
             }
-            public boolean selfCast() {return true;}
+            public boolean selfCast() {return false;}
             public Role role() {return Role.WARRIOR;}
         };
 
         new Ability() {//Триумф
-            final ChasMod TIME = new ChasMod(this, "time", Chastic.DAMAGE_DEALT);
+            final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod[] stats = new ChasMod[] {TIME};
             public ChasMod[] stats() {
                 return stats;
             }
+            public Trigger trig() {
+                return Trigger.KILL_ENTITY;
+            }
             private final int amp = value("amp", 1);
             public boolean cast(final Chain ch, final int lvl) {
                 if (!(ch.trig() instanceof PlayerKillEntityEvent)) {
-                    inform(ch, name() + " должна следовать тригеру <u>"
+                    inform(ch, name() + " <red>должна следовать тригеру <u>"
                         + Trigger.KILL_ENTITY.disName());
                     return false;
                 }
@@ -362,7 +369,7 @@ public class Warrior implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Дает эффект " + CLR + "силы " + TCUtil.N + "пользователю,",
-                TCUtil.N + "при убийстве цели, на " + TIME.id + " сек"};
+                TCUtil.N + "при убийстве цели, на " + TIME.id() + " сек"};
             public String[] descs() {
                 return desc;
             }

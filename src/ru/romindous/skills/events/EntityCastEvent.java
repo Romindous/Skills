@@ -12,6 +12,7 @@ public class EntityCastEvent extends EntityEvent implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
 
+    private final LivingEntity tgt;
     private final Location loc;
     private final Ability ab;
 
@@ -19,12 +20,17 @@ public class EntityCastEvent extends EntityEvent implements Cancellable {
 
     public EntityCastEvent(final Chain ch, final Ability abil) {
         super(ch.caster());
+        tgt = ch.target();
         loc = ch.at();
         ab = abil;
     }
 
     public LivingEntity getEntity() {
         return (LivingEntity) this.entity;
+    }
+
+    public LivingEntity getTarget() {
+        return this.tgt;
     }
 
     public Location getLocation() {

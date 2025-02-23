@@ -18,8 +18,8 @@ public abstract class SvSelect implements InventoryProvider {
         this.skIx = skIx;
     }
 
-    protected void openLast(final Player p) {
-        sv.abMenu.skillIx = skIx;
+    public void openLast(final Player p) {
+        sv.skillMenu.skillIx = skIx;
         p.closeInventory();
         sv.skillInv.open(p);
     }

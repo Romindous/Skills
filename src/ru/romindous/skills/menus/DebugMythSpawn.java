@@ -18,15 +18,15 @@ public class DebugMythSpawn /*implements InventoryProvider*/ {/*
         }
         
         for (final String mmob : types) {
-            final MythicMob mm = MythBoss.mobMgr.getMythicMob(mmob).get();
+            final MythicMob mm = MythBoss.mobMgr.getMythicMob(mmob).val();
             
             menuEntry.add( ClickableItem.from(
                     new ItemBuilder(ItemType.PIG_SPAWN_EGG)
                         .name(mm.getInternalName())
                         .lore("§bMythicMobs")
-                        .lore(mm.getdisName()==null ? "§8nodisName" : mm.getdisName().get())
-                        .lore(mm.getHealth()==null ? "§8noHealth" :"§7health="+mm.getHealth().get())
-                        .lore(mm.getDamage()==null ? "§8noDamage" :"§7damage="+mm.getDamage().get())
+                        .lore(mm.getdisName()==null ? "§8nodisName" : mm.getdisName().val())
+                        .lore(mm.getHealth()==null ? "§8noHealth" :"§7health="+mm.getHealth().val())
+                        .lore(mm.getDamage()==null ? "§8noDamage" :"§7damage="+mm.getDamage().val())
                         .lore("§7")
                         .lore("§7")
                         .lore("§7")
@@ -51,7 +51,7 @@ public class DebugMythSpawn /*implements InventoryProvider*/ {/*
         //boolean current;
         for (final String modelName : modelNames) {
 //Ostrov.log("idx="+idx+" index="+modelNames.indexOf(modelName));
-            //current = idx == modelNames.indexOf(modelName); //modelNames.get(idx)!=null && modelNames.get(idx).equals(modelName);
+            //current = idx == modelNames.indexOf(modelName); //modelNames.val(idx)!=null && modelNames.val(idx).equals(modelName);
         
             menuEntry.add(ClickableItem.from(new ItemBuilder(ItemType.RABBIT_HIDE)
                     .name(modelName)

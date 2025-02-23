@@ -41,12 +41,12 @@ public abstract class InvCondition {
         }
     };
 
-    public static final InvCondition FIST_OFF = new InvCondition(clr("Пустую") + TCUtil.N + " вторичную руку") {
+    /*public static final InvCondition FIST_OFF = new InvCondition(clr("Пустую") + TCUtil.N + " вторичную руку") {
         public EquipmentSlot result(final EntityEquipment inv) {
             final ItemStack it = inv.getItemInOffHand();
             return it.getType().isAir() ? OFF_HAND : null;
         }
-    };
+    };*/
 
     public static final InvCondition FIST_ANY = new InvCondition(TCUtil.N + "Любую руку " + clr("пустой")) {
         public EquipmentSlot result(final EntityEquipment inv) {
@@ -57,12 +57,12 @@ public abstract class InvCondition {
         }
     };
 
-    public static final InvCondition SWORD = new InvCondition(clr("Меч") + TCUtil.N + " в основной руке") {
+    /*public static final InvCondition SWORD = new InvCondition(clr("Меч") + TCUtil.N + " в основной руке") {
         public EquipmentSlot result(final EntityEquipment inv) {
             final ItemStack it = inv.getItemInMainHand();
             return ItemTags.SWORDS.contains(it.getType().asItemType()) ? HAND : null;
         }
-    };
+    };*/
 
     public static final InvCondition SWORD_BOTH = new InvCondition(clr("Мечи") + TCUtil.N + " в обоих руках") {
         public EquipmentSlot result(final EntityEquipment inv) {
@@ -80,21 +80,21 @@ public abstract class InvCondition {
         }
     };
 
-    public static final InvCondition SWORD_SHIELD = new InvCondition(clr("Меч") + TCUtil.N + " в основной руке, " + clr("щит") + TCUtil.N + " в другой") {
+    /*public static final InvCondition SWORD_SHIELD = new InvCondition(clr("Меч") + TCUtil.N + " в основной руке, " + clr("щит") + TCUtil.N + " в другой") {
         public EquipmentSlot result(final EntityEquipment inv) {
             final ItemStack it = inv.getItemInMainHand(), ofh = inv.getItemInOffHand();
             return ItemTags.SWORDS.contains(it.getType().asItemType())
                 && ItemType.SHIELD.equals(ofh.getType().asItemType())
                 ? (Main.srnd.nextBoolean() ? HAND : OFF_HAND) : null;
         }
-    };
+    };*/
 
-    public static final InvCondition AXE = new InvCondition(clr("Топор") + TCUtil.N + " в основной руке") {
+    /*public static final InvCondition AXE = new InvCondition(clr("Топор") + TCUtil.N + " в основной руке") {
         public EquipmentSlot result(final EntityEquipment inv) {
             final ItemStack it = inv.getItemInMainHand();
             return ItemTags.AXES.contains(it.getType().asItemType()) ? HAND : null;
         }
-    };
+    };*/
 
     public static final InvCondition MELEE = new InvCondition(clr("Любой клинок") + TCUtil.N + " в основной руке") {
         public EquipmentSlot result(final EntityEquipment inv) {
@@ -119,12 +119,12 @@ public abstract class InvCondition {
         }
     };
 
-    public static final InvCondition BOW = new InvCondition(clr("Лук / Арбалет") + TCUtil.N + " в основной руке") {
+    /*public static final InvCondition BOW = new InvCondition(clr("Лук / Арбалет") + TCUtil.N + " в основной руке") {
         public EquipmentSlot result(final EntityEquipment inv) {
             final ItemStack hnd = inv.getItemInMainHand();
             return ItemTags.RANGED.contains(hnd.getType().asItemType()) ? HAND : null;
         }
-    };
+    };*/
 
     public static final InvCondition BOW_ANY = new InvCondition(clr("Лук / Арбалет") + TCUtil.N + " в любой руке") {
         public EquipmentSlot result(final EntityEquipment inv) {

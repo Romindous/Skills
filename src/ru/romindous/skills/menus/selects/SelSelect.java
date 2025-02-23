@@ -11,6 +11,7 @@ import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
+import ru.romindous.skills.menus.UpgradeMenu;
 import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.sels.Selector;
@@ -57,40 +58,60 @@ public class SelSelect extends SvSelect {
         for (final Map.Entry<Selector.SelState, Integer> en : sv.sels.entrySet()) {
             while (switch (slot % 9) {case 0, 8 -> true; default -> false;}) slot++;
             final Selector.SelState sl = en.getKey();
-            if (!sv.canUse(sl.sel()) || sl.sel().equals(Selector.CASTER)) continue;
-            if (Selector.SAME.equals(sl.sel())) {
-                its.set(slot, ClickableItem.from(new ItemBuilder(sl.sel().display(sl.lvl()))
-                    .amount(en.getValue()).lore("<dark_gray>(клик - выбор)").build(), e -> {
-                        if (sk == null) {
-                            openLast(p);
-                            return;
-                        }
-
-                        sv.setSkillSel(p, sl, abSlot, skIx);
+            if (!sv.canUse(sl.val()) || sl.val().equals(Selector.CASTER)) continue;
+            final int amt = en.getValue();
+            if (Selector.SAME.equals(sl.val())) {
+                its.set(slot, ClickableItem.from(new ItemBuilder(sl.val().display(sl.lvl()))
+                    .amount(amt).lore("<dark_gray>(клик - выбор)").build(), e -> {
+                    if (sk == null) {
                         openLast(p);
+                        return;
                     }
-                ));
+
+                    sv.setSkillSel(p, sl, abSlot, skIx);
+                    openLast(p);
+                }));
+                slot++;
                 continue;
             }
-            its.set(slot, ClickableItem.from(new ItemBuilder(sl.sel().display(sl.lvl())).lore("<dark_gray>(клик - выбор)")
+            its.set(slot, ClickableItem.from(new ItemBuilder(sl.val().display(sl.lvl())).amount(amt)
+                .lore("<dark_gray>(клик - выбор)").lore(amt < 2 ? "" : TCUtil.A + "ПКМ" + TCUtil.N + " - Прокачка (" + amt + "/2)")
                 .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
-                    switch (e.getClick()) {
-                        case DROP, CONTROL_DROP:
-                            if (sv.change(sl, -1) < 0) return;
-                            ItemUtil.giveItemsTo(p, sl.sel().drop(sl.lvl()));
-                            reopen(p, its);
-                            return;
-                        default:
-                            if (sk == null) {
-                                openLast(p);
-                                return;
-                            }
-
-                            sv.setSkillSel(p, sl, abSlot, skIx);
-                            openLast(p);
-                    }
+                final int cnt = sv.count(sl);
+                if (cnt < 1) {openLast(p); return;}
+                final ItemStack drop;
+                switch (e.getClick()) {
+                    case DROP:
+                        sv.change(sl, -1);
+                        drop = sl.val().drop(sl.lvl());
+                        ItemUtil.giveItemsTo(p, drop);
+                        reopen(p, its);
+                        return;
+                    case CONTROL_DROP:
+                        sv.change(sl, -cnt);
+                        drop = sl.val().drop(sl.lvl());
+                        drop.setAmount(cnt);
+                        ItemUtil.giveItemsTo(p, drop);
+                        reopen(p, its);
+                        return;
+                    case RIGHT, SHIFT_RIGHT:
+                        if (cnt < 2) return;
+                        sv.change(sl, -2);
+                        drop = sl.val().drop(sl.lvl());
+                        drop.setAmount(2);
+                        ItemUtil.giveItemTo(p, drop,
+                            p.getInventory().getHeldItemSlot(), true);
+                        UpgradeMenu.ask(p);
+                        return;
                 }
-            ));
+                if (sk == null) {
+                    openLast(p);
+                    return;
+                }
+
+                sv.setSkillSel(p, sl, abSlot, skIx);
+                openLast(p);
+            }));
             slot++;
         }
 

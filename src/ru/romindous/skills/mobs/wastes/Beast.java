@@ -24,8 +24,8 @@ public class Beast extends SednaMob {
         return Zoglin.class;
     }
 
-    private final double minSize = mobConfig("min_scl", 0.6d),
-        maxSize = mobConfig("scale", 1.0d);
+    private final double minSize = value("min_scl", 0.6d),
+        maxSize = value("scale", 1.0d);
 
 
     @Override

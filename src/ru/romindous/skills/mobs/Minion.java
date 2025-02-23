@@ -146,7 +146,7 @@ public abstract class Minion extends SednaMob {
         e.setDroppedExp(0);
     }
 
-    private final int life = mobConfig("life", 100);
+    private final int life = value("life", 100);
     protected int ticksLife() {
         return life;
     }

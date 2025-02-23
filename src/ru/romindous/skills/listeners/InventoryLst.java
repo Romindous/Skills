@@ -1,5 +1,6 @@
 package ru.romindous.skills.listeners;
 
+import java.util.Optional;
 import com.destroystokyo.paper.ParticleBuilder;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -19,14 +20,15 @@ import org.bukkit.inventory.*;
 import org.bukkit.util.Vector;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.modules.quests.Quest;
-import ru.komiss77.modules.world.WXYZ;
+import ru.komiss77.modules.world.BVec;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.LocUtil;
-import ru.komiss77.utils.inventory.SmartInventory;
-import ru.romindous.skills.survs.Survivor;
+import ru.komiss77.utils.inventory.InventoryContent;
+import ru.komiss77.utils.inventory.InventoryManager;
 import ru.romindous.skills.guides.Entries;
 import ru.romindous.skills.items.SkillGroup;
-import ru.romindous.skills.menus.Enchanting;
+import ru.romindous.skills.menus.UpgradeMenu;
+import ru.romindous.skills.survs.Survivor;
 
 public class InventoryLst implements Listener {
     
@@ -48,25 +50,30 @@ public class InventoryLst implements Listener {
 	
 	@EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onOpn(final InventoryOpenEvent e) {
+        final Player pl = (Player) e.getPlayer();
+        final Optional<InventoryContent> op = InventoryManager.getContents(pl);
+        if (op.isPresent() && op.get().getHost().getType() == e.getInventory().getType()) return;
         switch (e.getInventory().getType()) {
             case ENCHANTING:
                 e.setCancelled(true);
-                SmartInventory
+                pl.sendMessage("§cНад столом чар еще идет работа!");
+                /*SmartInventory
                     .builder()
-                    .id("Enchanting " + e.getPlayer().getName())
+                    .id("Enchanting " + pl.getName())
                     .provider(new Enchanting(e.getInventory().getLocation()))
                     .size(6, 9)
                     .title("          §5§lСтол Чародея")
                     .build()
-                    .open((Player) e.getPlayer());
+                    .open(pl);*/
                 break;
             case ANVIL:
                 e.setCancelled(true);
-                e.getPlayer().sendMessage("§cНад наковальнями еще идет работа!");
+                if (UpgradeMenu.tryOpen(pl)) break;
+                pl.sendMessage("§cНад наковальнями еще идет работа!");
                 break;
             case GRINDSTONE:
                 e.setCancelled(true);
-                e.getPlayer().sendMessage("§cНад точилом еще идет работа!");
+                pl.sendMessage("§cНад точилом еще идет работа!");
                 break;
             default:
                 break;
@@ -123,7 +130,7 @@ public class InventoryLst implements Listener {
         new ParticleBuilder(Particle.SMALL_FLAME).location(loc).count(20)
             .offset(0.2d, 0.2d, 0.2d).extra(0d).receivers(20).spawn();
         e.setResult(ItemUtil.air);
-        final Player pl = LocUtil.getNearPl(new WXYZ(loc), REC_DST, null);
+        final Player pl = LocUtil.getNearPl(BVec.of(loc), REC_DST, null);
         if (pl == null) return;
         questIt(pl, rs);
     }

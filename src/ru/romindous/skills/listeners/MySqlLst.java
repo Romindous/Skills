@@ -6,6 +6,7 @@ import java.util.Map;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -53,8 +54,13 @@ public class MySqlLst implements Listener {
 
     @EventHandler (priority = EventPriority.MONITOR)
     public void onQuest (final QuestCompleteEvent e) {
-        if (!(e.getQuest() instanceof final Entry en) || en.sec == null || en.page == null) return;
-        PM.getOplayer(e.getPlayer(), Survivor.class).unread.add(en);
+        if (!(e.getQuest() instanceof final Entry en)
+            || en.sec == null || en.page == null) return;
+        final Player pl = e.getPlayer();
+        PM.getOplayer(pl, Survivor.class).unread.add(en);
+        Ostrov.sync(() -> pl.sendMessage(TCUtil.form(TCUtil.N
+            + "Есть новая запись в '" + TCUtil.P + "Заметках" + TCUtil.N + "'!")), 2);
+        pl.playSound(pl, Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 2f, 0.8f);
     }
     
     @EventHandler (priority = EventPriority.MONITOR)
@@ -80,6 +86,7 @@ public class MySqlLst implements Listener {
         }
 
         Main.diary.give(p);
+        sv.tag.visible(true);
 
         if (sv.firstJoin) {
             hasNoSkill(p, sv);
@@ -87,6 +94,7 @@ public class MySqlLst implements Listener {
         }
 
         for (final Map.Entry<String, String> en : e.getData().entrySet()) {
+            if (en.getValue().isBlank()) continue;
             switch (en.getKey()) {
                 case "role":
                     sv.role = Role.get(en.getValue()); //ключ skill точно будет, наличие проверяется выше!
@@ -123,6 +131,7 @@ public class MySqlLst implements Listener {
                 case "skills":
                     sv.skills.clear();
                     for (final String sk : en.getValue().split(StringUtil.SPLIT_0)) {
+//                        p.sendMessage("skill- '" + sk + "'");
                         final String[] skl = sk.split(eq);
                         final List<Selector.SelState> sels = new ArrayList<>();
                         final List<Ability.AbilState> abils = new ArrayList<>();
@@ -134,49 +143,55 @@ public class MySqlLst implements Listener {
                             default:
                                 cd = NumUtil.doubleOf(skl[5], 0d);
                             case 5:
-                                for (final String md : skl[4].split(StringUtil.SPLIT_1)) {
-                                    final int eqn = md.indexOf(StringUtil.SPLIT_2);
-                                    if (eqn == -1) {
-                                        Ostrov.log_err("decode skill sels error -> "+md);
-                                        continue;
+                                if (!skl[4].isBlank()) {
+                                    for (final String sl : skl[4].split(StringUtil.SPLIT_1)) {
+                                        final int eqn = sl.indexOf(StringUtil.SPLIT_2);
+                                        if (eqn == -1) {
+                                            Ostrov.log_err("decode skill mods error -> "+sl);
+                                            continue;
+                                        }
+                                        final Modifier m = Modifier.VALUES.get(sl.substring(0, eqn));
+                                        if (m == null) {
+                                            Ostrov.log_err("decode skill mods id -> "+sl);
+                                            continue;
+                                        }
+                                        mods.add(new Modifier.ModState(m,
+                                            NumUtil.intOf(sl.substring(eqn + 1), 0)));
                                     }
-                                    final Selector m = Selector.VALUES.get(md.substring(0, eqn));
-                                    if (m == null) {
-                                        Ostrov.log_err("decode skill sels id -> "+md);
-                                        continue;
-                                    }
-                                    sels.add(new Selector.SelState(m,
-                                        NumUtil.intOf(md.substring(eqn + 1), 0)));
                                 }
                             case 4:
-                                for (final String md : skl[3].split(StringUtil.SPLIT_1)) {
-                                    final int eqn = md.indexOf(StringUtil.SPLIT_2);
-                                    if (eqn == -1) {
-                                        Ostrov.log_err("decode skill mods error -> "+md);
-                                        continue;
+                                if (!skl[3].isBlank()) {
+                                    for (final String ab : skl[3].split(StringUtil.SPLIT_1)) {
+                                        final int eqn = ab.indexOf(StringUtil.SPLIT_2);
+                                        if (eqn == -1) {
+                                            Ostrov.log_err("decode skill abils error -> "+ab);
+                                            continue;
+                                        }
+                                        final Ability a = Ability.VALUES.get(ab.substring(0, eqn));
+                                        if (a == null) {
+                                            Ostrov.log_err("decode skill abils id -> "+ab);
+                                            continue;
+                                        }
+                                        abils.add(new Ability.AbilState(a,
+                                            NumUtil.intOf(ab.substring(eqn + 1), 0)));
                                     }
-                                    final Modifier m = Modifier.VALUES.get(md.substring(0, eqn));
-                                    if (m == null) {
-                                        Ostrov.log_err("decode skill mods id -> "+md);
-                                        continue;
-                                    }
-                                    mods.add(new Modifier.ModState(m,
-                                        NumUtil.intOf(md.substring(eqn + 1), 0)));
                                 }
                             case 3:
-                                for (final String ab : skl[2].split(StringUtil.SPLIT_1)) {
-                                    final int eqn = ab.indexOf(StringUtil.SPLIT_2);
-                                    if (eqn == -1) {
-                                        Ostrov.log_err("decode skill abils error -> "+ab);
-                                        continue;
+                                if (!skl[2].isBlank()) {
+                                    for (final String md : skl[2].split(StringUtil.SPLIT_1)) {
+                                        final int eqn = md.indexOf(StringUtil.SPLIT_2);
+                                        if (eqn == -1) {
+                                            Ostrov.log_err("decode skill sels error -> "+md);
+                                            continue;
+                                        }
+                                        final Selector m = Selector.VALUES.get(md.substring(0, eqn));
+                                        if (m == null) {
+                                            Ostrov.log_err("decode skill sels id -> "+md);
+                                            continue;
+                                        }
+                                        sels.add(new Selector.SelState(m,
+                                            NumUtil.intOf(md.substring(eqn + 1), 0)));
                                     }
-                                    final Ability a = Ability.VALUES.get(ab.substring(0, eqn));
-                                    if (a == null) {
-                                        Ostrov.log_err("decode skill abils id -> "+ab);
-                                        continue;
-                                    }
-                                    abils.add(new Ability.AbilState(a,
-                                        NumUtil.intOf(ab.substring(eqn + 1), 0)));
                                 }
                             case 2:
                                 trig = Trigger.get(skl[1]);
@@ -192,18 +207,18 @@ public class MySqlLst implements Listener {
                     break;
                 case "sels":
                     sv.sels.clear();
-                    for (final String md : en.getValue().split(StringUtil.SPLIT_0)) {
-                        final int eqn1 = md.indexOf(eq);
+                    for (final String sl : en.getValue().split(StringUtil.SPLIT_0)) {
+                        final int eqn1 = sl.indexOf(eq);
                         if (eqn1 == -1) {
-                            Ostrov.log_err("decode sels 1st split error -> "+md);
+                            Ostrov.log_err("decode sels 1st split error -> "+sl);
                             continue;
                         }
-                        final int amt = NumUtil.intOf(md.substring(0, eqn1), 0);
+                        final int amt = NumUtil.intOf(sl.substring(0, eqn1), 0);
                         if (amt == 0) {
-                            Ostrov.log_err("decode sels num is 0 -> "+md);
+                            Ostrov.log_err("decode sels num is 0 -> "+sl);
                             continue;
                         }
-                        final String sss = md.substring(eqn1 + 1);
+                        final String sss = sl.substring(eqn1 + 1);
                         final int eqn2 = sss.indexOf(eq);
                         if (eqn2 == -1) {
                             Ostrov.log_err("decode sels 2nd split error -> "+sss);
@@ -211,12 +226,14 @@ public class MySqlLst implements Listener {
                         }
                         final Selector s = Selector.VALUES.get(sss.substring(0, eqn2));
                         if (s == null) {
-                            Ostrov.log_err("decode sels id -> "+md);
+                            Ostrov.log_err("decode sels id -> "+sl);
                             continue;
                         }
                         sv.sels.put(new Selector.SelState(s,
-                            NumUtil.intOf(md.substring(eqn2 + 1), 0)), amt);
+                            NumUtil.intOf(sl.substring(eqn2 + 1), 0)), amt);
                     }
+                    sv.sels.put(Selector.SAME_ST, 1);
+                    sv.sels.put(Selector.CASTER_ST, 1);
                     break;
                 case "abils":
                     sv.abils.clear();
@@ -274,7 +291,7 @@ public class MySqlLst implements Listener {
                             NumUtil.intOf(md.substring(eqn2 + 1), 0)), amt);
                     }
                     break;
-                case "unread":
+                /*case "unread":
                     sv.unread.clear();
                     for (final String md : en.getValue().split(StringUtil.SPLIT_0)) {
                         if (md.isEmpty()) continue;
@@ -285,7 +302,7 @@ public class MySqlLst implements Listener {
                         }
                         sv.unread.add(uren);
                     }
-                    break;
+                    break;*/
                 case "data":
                     for (final String dt : en.getValue().split(StringUtil.SPLIT_0)) {
                         final int eqn = dt.indexOf(eq);
@@ -300,12 +317,6 @@ public class MySqlLst implements Listener {
                                 break;
                             case "mana":
                                 sv.setMana(p, NumUtil.intOf(dt.substring(eqn + 1), 0));
-                                break;
-                            case "mobKills":
-                                sv.mobKills = NumUtil.intOf(dt.substring(eqn + 1), 0);
-                                break;
-                            case "deaths":
-                                sv.deaths = NumUtil.intOf(dt.substring(eqn + 1), 0);
                                 break;
                             case "statPoints":
                                 sv.statsPoints = NumUtil.intOf(dt.substring(eqn + 1), 0);

@@ -17,7 +17,7 @@ import ru.komiss77.modules.rolls.RollTree;
 import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.ItemUtil;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.items.Groups;
+import ru.romindous.skills.objects.Groups;
 import ru.romindous.skills.mobs.SednaMob;
 
 public class Rotting extends SednaMob {

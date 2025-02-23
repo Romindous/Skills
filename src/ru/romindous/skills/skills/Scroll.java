@@ -1,12 +1,15 @@
 package ru.romindous.skills.skills;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.boot.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.config.ConfigVars;
+import ru.romindous.skills.skills.sels.Selector;
 import ru.romindous.skills.survs.Role;
 
 public interface Scroll {
@@ -14,6 +17,7 @@ public interface Scroll {
 //    NamespacedKey key = new NamespacedKey(Ostrov.instance, "scroll");
     String CLR = "<c>";
     String LVL = "lvl";
+    Set<Selector> DEFAULT = new HashSet<>();
 
     String data();
 
@@ -26,6 +30,8 @@ public interface Scroll {
     }
 
     String[] desc(final int lvl);
+
+    String[] next(final int lvl);
 
     //✵🌟🟃🞜💠⛨✞
     String side();
@@ -81,5 +87,9 @@ public interface Scroll {
             : ConfigVars.get(role().name + "." + data() + "." + id() + "." + val, def);
     }
 
-    interface Registerable {void register();}
+    interface Regable {void register();}
+    interface State {
+        Scroll val();
+        int lvl();
+    }
 }

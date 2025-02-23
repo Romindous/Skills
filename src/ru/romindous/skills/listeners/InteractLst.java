@@ -1,9 +1,10 @@
 package ru.romindous.skills.listeners;
 
+import java.util.Set;
 import io.papermc.paper.persistence.PersistentDataContainerView;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockType;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.block.data.type.CaveVinesPlant;
 import org.bukkit.entity.Player;
@@ -31,22 +32,23 @@ import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.items.Groups;
-import ru.romindous.skills.survs.Survivor;
-import ru.romindous.skills.survs.Role;
-import ru.romindous.skills.survs.Stat;
-import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.objects.Groups;
 import ru.romindous.skills.items.ItemTags;
 import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.survs.Survivor;
 
 
 public class InteractLst implements Listener {
 
     private static final PotionType clr = PotionType.THICK;
-    private static final double STAFF_DMG = 2.0d;
+    private static final Set<BlockType> ANVILS = Set.of(BlockType.ANVIL,
+        BlockType.CHIPPED_ANVIL, BlockType.DAMAGED_ANVIL);
 
     //в LockListener HIGH
     @EventHandler (priority = EventPriority.LOW, ignoreCancelled = false)
@@ -119,9 +121,9 @@ public class InteractLst implements Listener {
                                 pr.setItem(new ItemBuilder(st.shell).build());
                                 pr.setGravity(false);
                             });
-                        p.setCooldown(hand.getType(), 8);
                         p.damageItemStack(e.getHand(), 1);
-                        ShotLst.damage(prj, Stat.ranged(STAFF_DMG * st.dmg, sv.getStat(Stat.ACCURACY)));
+                        p.setCooldown(hand.getType(), Groups.StaffType.STAFF_CD);
+                        ShotLst.damage(prj, Stat.ranged(st.dmg, sv.getStat(Stat.ACCURACY)));
                         break;
                     }
 
@@ -130,14 +132,13 @@ public class InteractLst implements Listener {
                 break;
             case RIGHT_CLICK_BLOCK:
                 if (hand != null) {
-                    final Material hm = hand.getType();
-                    if (p.hasCooldown(hm)) {
+                    if (p.hasCooldown(hand)) {
                         e.setUseItemInHand(Result.DENY);
                         return;
                     }
 
                     b = e.getClickedBlock();
-                    if (ItemTags.STAFFS.contains(hm.asItemType())) {
+                    if (ItemTags.STAFFS.contains(hand.getType().asItemType())) {
                         if (b.getBlockData() instanceof Ageable) {
                             final Ageable ag = (Ageable) b.getBlockData().clone();
                             if (ag.getAge() == ag.getMaximumAge()) {
@@ -151,7 +152,7 @@ public class InteractLst implements Listener {
                         }
                     }
 
-                    if (ItemType.GLASS_BOTTLE.equals(hm.asItemType())) {
+                    if (ItemUtil.is(hand, ItemType.GLASS_BOTTLE)) {
                         switch (b.getType()) {
                             case CAULDRON, WATER_CAULDRON, BEE_NEST, BEEHIVE:
                                 break;
@@ -174,7 +175,8 @@ public class InteractLst implements Listener {
                         break;
                     }
 
-                    claim(hand, p, sv, e.getHand());
+                    if (!ANVILS.contains(b.getType().asBlockType()))
+                        claim(hand, p, sv, e.getHand());
                 }
 
                 if (p.isSneaking()) sv.trigger(Trigger.SHIFT_RIGHT, e, p);
@@ -224,7 +226,7 @@ public class InteractLst implements Listener {
             final Role rl = sl.role();
             if (rl != null && rl != sv.role) {
                 p.sendMessage(TCUtil.form(Main.prefix + sl.rarity().color() + sl.name()
-                    + " <red>можно присвоить только роли " + rl.disName()));
+                    + " <red>может присвоить только роль " + rl.disName()));
                 return;
             }
             sv.giveScroll(p, sl, lvl);
@@ -237,7 +239,7 @@ public class InteractLst implements Listener {
             final Role rl = ab.role();
             if (rl != null && rl != sv.role) {
                 p.sendMessage(TCUtil.form(Main.prefix + ab.rarity().color() + ab.name()
-                    + " <red>можно присвоить только роли " + rl.disName()));
+                    + " <red>может присвоить только роль " + rl.disName()));
                 return;
             }
             sv.giveScroll(p, ab, lvl);
@@ -250,7 +252,7 @@ public class InteractLst implements Listener {
             final Role rl = md.role();
             if (rl != null && rl != sv.role) {
                 p.sendMessage(TCUtil.form(Main.prefix + md.rarity().color() + md.name()
-                    + " <red>можно присвоить только роли " + rl.disName()));
+                    + " <red>может присвоить только роль " + rl.disName()));
                 return;
             }
             sv.giveScroll(p, md, lvl);
@@ -370,7 +372,7 @@ public class InteractLst implements Listener {
 
             if (mb.getType() == EntityType.SLIME) {
                 final Slime cb = (Slime) e.getRightClicked();
-                final CuBlock cbl = SM.cublocks.get(cb.getEntityId());
+                final CuBlock cbl = SM.cublocks.val(cb.getEntityId());
                 final Player p = e.getPlayer();
                 if (cbl != null && !Timer.has(p, "cublock")) {
                     Timer.add(p, "cublock", 2);

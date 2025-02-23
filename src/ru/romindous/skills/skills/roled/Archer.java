@@ -32,7 +32,7 @@ import ru.romindous.skills.skills.sels.Selector;
 import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.survs.Role;
 
-public class Archer implements Scroll.Registerable {
+public class Archer implements Scroll.Regable {
     @Override
     public void register() {
 
@@ -49,7 +49,7 @@ public class Archer implements Scroll.Registerable {
             }
             private final String[] desc = new String[]{
                 TCUtil.N + "Сущность, с " + CLR + "обратной " + TCUtil.N + "стороны",
-                TCUtil.N + CLR + "цели" + TCUtil.N + ", не далее " + DIST.id + " бл."};
+                TCUtil.N + CLR + "цели" + TCUtil.N + ", не далее " + DIST.id() + " бл."};
             public String[] descs() {
                 return desc;
             }
@@ -78,15 +78,14 @@ public class Archer implements Scroll.Registerable {
                 final LivingEntity caster = ch.caster();
 
                 final double dmg = POWER.modify(ch, lvl);
-                next(ch, () -> {
-                    final Firework fw = caster.launchProjectile(Firework.class);
-                    final FireworkMeta fm = fw.getFireworkMeta();
-                    fm.addEffect(FW_EFF);
-                    fw.setFireworkMeta(fm);
-                    fw.setShotAtAngle(true);
-                    fw.setTicksToDetonate((int) (dmg * timeMul));
-                    ShotLst.damage(fw, dmg);
-                });
+                final Firework fw = caster.launchProjectile(Firework.class);
+                final FireworkMeta fm = fw.getFireworkMeta();
+                fm.addEffect(FW_EFF);
+                fw.setFireworkMeta(fm);
+                fw.setShotAtAngle(true);
+                fw.setTicksToDetonate((int) (dmg * timeMul));
+                ShotLst.damage(fw, dmg);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -97,7 +96,7 @@ public class Archer implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Запускает " + CLR + "феерверк " + TCUtil.N + "со ",
-                TCUtil.N + "средним уроном в " + POWER.id + " ед."};
+                TCUtil.N + "средним уроном в " + POWER.id() + " ед."};
             public String[] descs() {
                 return desc;
             }
@@ -118,7 +117,7 @@ public class Archer implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 if (!(ch.trig() instanceof final ProjectileLaunchEvent ee)) {
-                    inform(ch, name() + " должна следовать тригеру <u>"
+                    inform(ch, name() + " <red>должна следовать тригеру <u>"
                         + Trigger.PROJ_LAUNCH.disName());
                     return false;
                 }
@@ -132,10 +131,9 @@ public class Archer implements Scroll.Registerable {
 
                 final ItemStack wpn = ar.getWeapon();
                 final Vector vc = ar.getVelocity().multiply(SPEED.modify(ch, lvl));
-                next(ch, () -> {
-                    final SpectralArrow spa = caster.launchProjectile(SpectralArrow.class, vc);
-                    if (wpn != null) spa.setWeapon(wpn);
-                });
+                final SpectralArrow spa = caster.launchProjectile(SpectralArrow.class, vc);
+                if (wpn != null) spa.setWeapon(wpn);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -146,7 +144,7 @@ public class Archer implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Создает спектральную " + CLR + "копию " + TCUtil.N + "при выстреле стрел,",
-                TCUtil.N + "со скоростью равной " + SPEED.id + "x " + TCUtil.N + "оригинала"};
+                TCUtil.N + "со скоростью равной " + SPEED.id() + "x " + TCUtil.N + "оригинала"};
             public String[] descs() {
                 return desc;
             }
@@ -171,7 +169,7 @@ public class Archer implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 if (!(ch.trig() instanceof final ProjectileHitEvent ee)) {
-                    inform(ch, name() + " должна следовать тригеру <u>"
+                    inform(ch, name() + " <red>должна следовать тригеру <u>"
                         + Trigger.RANGED_HIT.disName());
                     return false;
                 }
@@ -210,14 +208,18 @@ public class Archer implements Scroll.Registerable {
                 return "Рикошет";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Позволяет стреле срикошетить при " + CLR + "попадании",
-                TCUtil.N + "в моба, перенося " + RATIO.id + "x " + TCUtil.N + "скорости,",
-                TCUtil.N + "если след. цель в радиусе " + DIST.id + " бл."};
+                TCUtil.N + "Позволяет стреле срикошетить при",
+                TCUtil.N + CLR + "попадании" + TCUtil.N + "в цель, перенося "
+                    + RATIO.id() + "x " + TCUtil.N + "скорости,",
+                TCUtil.N + "если след. цель в радиусе " + DIST.id() + " бл."};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
-                return Rarity.COMMON;
+                return Rarity.UNCOM;
+            }
+            public InvCondition equip() {
+                return InvCondition.BOW_ANY;
             }
             public boolean selfCast() {return false;}
             public Role role() {return Role.ARCHER;}
@@ -244,11 +246,9 @@ public class Archer implements Scroll.Registerable {
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 fe.setDamage(DAMAGE.modify(ch, lvl));
                 EntityUtil.effect(tgt, Sound.ENTITY_FOX_TELEPORT, 0.8f, Particle.REVERSE_PORTAL);
-
-                next(ch, () -> {
-                    tgt.damage(fe.getDamage(), fe.getDamageSource());
-                    if (tgt instanceof Mob) ((Mob) tgt).setTarget(null);
-                });
+                tgt.damage(fe.getDamage(), fe.getDamageSource());
+                if (tgt instanceof Mob) ((Mob) tgt).setTarget(null);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -258,18 +258,18 @@ public class Archer implements Scroll.Registerable {
                 return "Жаунт";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Использует " + HUNGER.id + " ед. " + TCUtil.N + "сытости,",
+                TCUtil.N + "Использует " + HUNGER.id() + " ед. " + TCUtil.N + "сытости,",
                 TCUtil.N + "пользователя, телепортируя его за",
                 TCUtil.N + CLR + "спину" + TCUtil.N + "цели, и нанося "
-                    + DAMAGE.id + " ед. " + TCUtil.N + "урона"};
+                    + DAMAGE.id() + " ед. " + TCUtil.N + "урона"};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
-                return Rarity.COMMON;
+                return Rarity.UNCOM;
             }
             public InvCondition equip() {
-                return InvCondition.BOW_ANY;
+                return InvCondition.MELEE;
             }
             public boolean selfCast() {return false;}
             public Role role() {return Role.ARCHER;}
@@ -287,20 +287,20 @@ public class Archer implements Scroll.Registerable {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
-                final Location start = caster.getEyeLocation().add(0d, height, 0d);
+                final Location start = caster.getEyeLocation()
+                    .add(Main.srnd.nextFloat() - 0.5d, height, Main.srnd.nextFloat() - 0.5d);
                 new ParticleBuilder(Particle.SQUID_INK).location(start).count(8)
                     .offset(0.4d, 0.4d, 0.4d).extra(0.0).allPlayers().spawn();
                 start.getWorld().playSound(start, Sound.ENTITY_DROWNED_SHOOT, 1f, 1.4f);
 
                 final double dmg = DAMAGE.modify(ch, lvl);
-                next(ch, () -> {
-                    final Snowball sb = caster.launchProjectile(Snowball.class, EntityUtil.center(tgt).subtract(start)
-                        .toVector().normalize().multiply(speed).add(tgt.getVelocity().multiply(0.5d)), s -> {
-                        s.setItem(FWS); s.setGravity(false); s.setGlowing(true);
-                    });
-                    sb.teleport(start);
-                    ShotLst.damage(sb, dmg);
+                final Snowball sb = caster.launchProjectile(Snowball.class, EntityUtil.center(tgt).subtract(start)
+                    .toVector().normalize().multiply(speed).add(tgt.getVelocity().multiply(0.5d)), s -> {
+                    s.setItem(FWS); s.setGravity(false); s.setGlowing(true);
                 });
+                sb.teleport(start);
+                ShotLst.damage(sb, dmg);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -311,7 +311,7 @@ public class Archer implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Создает снаряд над пользователем, при " + CLR + "ударе",
-                TCUtil.N + "моба, нанося " + DAMAGE.id + " ед. " + TCUtil.N + "урона при попадании"};
+                TCUtil.N + "моба, нанося " + DAMAGE.id() + " ед. " + TCUtil.N + "урона при попадании"};
             public String[] descs() {
                 return desc;
             }
@@ -319,7 +319,7 @@ public class Archer implements Scroll.Registerable {
                 return Rarity.COMMON;
             }
             public InvCondition equip() {
-                return InvCondition.FIST_OFF;
+                return InvCondition.FIST_ANY;
             }
             public boolean selfCast() {return false;}
             public Role role() {return Role.ARCHER;}

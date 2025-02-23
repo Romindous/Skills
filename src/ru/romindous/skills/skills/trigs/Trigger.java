@@ -11,10 +11,10 @@ import ru.romindous.skills.skills.sels.Selector;
 
 public enum Trigger {//тригер
 
-    KILL_ENTITY("Убийство Сущности", null, ItemType.ROTTEN_FLESH, "Срабатывает при убийстве", "любого моба игроком"), //PlayerKillEntityEvent
     ATTACK_ENTITY("Нанесение Урона", null, ItemType.IRON_SWORD, "Срабатывает при нанесении", "физического урона пользователем"), //EntityDamageByEntityEvent
     PROJ_LAUNCH("Запуск Снаряда", null, ItemType.FIRE_CHARGE, "Срабатывает при запуске", "любого снаряда пользователем"), //ProjectileLaunchEvent
     RANGED_HIT("Попадание с Дистанции", null, ItemType.APPLE, "Срабатывает при попадании", "снарядом любого моба игроком"), //ProjectileHitEvent
+    KILL_ENTITY("Убийство Сущности", null, ItemType.ROTTEN_FLESH, "Срабатывает при убийстве", "любого моба игроком"), //PlayerKillEntityEvent
     SHIFT_LEFT("Шифт с ЛКМ", null, ItemType.TNT_MINECART, "Срабатывает при нажатии", "ЛКМ в крадущемся виде"), //PlayerInteractEvent
     SHIFT_RIGHT("Шифт с ПКМ", null, ItemType.CHEST_MINECART, "Срабатывает при нажатии", "ПКМ в крадущемся виде", "(надо дерать что-то в руке)"), //PlayerInteractEvent
     SHIFT_JUMP("Шифт с Прыжком", null, ItemType.BIG_DRIPLEAF, "Срабатывает при прыжке", "пользователя в крадущемся виде"), //PlayerJumpEvent -
@@ -65,7 +65,7 @@ public enum Trigger {//тригер
     }
 
     /*private double value(final String val, final double def) {
-        return ConfigVars.get(prefix + name() + "." + val, def);
+        return ConfigVars.val(prefix + name() + "." + val, def);
     }*/
 
     public static Trigger get(final String st) {

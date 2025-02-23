@@ -71,28 +71,26 @@ public record Chain(Skill sk, LivingEntity caster, LivingEntity target, Event tr
         };
         return loc == null ? cst.getEyeLocation() : loc;
     }
+
     private static LivingEntity tgtOf(final Event e, final LivingEntity cst) {
         final LivingEntity ent = switch (e) {
-            case final PlayerKillEntityEvent ee:
-                yield ee.getEntity();
             case final EntityDamageEvent ee:
                 if (!(ee.getEntity() instanceof final LivingEntity tgt)) yield null;
-                if (ee.getDamageSource().getCausingEntity() instanceof final LivingEntity dmgr) {
-                    if (cst.getEntityId() == dmgr.getEntityId()) yield tgt;
-                    else if (tgt.getEntityId() == cst.getEntityId()) yield dmgr;
-                }
-                yield tgt;
-            case final ProjectileLaunchEvent ignored: yield null;
+                if (!(ee.getDamageSource().getCausingEntity()
+                    instanceof final LivingEntity dmgr)) yield tgt;
+                yield cst.getEntityId() == tgt.getEntityId() ? dmgr : tgt;
             case final ProjectileHitEvent ee:
                 if (!(ee.getEntity().getShooter() instanceof LivingEntity)) yield null;
-                if (!(ee.getHitEntity() instanceof final LivingEntity tgt)) yield null;
-                yield tgt;
-            case final PlayerInteractEvent ee: yield ee.getPlayer();
-            case final PlayerJumpEvent ee: yield ee.getPlayer();
-            case final PlayerToggleFlightEvent ee: yield ee.getPlayer();
+                yield ee.getHitEntity() instanceof final LivingEntity tgt ? tgt : null;
             case final EntityDeathEvent ee: yield ee.getEntity();
+            case final PlayerKillEntityEvent ee: yield ee.getEntity();
+            case final ProjectileLaunchEvent ee: yield ee.getEntity().getShooter()
+                instanceof final LivingEntity sh ? sh : null;
             case final Minion.MinionSpawnEvent ee: yield ee.getEntity();
-            case final EntityCastEvent ee: yield ee.getEntity();
+            case final EntityCastEvent ee: yield ee.getTarget();
+//            case final PlayerInteractEvent ee: yield ee.getPlayer();
+//            case final PlayerJumpEvent ee: yield ee.getPlayer();
+//            case final PlayerToggleFlightEvent ee: yield ee.getPlayer();
             default: yield null;
         };
         return ent == null ? cst : ent;

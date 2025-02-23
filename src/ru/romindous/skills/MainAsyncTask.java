@@ -3,7 +3,6 @@ package ru.romindous.skills;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import ru.komiss77.modules.player.PM;
-import ru.komiss77.utils.ScreenUtil;
 import ru.romindous.skills.survs.Survivor;
 
 
@@ -27,7 +26,7 @@ public class MainAsyncTask implements Runnable {
             //каждый тик 
             if (sv.role != null) {
                 /*if (sv.vampireBatTime>0) {
-                    bat = VanilaModel.vampireBats.get(sv.nik);
+                    bat = VanilaModel.vampireBats.val(sv.nik);
                     if (bat!=null && !bat.isDead()) {
                         bodyLoc = p.getEyeLocation().add(0d, -1d, 0d);
                         batLoc = bat.getLocation();
@@ -41,17 +40,17 @@ public class MainAsyncTask implements Runnable {
             
 
             //каждую секунду с рабросом по тикам для игроков
-            if (sv.tickAsync % 20 == 0) { //p.getTicksLived() не подходит, выхватывает числа не по порядку
+            /*if (sv.tickAsync % 20 == 0) { //p.getTicksLived() не подходит, выхватывает числа не по порядку
                 // --- конец блока, где скилл!=null ---
 
                 //подсказки игрокам
-                /*if (sv.totalPlyTime<3000) { //через 30 сек., если глобально наиграл меньше 15 минут
+                *//*if (sv.totalPlyTime<3000) { //через 30 сек., если глобально наиграл меньше 15 минут
                     switch (sv.currentPlyTime) {
                         case 30:
                             ScreenUtil.sendTitle(p, "", "§7одно §4❤ §7= §f"+HEALTH_DIVIDER*2+" §7НР", 40, 120, 60);
                             break;
                     }
-                }*/
+                }*//*
                 if (sv.currentPlyTime == 40) {
                     ScreenUtil.sendTitle(p, "", "§fАльфа-тест §4Седны", 10, 20, 8);
                 } else if (sv.currentPlyTime == 42) {
@@ -70,7 +69,7 @@ public class MainAsyncTask implements Runnable {
             }
             // --- конец блока каждую секунду игрока ---
 
-            sv.tickAsync++;
+            sv.tickAsync++;*/
 
         }
         // --- конец блока каждый тик игрока ---

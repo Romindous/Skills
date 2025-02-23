@@ -37,6 +37,14 @@ public class EntityLst implements Listener {
 
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onTgt(final EntityTargetLivingEntityEvent e) {
+        if (e.getEntity() instanceof final Mob mb) {
+            if (mb.hasPotionEffect(PotionEffectType.BLINDNESS)
+                || mb.hasPotionEffect(PotionEffectType.NAUSEA)) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+
         final LivingEntity tgt = e.getTarget();
         if (tgt == null) return;
 
@@ -44,14 +52,6 @@ public class EntityLst implements Listener {
         if (ipe != null) {
             if (Main.srnd.nextInt(BVec.of(tgt.getLocation())
                 .dist(e.getEntity().getLocation()) + ipe.getAmplifier()) != 0) {
-                e.setCancelled(true);
-                return;
-            }
-        }
-
-        if (e.getEntity() instanceof final Mob mb) {
-            if (mb.hasPotionEffect(PotionEffectType.BLINDNESS)
-                || mb.hasPotionEffect(PotionEffectType.NAUSEA)) {
                 e.setCancelled(true);
                 return;
             }
@@ -79,16 +79,14 @@ public class EntityLst implements Listener {
     
     @EventHandler
     public void onExpld(final EntityExplodeEvent e) {
-        if (!(e.getEntity() instanceof final Mob mb)) return;
-        if (CustomEntity.get(mb) instanceof final Spored sp) {
+        if (CustomEntity.get(e.getEntity()) instanceof final Spored sp) {
             sp.onExplode(e);
             return;
         }
         switch (e.getEntityType()) {
             case FIREBALL, SMALL_FIREBALL, TNT, WITHER_SKULL:
-                if (Main.subServer != SubServer.INFERNAL) {
-                    e.blockList().clear();
-                }
+                if (Main.subServer == SubServer.INFERNAL) break;
+                e.blockList().clear();
             default:
                 break;
         }

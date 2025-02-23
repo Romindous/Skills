@@ -57,18 +57,22 @@ public enum SubServer {
         w.setGameRule(GameRule.DO_WEATHER_CYCLE, true);
         w.setGameRule(GameRule.MOB_GRIEFING, true);
         w.setGameRule(GameRule.PLAYERS_SLEEPING_PERCENTAGE, 0);
+        w.setGameRule(GameRule.SPAWN_CHUNK_RADIUS, 0);
+        w.setGameRule(GameRule.SPAWN_RADIUS, 0);
         switch (Main.subServer) {
             case WASTES:
                 w.setTime(4000l);
                 w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
                 w.setGameRule(GameRule.RANDOM_TICK_SPEED, 2);
                 w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+                w.setGameRule(GameRule.DO_TRADER_SPAWNING, true);
                 break;
             case KRIOLITE:
                 w.setTime(16000l);
                 w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
                 w.setGameRule(GameRule.RANDOM_TICK_SPEED, 0);
                 w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+                w.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
                 w.setThundering(true);
                 w.setStorm(true);
                 w.setWeatherDuration(Integer.MAX_VALUE);
@@ -78,11 +82,13 @@ public enum SubServer {
                 w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
                 w.setGameRule(GameRule.RANDOM_TICK_SPEED, 4);
                 w.setGameRule(GameRule.DO_PATROL_SPAWNING, true);
+                w.setGameRule(GameRule.DO_TRADER_SPAWNING, true);
                 break;
             case AQUAROD, KALEUM, INFERNAL:
                 w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
                 w.setGameRule(GameRule.RANDOM_TICK_SPEED, 2);
                 w.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+                w.setGameRule(GameRule.DO_TRADER_SPAWNING, false);
                 break;
             default:
                 break;

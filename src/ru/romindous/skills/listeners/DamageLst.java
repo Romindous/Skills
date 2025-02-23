@@ -5,7 +5,6 @@ import java.util.Set;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
-import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
@@ -19,6 +18,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.komiss77.modules.player.PM;
 import ru.romindous.skills.Main;
+import ru.romindous.skills.MainTask;
 import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.mobs.Minion;
 import ru.romindous.skills.mobs.SednaMob;
@@ -82,20 +82,23 @@ public class DamageLst implements Listener {
         double dmg = initDmg(ds.getDirectEntity(), e.getDamage());
         if (dmg < 1d) return;
 
+        final boolean trig;
         if (DIRECT.contains(dt)) {
             e.setDamage(Stat.direct(dmg, sv.getStat(Stat.STRENGTH)));
-            sv.trigger(Trigger.ATTACK_ENTITY, e, p);
+            trig = true;
         } else if (RANGED.contains(dt)) {
             e.setDamage(Stat.ranged(dmg, sv.getStat(Stat.ACCURACY)));
-            sv.trigger(Trigger.ATTACK_ENTITY, e, p);
-//                    sv.trigger(Trigger.RANGED_HIT, e, p);
+            trig = true;
         } else if (MAGIC.contains(dt)) {
             e.setDamage(Stat.magic(dmg, sv.getStat(Stat.MAGIC)));
-        }
+            trig = false;
+        } else return;
+        if (trig && tgt.getHealth() > e.getFinalDamage())
+            sv.trigger(Trigger.ATTACK_ENTITY, e, p);
     }
 
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onPlayerDamagePlayer (final EntityDamageByEntityEvent e) {
+    public void onPvP(final EntityDamageByEntityEvent e) {
         final DamageSource ds = e.getDamageSource();
         if (!(e.getEntity() instanceof final Player tgt)
             || !(ds.getCausingEntity() instanceof final Player dmgr)) return;
@@ -114,18 +117,21 @@ public class DamageLst implements Listener {
         double dmg = initDmg(ds.getDirectEntity(), e.getDamage());
         if (dmg < 1d) return;
 
+        final boolean trig;
         if (DIRECT.contains(dt)) {
             dmg = Stat.direct(dmg, dmgrSv.getStat(Stat.STRENGTH));
-            dmgrSv.trigger(Trigger.ATTACK_ENTITY, e, dmgr);
+            trig = true;
         } else if (RANGED.contains(dt)) {
             dmg = Stat.ranged(dmg, dmgrSv.getStat(Stat.ACCURACY));
-            dmgrSv.trigger(Trigger.ATTACK_ENTITY, e, dmgr);
-//                dmgrSv.trigger(Trigger.RANGED_HIT, e, dmgr);
+            trig = true;
         } else if (MAGIC.contains(dt)) {
             dmg = Stat.magic(dmg, dmgrSv.getStat(Stat.MAGIC));
+            trig = false;
         } else return;
 
         e.setDamage(Stat.defense(dmg, tgtSv.getStat(Stat.PASSIVE)));
+        if (trig && tgt.getHealth() > e.getFinalDamage())
+            dmgrSv.trigger(Trigger.ATTACK_ENTITY, e, dmgr);
         tgtSv.trigger(Trigger.USER_HURT, e, tgt);
     }
 
@@ -143,6 +149,8 @@ public class DamageLst implements Listener {
         DamageType.LAVA, DamageType.LIGHTNING_BOLT, DamageType.DRY_OUT, DamageType.DROWN, DamageType.WITHER, DamageType.FREEZE,
         DamageType.STARVE, DamageType.CACTUS, DamageType.CRAMMING, DamageType.DRAGON_BREATH, DamageType.OUT_OF_WORLD,
         DamageType.OUTSIDE_BORDER, DamageType.SWEET_BERRY_BUSH);
+    private static final Set<DamageType> NO_DTICK = Set.of(DamageType.ON_FIRE, DamageType.DRY_OUT,
+        DamageType.DROWN, DamageType.WITHER, DamageType.FREEZE, DamageType.STARVE, DamageType.DRAGON_BREATH);
     private static final Set<DamageType> FALL = Set.of(DamageType.FLY_INTO_WALL, DamageType.FALL, DamageType.STALAGMITE,
         DamageType.FALLING_BLOCK, DamageType.FALLING_STALACTITE, DamageType.FALLING_ANVIL);
 
@@ -156,6 +164,7 @@ public class DamageLst implements Listener {
         if (dmg < 1d) return;
         if (ENVIRONMENT.contains(dt)) {
             dmg = ent.getAttribute(Attribute.MAX_HEALTH).getBaseValue() * envDmgPer * dmg;
+            if (NO_DTICK.contains(dt)) MainTask.unDTick(ent);
         } else if (FALL.contains(dt)) {
             if (!(ent instanceof Mob)) return;
             e.setCancelled(true);
@@ -167,7 +176,7 @@ public class DamageLst implements Listener {
         if (sv != null) dmg = Stat.defense(dmg, sv.getStat(Stat.PASSIVE));
         e.setDamage(dmg);
 
-        /*final CuBlock cube = SM.cublocks.get(ent.getEntityId());
+        /*final CuBlock cube = SM.cublocks.val(ent.getEntityId());
         if (cube != null) {
             switch (e.getCause()) {
                 case SUFFOCATION, FIRE, POISON, WITHER,

@@ -12,6 +12,7 @@ import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
 import ru.romindous.skills.Main;
+import ru.romindous.skills.menus.UpgradeMenu;
 import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.skills.chas.ChasMod;
@@ -67,35 +68,79 @@ public class ModSelect extends SvSelect {
         for (final Map.Entry<Modifier.ModState, Integer> en : sv.mods.entrySet()) {
             while (switch (slot % 9) {case 0, 8 -> true; default -> false;}) slot++;
             final Modifier.ModState md = en.getKey();
-            if (!sv.canUse(md.mod())) continue;
+            if (!sv.canUse(md.val())) continue;
             final List<String> fnd = new ArrayList<>();
             if (chs.length != 0) {
-                for (final Chastic ch : md.mod().chastics()) {
+                for (final Chastic ch : md.val().chastics()) {
                     if (Arrays.binarySearch(chs, ch) < 0) continue;
                     fnd.add(ch.disName());
                 }
             }
-            its.set(slot, fnd.isEmpty() ? ClickableItem.from(new ItemBuilder(md.mod().display(md.lvl())).amount(en.getValue())
-                .lore(relate(fnd)).lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
+            final int amt = en.getValue();
+            its.set(slot, fnd.isEmpty() ? ClickableItem.from(new ItemBuilder(md.val().display(md.lvl())).amount(amt)
+                .lore(relate(fnd)).lore(amt < 2 ? "" : TCUtil.A + "ПКМ" + TCUtil.N + " - Прокачка (" + amt + "/2)")
+                .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
+                final int cnt = sv.count(md);
+                if (cnt < 1) {openLast(p); return;}
+                final ItemStack drop;
                 switch (e.getClick()) {
-                    case DROP, CONTROL_DROP:
-                        if (sv.change(md, -1) < 0) return;
-                        ItemUtil.giveItemsTo(p, md.mod().drop(md.lvl()));
+                    case DROP:
+                        sv.change(md, -1);
+                        drop = md.val().drop(md.lvl());
+                        ItemUtil.giveItemsTo(p, drop);
                         reopen(p, its);
                         return;
+                    case CONTROL_DROP:
+                        sv.change(md, -cnt);
+                        drop = md.val().drop(md.lvl());
+                        drop.setAmount(cnt);
+                        ItemUtil.giveItemsTo(p, drop);
+                        reopen(p, its);
+                        return;
+                    case RIGHT, SHIFT_RIGHT:
+                        if (cnt < 2) return;
+                        sv.change(md, -2);
+                        drop = md.val().drop(md.lvl());
+                        drop.setAmount(2);
+                        ItemUtil.giveItemTo(p, drop,
+                            p.getInventory().getHeldItemSlot(), true);
+                        UpgradeMenu.ask(p);
+                        return;
                 }
-                p.sendMessage(TCUtil.form(Main.prefix + "<red>Навык не использует:"));
-                for (final Chastic ch : md.mod().chastics()) fnd.add(ch.disName());
+
+                p.sendMessage(TCUtil.form(Main.prefix + sk.name + "<red> не использует:"));
+                for (final Chastic ch : md.val().chastics()) fnd.add(ch.disName());
                 p.sendMessage(TCUtil.form(String.join(TCUtil.N + ", ", fnd)));
                 reopen(p, its);
-            }) : ClickableItem.from(new ItemBuilder(md.mod().display(md.lvl()))
-                .amount(en.getValue()).lore("<dark_gray>(клик - выбор)").lore(relate(fnd))
+            }) : ClickableItem.from(new ItemBuilder(md.val().display(md.lvl()))
+                .amount(amt).lore("<dark_gray>(клик - выбор)").lore(relate(fnd))
+                .lore(amt < 2 ? "" : TCUtil.A + "ПКМ" + TCUtil.N + " - Прокачка (" + amt + "/2)")
                 .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
+                final int cnt = sv.count(md);
+                if (cnt < 1) {openLast(p); return;}
+                final ItemStack drop;
                 switch (e.getClick()) {
-                    case DROP, CONTROL_DROP:
-                        if (sv.change(md, -1) < 0) return;
-                        ItemUtil.giveItemsTo(p, md.mod().drop(md.lvl()));
+                    case DROP:
+                        sv.change(md, -1);
+                        drop = md.val().drop(md.lvl());
+                        ItemUtil.giveItemsTo(p, drop);
                         reopen(p, its);
+                        return;
+                    case CONTROL_DROP:
+                        sv.change(md, -cnt);
+                        drop = md.val().drop(md.lvl());
+                        drop.setAmount(cnt);
+                        ItemUtil.giveItemsTo(p, drop);
+                        reopen(p, its);
+                        return;
+                    case RIGHT, SHIFT_RIGHT:
+                        if (cnt < 2) return;
+                        sv.change(md, -2);
+                        drop = md.val().drop(md.lvl());
+                        drop.setAmount(2);
+                        ItemUtil.giveItemTo(p, drop,
+                            p.getInventory().getHeldItemSlot(), true);
+                        UpgradeMenu.ask(p);
                         return;
                 }
 
@@ -116,13 +161,13 @@ public class ModSelect extends SvSelect {
         final Set<Chastic> chs = EnumSet.noneOf(Chastic.class);
         chs.add(Chastic.MANA); chs.add(Chastic.COOLDOWN);
         for (final Selector.SelState sls : sk.sels) {
-            for (final ChasMod cm : sls.sel().stats()) {
-                chs.add(cm.chs);
+            for (final ChasMod cm : sls.val().stats()) {
+                chs.add(cm.chs());
             }
         }
         for (final Ability.AbilState abs : sk.abils) {
-            for (final ChasMod cm : abs.abil().stats()) {
-                chs.add(cm.chs);
+            for (final ChasMod cm : abs.val().stats()) {
+                chs.add(cm.chs());
             }
         }
         final Chastic[] cha = chs.toArray(new Chastic[0]);

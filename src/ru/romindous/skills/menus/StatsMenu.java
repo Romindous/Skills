@@ -32,7 +32,7 @@ public class StatsMenu implements InventoryProvider {
             if (st.ordinal() == stats.length >> 1) {
                 content.add(ClickableItem.from(new ItemBuilder(ItemType.NETHER_STAR)
                     .name(TCUtil.sided(TCUtil.P + "Главное Меню")).build(), e -> {
-                    p.performCommand("skill");
+                    MainMenu.open(p);
                 }));
             }
             

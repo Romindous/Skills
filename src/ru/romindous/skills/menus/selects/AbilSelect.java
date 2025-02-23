@@ -13,6 +13,8 @@ import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
 import ru.romindous.skills.Main;
+import ru.romindous.skills.guides.Entries;
+import ru.romindous.skills.menus.UpgradeMenu;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.abils.InvCondition;
@@ -64,39 +66,83 @@ public class AbilSelect extends SvSelect {
         for (final Map.Entry<Ability.AbilState, Integer> en : sv.abils.entrySet()) {
             while (switch (slot % 9) {case 0, 8 -> true; default -> false;}) slot++;
             final Ability.AbilState ab = en.getKey();
-            if (!sv.canUse(ab.abil())) continue;
+            if (!sv.canUse(ab.val())) continue;
             if (sk.trig == null) continue;
             final Trigger trg = abSlot == 0 ? sk.trig : Trigger.ABIL_CAST;
-            final Trigger rt = ab.abil().trig();
+            final Trigger rt = ab.val().trig();
             final boolean trc = rt != null && rt != trg;
-            final String[] check = trc ? new String[] {"<red>Должна следовать тригеру "
-                + rt.disName() + "<red>.", "<red>Сейчас - " + trg.disName()} : checkInvCond(ab.abil().equip());
-            its.set(slot, trc ? ClickableItem.from(new ItemBuilder(ab.abil().display(ab.lvl())).amount(en.getValue())
-                .lore(check).lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
+            final String[] check = trc ? new String[] {"<red>Нужен тригер "
+                + rt.disName() + "<red>.", "<red>Сейчас - " + trg.disName()} : checkInvCond(ab.val().equip());
+            final int amt = en.getValue();
+            its.set(slot, trc ? ClickableItem.from(new ItemBuilder(ab.val().display(ab.lvl())).amount(amt)
+                .lore(check).lore(amt < 2 ? "" : TCUtil.A + "ПКМ" + TCUtil.N + " - Прокачка (" + amt + "/2)")
+                .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
+                final int cnt = sv.count(ab);
+                if (cnt < 1) {openLast(p); return;}
+                final ItemStack drop;
                 switch (e.getClick()) {
-                    case DROP, CONTROL_DROP:
-                        if (sv.change(ab, -1) < 0) return;
-                        ItemUtil.giveItemsTo(p, ab.abil().drop(ab.lvl()));
+                    case DROP:
+                        sv.change(ab, -1);
+                        drop = ab.val().drop(ab.lvl());
+                        ItemUtil.giveItemsTo(p, drop);
                         reopen(p, its);
+                        return;
+                    case CONTROL_DROP:
+                        sv.change(ab, -cnt);
+                        drop = ab.val().drop(ab.lvl());
+                        drop.setAmount(cnt);
+                        ItemUtil.giveItemsTo(p, drop);
+                        reopen(p, its);
+                        return;
+                    case RIGHT, SHIFT_RIGHT:
+                        if (cnt < 2) return;
+                        sv.change(ab, -2);
+                        drop = ab.val().drop(ab.lvl());
+                        drop.setAmount(2);
+                        ItemUtil.giveItemTo(p, drop,
+                            p.getInventory().getHeldItemSlot(), true);
+                        UpgradeMenu.ask(p);
                         return;
                 }
 
                 p.sendMessage(TCUtil.form(Main.prefix + "<red>Способность "
-                    + TCUtil.P + ab.abil().name() + " <red>должна следовать"));
+                    + TCUtil.P + ab.val().name() + " <red>должна следовать"));
                 p.sendMessage(TCUtil.form(Main.prefix + "<red>тригеру " + rt.disName() + "<red>. Сейчас - "
                     + trg.disName() + (abSlot == 0 ? "" : " <dark_gray>(пред. способность)")));
                 reopen(p, its);
-            }) : ClickableItem.from(new ItemBuilder(ab.abil().display(ab.lvl()))
-                .amount(en.getValue()).lore(check).lore("<dark_gray>(клик - выбор)")
+            }) : ClickableItem.from(new ItemBuilder(ab.val().display(ab.lvl()))
+                .amount(amt).lore(check).lore("<dark_gray>(клик - выбор)")
+                .lore(amt < 2 ? "" : TCUtil.A + "ПКМ" + TCUtil.N + " - Прокачка (" + amt + "/2)")
                 .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Выдать").build(), e -> {
+                final int cnt = sv.count(ab);
+                if (cnt < 1) {openLast(p); return;}
+                final ItemStack drop;
                 switch (e.getClick()) {
-                    case DROP, CONTROL_DROP:
-                        if (sv.change(ab, -1) < 0) return;
-                        ItemUtil.giveItemsTo(p, ab.abil().drop(ab.lvl()));
+                    case DROP:
+                        sv.change(ab, -1);
+                        drop = ab.val().drop(ab.lvl());
+                        ItemUtil.giveItemsTo(p, drop);
                         reopen(p, its);
+                        return;
+                    case CONTROL_DROP:
+                        sv.change(ab, -cnt);
+                        drop = ab.val().drop(ab.lvl());
+                        drop.setAmount(cnt);
+                        ItemUtil.giveItemsTo(p, drop);
+                        reopen(p, its);
+                        return;
+                    case RIGHT, SHIFT_RIGHT:
+                        if (cnt < 2) return;
+                        sv.change(ab, -2);
+                        drop = ab.val().drop(ab.lvl());
+                        drop.setAmount(2);
+                        ItemUtil.giveItemTo(p, drop,
+                            p.getInventory().getHeldItemSlot(), true);
+                        UpgradeMenu.ask(p);
                         return;
                 }
 
+                if (abSlot != 0) Entries.new_abil.complete(p, sv, false);
                 sv.setSkillAbil(p, ab, abSlot, skIx);
                 openLast(p);
             }));
@@ -107,7 +153,7 @@ public class AbilSelect extends SvSelect {
             .name(TCUtil.sided("<red>Отмена")).build(), e -> openLast(p)));
     }
 
-    private static final String[] MATCH_SINGLE = {"<apple>Можно ее выбрать!"};
+    private static final String[] MATCH_SINGLE = {"<apple>Можно выбрать!"};
     private static final String[] MATCH_MULTI = {"<apple>Нужная " + TCUtil.P + "экипировка "
         + "<apple>совпадает", "<apple>с остальными способностями!"};
     private String[] checkInvCond(final @Nullable InvCondition ic) {
@@ -116,10 +162,10 @@ public class AbilSelect extends SvSelect {
         for (int i = 0; i != sk.abils.length; i++) {
             if (i == abSlot) continue;
             final Ability.AbilState ab = sk.abils[i];
-            final InvCondition ric = ab.abil().equip();
+            final InvCondition ric = ab.val().equip();
             if (ric == null || ic.equals(ric)) continue;
             return new String[]{"<gold>Требуемое " + TCUtil.P + "снаряжение " + "<gold>этой способности",
-                "<gold>(" + ic.describe() + "<gold>)", "<gold>отличается от снаряжения для " + ab.abil().name(ab.lvl()),
+                "<gold>(" + ic.describe() + "<gold>)", "<gold>отличается от снаряжения для " + ab.val().name(ab.lvl()),
                 "<gold>(" + ric.describe() + "<gold>)"};
         }
         return MATCH_MULTI;

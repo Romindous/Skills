@@ -327,7 +327,7 @@ public class BlockLst implements Listener {
                 break;
         }
 
-        /*final BossType bossByMat = BossType.finBlks.get(b.getType());
+        /*final BossType bossByMat = BossType.finBlks.val(b.getType());
          *//*if (Timer.has(p, "bossSpawn")) {
                 p.sendMessage(Main.prefix + "босса можно призвать снова через "+Timer.getLeft(p, "bossSpawn"));
                 return;

@@ -59,7 +59,7 @@ public class WorldMenu implements InventoryProvider {
                 if (Main.subServer == ss) {
                     content.set(ss.ordinal()/3 + ss.ordinal(), ClickableItem.from(new ItemBuilder(ss.displayMat)
                         .name(TCUtil.sided(ss.disName, "⛨")).lore(TCUtil.N + "Ты здесь")
-                        .build(), e -> p.performCommand("skill")));
+                        .build(), e -> MainMenu.open(p)));
                 } else {
                     content.set(ss.ordinal()/3 + ss.ordinal(), ClickableItem.from(new ItemBuilder(ss.displayMat)
                         .name(TCUtil.sided(ss.disName, "⛨")).build(), e -> moveTo(p, ss, true)));

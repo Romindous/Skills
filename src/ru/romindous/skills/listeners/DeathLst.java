@@ -105,7 +105,7 @@ public class DeathLst implements Listener {
                 default:
                     if (event.getDamager() instanceof final Mob dmgr) {
                         final String plNm = dmgr.getPersistentDataContainer()
-                                .get(EntUtil.ownerPlName, PersistentDataType.STRING);
+                                .val(EntUtil.ownerPlName, PersistentDataType.STRING);
                         if (plNm != null) { //чей-то миньон атакует
                             killer = Bukkit.getPlayerExact(plNm);
                         }
@@ -136,7 +136,7 @@ public class DeathLst implements Listener {
         //bfr - сам буфер
         /*final Location kLoc = killer.getLocation();
         final int encd = ((kLoc.blockX() >> COORD_DEL) << LOC_ENCD) + (kLoc.blockZ() >> COORD_DEL);
-        final Float bfr = farmLocs.get(encd);
+        final Float bfr = farmLocs.val(encd);
         final float mult = bfr == null ? 1f : bfr * DROP_MUL;
         farmLocs.put(encd, mult);
         if (farmLocs.size() > kLoc.getWorld().getPlayers().size() * PER_PLAYER) {
@@ -170,6 +170,7 @@ public class DeathLst implements Listener {
             }
 
 //            if (Main.srnd.nextFloat() > thresh)
+            if (kSv.role == null) continue;
             dropScroll(loc, killer, kSv);
         }
     }
@@ -226,7 +227,7 @@ public class DeathLst implements Listener {
             final Location deathLoc = mob.getLocation();
             
             *//*if (mob.getPersistentDataContainer().has(EntUtil.ownerPlName)) {
-            	final Survivor os = SM.getSurvivor(mob.getPersistentDataContainer().get(EntUtil.ownerPlName, PersistentDataType.STRING));
+            	final Survivor os = SM.getSurvivor(mob.getPersistentDataContainer().val(EntUtil.ownerPlName, PersistentDataType.STRING));
             	if (os != null) {
             		os.minis.remove(mob.getEntityId());
             	}
@@ -270,7 +271,7 @@ public class DeathLst implements Listener {
                             break;
                         default:
                             if (event.getDamager() instanceof final Mob dmgr) {
-                                final String plNm = dmgr.getPersistentDataContainer().get(EntUtil.ownerPlName, PersistentDataType.STRING);
+                                final String plNm = dmgr.getPersistentDataContainer().val(EntUtil.ownerPlName, PersistentDataType.STRING);
                                 if (plNm != null) { //чей-то миньон атакует
                                     killer = Bukkit.getPlayerExact(plNm);
                                     break;
@@ -296,7 +297,7 @@ public class DeathLst implements Listener {
             //если игрок-убийца не определён, дальше не пойдёт
             final Survivor kSv = SM.getSurvivor(killer);
 
-            final Boss bss = Bosses.bosses.get(mob.getUniqueId());
+            final Boss bss = Bosses.bosses.val(mob.getUniqueId());
             if (bss != null) {
             	bss.dthBss(killer);
             }
@@ -418,7 +419,7 @@ public class DeathLst implements Listener {
             cc.lastMobKillStamp = Timer.getTime(); //обновить штамп
             
             if (kSv.isReady(killer, Ability.ВЫЦВЕТКА)) {
-            	final Spored sp = spores.get(mob.getEntityId());
+            	final Spored sp = spores.val(mob.getEntityId());
             	final int sps = sp == null ? 1 : sp.stack, lvl = kSv.getAbilityLvl(Ability.ВЫЦВЕТКА);
             	final float fct = kSv.getStatEffect(Ability.ВЫЦВЕТКА, lvl) - 1f;
             	deathLoc.getWorld().playSound(deathLoc, Sound.BLOCK_BIG_DRIPLEAF_HIT, 0.01f * sps + 1f, 0.6f);
@@ -426,7 +427,7 @@ public class DeathLst implements Listener {
                 for (final LivingEntity le : LocUtil.getChEnts(deathLoc, lvl, LivingEntity.class)) {
             		if (le.getEntityId() != killer.getEntityId()) {
                     	//Bukkit.getConsoleSender().sendMessage(spores.toString());
-                    	final Spored osp = spores.get(le.getEntityId());
+                    	final Spored osp = spores.val(le.getEntityId());
                     	if (osp == null) {
                     		spores.put(le.getEntityId(), new Spored(le, fct, sps, 40));
                     		continue;

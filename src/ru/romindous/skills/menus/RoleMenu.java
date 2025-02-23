@@ -21,8 +21,8 @@ public class RoleMenu implements InventoryProvider {
     public static final SmartInventory skillSelect = SmartInventory.builder()
         .id("SkillSelect")
         .provider(new RoleMenu())
-        .size(3, 9)
-        .title("§9§lВыбери Роль")
+        .size(1, 9)
+        .title("        §9§lВыбери Роль")
         .build();
 
     private static final ItemStack cyan = new ItemBuilder(ItemType.CYAN_STAINED_GLASS_PANE).name("§0.").build();
@@ -59,7 +59,7 @@ public class RoleMenu implements InventoryProvider {
             for (final Role rl : Role.values()) {
                 final boolean eq = sv.role == rl;
                 content.set(i, ClickableItem.from(new ItemBuilder(rl.getIcon()).lore(eq ? "§fТвой класс сейчас" : "")
-                    .lore(!eq || sv.role == null ? "" : "§7Перевыбор класса - §cполный сброс §7характеристик!")
+                    .lore(sv.role == null || eq ? "" : "§7Перевыбор класса - §cполный сброс §7характеристик!")
                     .build(), e -> {
                     p.closeInventory();
                     p.performCommand("skill select " + rl.name());

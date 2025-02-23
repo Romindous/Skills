@@ -10,7 +10,7 @@ import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.skills.Rarity;
 import ru.romindous.skills.SubServer;
 import ru.romindous.skills.skills.trigs.Trigger;
-import ru.romindous.skills.items.Groups;
+import ru.romindous.skills.objects.Groups;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
@@ -59,15 +59,25 @@ public class Entries {
                 .lore("<mithril>[Требуемая роль]", "", "<mithril>[Способ выбора сущностей]", "", "<mithril>[Влияющие модификаторы]", "<mithril>(Эффект на навык)").build();
             private static final ItemStack MOD_IT = new ItemBuilder(ItemType.ARMS_UP_POTTERY_SHERD).name(TCUtil.sided(Rarity.COMMON.color() + "<i>Модификатор<!i> I", Modifier.SIDE))
                 .lore("<mithril>[Требуемая роль]", "", "<mithril>[Пересчет характеристик]", "<mithril>(Другие требования)").build();
-            public static final Entry abil = new Entry('i', ItemType.COAST_ARMOR_TRIM_SMITHING_TEMPLATE, 0, null, trig, "Интересный лут",
+            public static final Entry abil = new Entry('i', ItemType.DRIED_KELP, 0, null, trig, "Интересный лут",
                 "Получи скрижаль способности", "", Quest.QuestVis.PARENT, Quest.QuestFrame.GOAL, Section.SKILLS,
                 "Используя эту скрижаль, я могу выучить данную 0[<indigo>способность]. Ее комбинация с 1[<sky>подборником] и подходящими 2[<dark_aqua>модификаторами] позволит мне создать навык, который поможет мне выжить в этой дыре...",
                 ABIL_IT, SEL_IT, MOD_IT);
 
-                public static final Entry skill = new Entry('k', ItemType.COPPER_BULB, 0, null, abil, "А на деле...",
+                public static final Entry skill = new Entry('k', ItemType.CAMPFIRE, 0, null, abil, "А на деле...",
                     "Используй навык в первый раз", "", Quest.QuestVis.PARENT, Quest.QuestFrame.TASK, Section.SKILLS,
                     "Использование навыка истощает собранные души, но может мне немало помочь. Открытие различных 0[<indigo>способностей] и 1[<dark_aqua>модификаторов] позволит мне оптимизировать данный навык и создать из него свой боевой стиль...",
                     ABIL_IT, MOD_IT);
+
+                    public static final Entry new_abil = new Entry('m', ItemType.COAST_ARMOR_TRIM_SMITHING_TEMPLATE, 0, null, skill, "Друг за дружкой",
+                        "Создай цепочку из двух способностей", "", Quest.QuestVis.HIDDEN, Quest.QuestFrame.TASK, Section.SKILLS,
+                        "Возможность иметь более одного 0[<dark_aqua>модификатора] заставила меня задуматся о похожем потенциале со 1[<indigo>способностями]. В теории, их можно связать в цепочку, и изполнять одну за другой...",
+                        MOD_IT, ABIL_IT);
+
+                    public static final Entry new_skill = new Entry('n', ItemType.SOUL_CAMPFIRE, 0, null, skill, "Второе чувство",
+                        "Открой второй навык у себя в меню", "", Quest.QuestVis.HIDDEN, Quest.QuestFrame.TASK, Section.SKILLS,
+                        "У меня уже достаточно опыта, чтобы реагировать на несколько 0[<pink>тригеров] за раз. Почему бы мне не создать еще один навык, со своими отдельными 1[<indigo>способностями]? Можно даже скомбинировать его выполнение с предыдущим...",
+                        TRIG_IT, ABIL_IT);
 
                 public static final Entry combine = new Entry('l', ItemType.ANVIL, 0, null, abil, "Ступень развития",
                     "Соедени два одинаковых компонента навыка", "", Quest.QuestVis.PARENT, Quest.QuestFrame.TASK);

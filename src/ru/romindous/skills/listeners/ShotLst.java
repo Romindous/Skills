@@ -34,6 +34,7 @@ public class ShotLst implements Listener {
     }
     public static double damage(final Projectile prj) {
         final DmgPrj dmg = projDmg.get(prj.getEntityId());
+//        Bukkit.getConsoleSender().sendMessage("pr-" + prj.getType().name() + " d=" + dmg);
         if (dmg != null) return dmg.damage;
         final ItemStack it;
         final int lvl;

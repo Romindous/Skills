@@ -10,6 +10,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.EquipmentSlot;
+import ru.komiss77.Ostrov;
 import ru.komiss77.Timer;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
@@ -27,8 +28,6 @@ import ru.romindous.skills.skills.sels.Selector;
 import ru.romindous.skills.skills.trigs.Trigger;
 
 public class Skill {//скилл
-
-    public static final byte SIG_FIGS = 1;
 
     public final String name;
     public final Trigger trig;
@@ -55,8 +54,16 @@ public class Skill {//скилл
 
         double cd = 0;
         for (int i = 0; i != abils.length; i++) {
-            final Ability.AbilState as = abils[i]; final Selector.SelState ss = sels[i];
-            cd += as.abil().CD.calc(as.lvl()) * ss.sel().cdMul.calc(ss.lvl());
+            final Ability.AbilState as = abils[i];
+            final Selector.SelState ss;
+            if (sels.length == abils.length) ss = sels[i];
+            else {
+                ss = sels.length < abils.length ? sels[i]
+                    : as.val().selfCast() ? Selector.CASTER_ST : Selector.SAME_ST;
+                Ostrov.log_warn("skill " + name + " sels != abils - "
+                    + sels.length + " != " + abils.length);
+            }
+            cd += as.val().CD.calc(as.lvl()) * ss.val().cdMul.calc(ss.lvl());
         }
         coolDown = maxCD = cd;
         cdBar = BossBar.bossBar(TCUtil.form(TCUtil.N + "Перезарядка " + TCUtil.P + name),
@@ -70,20 +77,20 @@ public class Skill {//скилл
         for (int i = 0; i != abils.length; i++) {
             final Ability.AbilState as = abils[i];
             final Selector.SelState ss = sels[i];
-            final int nus = ss.sel().avgAmount(ss.lvl());
-            avgMana += uses * nus * Stat.skillMana(modifyAll(Chastic.MANA, as.abil().MANA.calc(as.lvl())
-                * ss.sel().manaMul.calc(ss.lvl())), cs.getStat(Stat.SPIRIT));
+            final int nus = ss.val().avgAmount(ss.lvl());
+            avgMana += uses * nus * Stat.skillMana(modifyAll(Chastic.MANA, as.val().MANA.calc(as.lvl())
+                * ss.val().manaMul.calc(ss.lvl())), cs.getStat(Stat.SPIRIT));
             uses = nus;
             sets.add("<dark_gray>" + (i + 1) + ")=-=-=-=-=-=-=-=-=-=-");
-            sets.add(TCUtil.sided("<u>" + ss.sel().name(ss.lvl()) + "</u>", ss.sel().side()) + " <dark_gray>выбирает:");
-            sets.addAll(ss.sel().context(this, ss.lvl()));
-            sets.add(TCUtil.sided("<u>" + as.abil().name(as.lvl()) + "</u>", as.abil().side()) + " <dark_gray>на деле:");
-            sets.addAll(as.abil().context(this, as.lvl()));
+            sets.add(TCUtil.sided("<u>" + ss.val().name(ss.lvl()) + "</u>", ss.val().side()) + " <dark_gray>выбирает:");
+            sets.addAll(ss.val().context(this, ss.lvl()));
+            sets.add(TCUtil.sided("<u>" + as.val().name(as.lvl()) + "</u>", as.val().side()) + " <dark_gray>на деле:");
+            sets.addAll(as.val().context(this, as.lvl()));
         }
         desc.add(TCUtil.N + "Расходует (в среднем): " + Main.manaClr
-            + StringUtil.toSigFigs(avgMana, SIG_FIGS) + " душ");
+            + StringUtil.toSigFigs(avgMana, Stat.SIG_FIGS_PER) + " душ");
         desc.add(TCUtil.N + "Перезаряжается: " + Main.cdClr
-            + StringUtil.toSigFigs(getCDFor(cs), SIG_FIGS) + " сек");
+            + StringUtil.toSigFigs(getCDFor(cs), Stat.SIG_FIGS_PER) + " сек");
         desc.add("<dark_gray>Реагирует на: " + TCUtil.sided(trig.disName(), "🟃"));
         desc.addAll(sets);
         return desc;
@@ -109,7 +116,7 @@ public class Skill {//скилл
     /*public Trigger posTrig(final int at) {
         if (at == 0) return trig;
         return abils[at > abils.length
-            ? abils.length - 1 : at - 1].abil().finish();
+            ? abils.length - 1 : at - 1].val().finish();
     }*/
 
     public void updateKd(final Player p) {
@@ -131,7 +138,7 @@ public class Skill {//скилл
         if (cd > 0d) {
             if (!(caster instanceof final Player pl)) return;
             cs.inform(pl, TCUtil.P + name + TCUtil.N + " на перезарядке "
-                + TCUtil.A + StringUtil.toSigFigs(cd, SIG_FIGS) + " сек" + TCUtil.N + "!");
+                + TCUtil.A + StringUtil.toSigFigs(cd, Stat.SIG_FIGS_PER) + " сек" + TCUtil.N + "!");
             return;
         }
         this.cst = cs;
@@ -149,9 +156,9 @@ public class Skill {//скилл
         if (abils.length <= curr) return false;
         final Ability.AbilState abs = abils[curr];
         final Selector.SelState sls = sels[curr];
-        final float useMana = (float) Stat.skillMana(modifyAll(Chastic.MANA, abs.abil().MANA.calc(abs.lvl())
-            * sls.sel().manaMul.calc(sls.lvl())), cst.getStat(Stat.SPIRIT));
-        final Ability ab = abs.abil();
+        final float useMana = (float) Stat.skillMana(modifyAll(Chastic.MANA, abs.val().MANA.calc(abs.lvl())
+            * sls.val().manaMul.calc(sls.lvl())), cst.getStat(Stat.SPIRIT));
+        final Ability ab = abs.val();
         final InvCondition ic = ab.equip();
         final EquipmentSlot swing = ic == null ? EquipmentSlot.BODY
             : ic.result(link.caster().getEquipment());
@@ -170,7 +177,7 @@ public class Skill {//скилл
             if (swing.isHand()) Nms.swing(ch.caster(), swing);
             return true;
         }
-        final Collection<LivingEntity> tgts = ss.sel().select(ch, ss.lvl());
+        final Collection<LivingEntity> tgts = ss.val().select(ch, ss.lvl());
         if (tgts.isEmpty()) return false;
         boolean casted = false;
         for (final LivingEntity tgt : tgts) {
@@ -191,13 +198,13 @@ public class Skill {//скилл
 
     public double modifyAll(final Chastic ch, double def) {
         for (final Modifier.ModState md : mods)
-            def = md.mod().modify(ch, def, md.lvl(), null);
+            def = md.val().modify(ch, def, md.lvl(), null);
         return def;
     }
 
     public double modifyAll(final Chastic ch, double def, final Chain info) {
         for (final Modifier.ModState md : mods)
-            def = md.mod().modify(ch, def, md.lvl(), info);
+            def = md.val().modify(ch, def, md.lvl(), info);
         return def;
     }
 }

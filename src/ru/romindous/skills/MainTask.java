@@ -1,10 +1,13 @@
 package ru.romindous.skills;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -17,7 +20,6 @@ import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.ScreenUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.listeners.ShotLst;
-import ru.romindous.skills.skills.abils.Bleeding;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.survs.SM;
@@ -30,6 +32,7 @@ public class MainTask implements Runnable {
     public static int tick;
 	public static int proccesTime;
     private final World w = Bukkit.getWorlds().getFirst();
+	private static final List<LivingEntity> noDmg = new LinkedList<>();
 
 	public static final int PRJ_DMG_SEC = 8;
 	public static final int UPD_TCK_PER = 2;
@@ -181,12 +184,20 @@ public class MainTask implements Runnable {
             }*/
         }
 
+		for (final LivingEntity e : noDmg)
+			if (e.isValid()) e.setNoDamageTicks(0);
+		noDmg.clear();
+
+		final List<Ability.InterNext> nxs = new ArrayList<>();
 		final Iterator<Ability.InterNext> nit = Ability.nexts.iterator();
 		while (nit.hasNext()) {
 			final Ability.InterNext in = nit.next();
 			if (in == null || in.time() + Ability.stepCd < tick) continue;
+			nxs.add(in); nit.remove();
+		}
+		for (final Ability.InterNext in : nxs) {
 			in.ch().target().setNoDamageTicks(0);
-			in.run(); nit.remove();
+			in.run();
 		}
 
 		final int sec = tick / 20;
@@ -202,7 +213,6 @@ public class MainTask implements Runnable {
             if (sv == null) continue;
             //каждую секунду с рабросом по тикам для игроков
             if (isSec) {
-                Bleeding.bleeds.values().removeIf(Bleeding::endTick);
                 //задания
                 if (sv.miniQuestTask != null && sv.miniQuestTask.secondTick()) {
                     sv.miniQuestTask = null;
@@ -231,5 +241,10 @@ public class MainTask implements Runnable {
     	}
 		inv.setItem(8, fst);
     }
+
+	public static void unDTick(final LivingEntity e) {
+		if (!e.isValid()) return;
+		noDmg.add(e);
+	}
     
 }

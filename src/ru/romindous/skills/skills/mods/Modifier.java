@@ -8,11 +8,12 @@ import ru.komiss77.objects.IntHashMap;
 import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
-import ru.romindous.skills.skills.chas.Chastic;
-import ru.romindous.skills.survs.Role;
 import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Chain;
+import ru.romindous.skills.skills.chas.Chastic;
+import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.survs.Stat;
 
 public abstract class Modifier implements Scroll {//модификатор
 
@@ -77,9 +78,7 @@ public abstract class Modifier implements Scroll {//модификатор
             (md.mulScale * level + md.mulBase) * def);
     }*/
 
-    public record ModState(Modifier mod, int lvl) {}
-
-    private static final byte SIG_FIGS = 2;
+    public record ModState(Modifier val, int lvl) implements State {}
 
     private String relate(final Modifier md, final Skill sk) {
         if (sk == null) return "";
@@ -96,17 +95,39 @@ public abstract class Modifier implements Scroll {//модификатор
         for (final Chastic ch : chastics()) {
             final Mod md = chMods[ch.ordinal()];
             dscs.add(TCUtil.N + "◇ " + ch.disName() + TCUtil.N + " - на");
-            dscs.add(ch.color() + StringUtil.toSigFigs(md.conScale * lvl + md.conBase, SIG_FIGS)
-                + TCUtil.N + " или " + ch.color() +
-                StringUtil.toSigFigs(md.mulScale * lvl + md.mulBase * 100f, SIG_FIGS) +
-                "%" + TCUtil.N + ", смотря что ниже");
+            dscs.add(ch.color() + StringUtil.toSigFigs(md.conScale * lvl + md.conBase, Stat.SIG_FIGS_NUM)
+                + TCUtil.N + " или " + ch.color() + StringUtil.toSigFigs(md.mulScale * lvl + md.mulBase * 100f,
+                Stat.SIG_FIGS_PER) + "%" + TCUtil.N + ", смотря что ниже");
         }
         final String nds = needs();
         if (!nds.isEmpty()) {
             dscs.add("<dark_gray>Требования:");
             dscs.add(nds.replace(CLR, rarity().color()));
         }
-        dscs.add(" ");
+//        dscs.add(" ");
+        return dscs.toArray(new String[0]);
+    }
+
+    @Override
+    public String[] next(final int lvl) {
+        final List<String> dscs = new ArrayList<>();
+        dscs.add(TCUtil.N + "Применимая роль: " + (role() == null ? Role.ANY : role().disName()));
+        dscs.add("<dark_gray>Модифицирует:");
+        for (final Chastic ch : chastics()) {
+            final Mod md = chMods[ch.ordinal()];
+            dscs.add(TCUtil.N + "◇ " + ch.disName() + TCUtil.N + " - на "
+                + ch.color() + StringUtil.toSigFigs(md.conScale * lvl + md.conBase, Stat.SIG_FIGS_NUM) + TCUtil.P
+                + (md.conScale > 0 ? " (+" : " (") + StringUtil.toSigFigs(md.conScale, Stat.SIG_FIGS_NUM) + ")");
+            dscs.add(TCUtil.N + "или " + ch.color() + StringUtil.toSigFigs((md.mulScale * lvl + md.mulBase) * 100d,
+                Stat.SIG_FIGS_PER) + "%" + TCUtil.P + (md.mulScale > 0 ? " (+" : " (")
+                + StringUtil.toSigFigs(md.mulScale * 100d, Stat.SIG_FIGS_PER) + "%)" + TCUtil.N + ", смотря что ниже");
+        }
+        final String nds = needs();
+        if (!nds.isEmpty()) {
+            dscs.add("<dark_gray>Требования:");
+            dscs.add(nds.replace(CLR, rarity().color()));
+        }
+//        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }
 

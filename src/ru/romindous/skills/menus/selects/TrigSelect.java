@@ -63,19 +63,19 @@ public class TrigSelect extends SvSelect {
                 .lore("").lore(Trigger.color + "Клик - Выбрать").build(), e -> {
                     Entries.trig.complete(p, sv, false);
                     if (sk == null) {
-                        sv.setSkill(skIx, new Skill("Навык-" + skIx, tr, new Selector.SelState[0],
+                        sv.setSkill(p, skIx, new Skill("Навык-" + skIx, tr, new Selector.SelState[0],
                             new Ability.AbilState[0], new Modifier.ModState[0]));
                         openLast(p);
                         return;
                     }
 
                     if (sk.abils.length != 0) {
-                        final Trigger rt = sk.abils[0].abil().trig();
+                        final Trigger rt = sk.abils[0].val().trig();
                         if (rt != null && rt != tr) {
                             for (final Ability.AbilState as : sk.abils) sv.change(as, 1);
                             for (final Modifier.ModState ms : sk.mods) sv.change(ms, 1);
                             for (final Selector.SelState ss : sk.sels) sv.change(ss, 1);
-                            sv.setSkill(skIx, new Skill(sk.name, tr, new Selector.SelState[0],
+                            sv.setSkill(p, skIx, new Skill(sk.name, tr, new Selector.SelState[0],
                                 new Ability.AbilState[0], new Modifier.ModState[0]));
                             p.sendMessage(TCUtil.form(Main.prefix
                                 + "<red>Навык распался из за несовпадения тригеров!"));
@@ -83,7 +83,7 @@ public class TrigSelect extends SvSelect {
                             return;
                         }
                     }
-                    sv.setSkill(skIx, new Skill(sk.name, tr, sk.sels, sk.abils, sk.mods));
+                    sv.setSkill(p, skIx, new Skill(sk.name, tr, sk.sels, sk.abils, sk.mods));
                     openLast(p);
                 }
             ));

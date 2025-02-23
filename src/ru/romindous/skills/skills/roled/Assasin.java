@@ -17,10 +17,10 @@ import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Main;
+import ru.romindous.skills.objects.Effects;
 import ru.romindous.skills.skills.Rarity;
 import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.abils.Ability;
-import ru.romindous.skills.skills.abils.Bleeding;
 import ru.romindous.skills.skills.abils.Chain;
 import ru.romindous.skills.skills.abils.InvCondition;
 import ru.romindous.skills.skills.chas.ChasMod;
@@ -29,7 +29,7 @@ import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
 import ru.romindous.skills.survs.Role;
 
-public class Assasin implements Scroll.Registerable {
+public class Assasin implements Scroll.Regable {
     @Override
     public void register() {
 
@@ -47,8 +47,8 @@ public class Assasin implements Scroll.Registerable {
             }
             private final String[] desc = new String[]{
                 TCUtil.N + "Сущности вокруг, со " + CLR + "здоровьем" + TCUtil.N + ", менее",
-                TCUtil.N + "чем у " + CLR + "цели" + TCUtil.N + ", не далее " + DIST.id + " бл.",
-                TCUtil.N + "Лимит - " + AMT.id + " сущ. (округляемо)"};
+                TCUtil.N + "чем у " + CLR + "цели" + TCUtil.N + ", не далее " + DIST.id() + " бл.",
+                TCUtil.N + "Лимит - " + AMT.id() + " сущ. (округляемо)"};
             public String[] descs() {
                 return desc;
             }
@@ -94,7 +94,7 @@ public class Assasin implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Концентрация дает " + CLR + "скорость " + TCUtil.N + "пользователю,",
-                TCUtil.N + CLR + "уровня " + EFFECT.id + TCUtil.N + " (округляемо) на " + TIME.id + " сек."};
+                TCUtil.N + CLR + "уровня " + EFFECT.id() + TCUtil.N + " (округляемо) на " + TIME.id() + " сек."};
             public String[] descs() {
                 return desc;
             }
@@ -102,7 +102,7 @@ public class Assasin implements Scroll.Registerable {
                 return Rarity.COMMON;
             }
             public InvCondition equip() {
-                return InvCondition.SWORD;
+                return InvCondition.SWORD_BOTH;
             }
             public boolean selfCast() {return true;}
             public Role role() {return Role.ASSASIN;}
@@ -123,14 +123,11 @@ public class Assasin implements Scroll.Registerable {
                     return false;
                 }
                 EntityUtil.effect(caster, Sound.ITEM_CHORUS_FRUIT_TELEPORT, 0.8f, Particle.PORTAL);
-//                addEffect(caster, PotionEffectType.HASTE, TIME.modify(ch, lvl), amp, true);
-
                 EntityUtil.effect(caster, Sound.ITEM_CHORUS_FRUIT_TELEPORT, 0.8f, Particle.REVERSE_PORTAL);
 
-                next(ch, () -> {
-                    caster.teleport(tlc.subtract(target.getEyeLocation().getDirection().multiply(2d)));
-                    if (target instanceof Mob) ((Mob) target).setTarget(null);
-                });
+                caster.teleport(tlc.subtract(target.getEyeLocation().getDirection().multiply(2d)));
+                if (target instanceof Mob) ((Mob) target).setTarget(null);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -141,7 +138,7 @@ public class Assasin implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Телепорует пользователя за " + CLR + "спину",
-                TCUtil.N + "цели, если она ближе " + DIST.id + " бл."};
+                TCUtil.N + "цели, если она ближе " + DIST.id() + " бл."};
             public String[] descs() {
                 return desc;
             }
@@ -181,13 +178,13 @@ public class Assasin implements Scroll.Registerable {
                 return "Проворство";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Дает спешку " + EFFECT.id + " ур. " + TCUtil.N + "(округляемо) на " + TIME.id + " сек.",
+                TCUtil.N + "Дает спешку " + EFFECT.id() + " ур. " + TCUtil.N + "(округляемо) на " + TIME.id() + " сек.",
                 TCUtil.N + "взамен на снятие" + CLR + "невидимости " + TCUtil.N + "у пользователя"};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
-                return Rarity.COMMON;
+                return Rarity.UNCOM;
             }
             public boolean selfCast() {return true;}
             public Role role() {return Role.ASSASIN;}
@@ -208,12 +205,11 @@ public class Assasin implements Scroll.Registerable {
                 EntityUtil.effect(caster, Sound.ENTITY_WIND_CHARGE_WIND_BURST, 0.6f, Particle.CAMPFIRE_COSY_SMOKE);
 
                 final double dst = DIST.modify(ch, lvl);
-                next(ch, () -> {
-                    for (final Mob mb : LocUtil.getChEnts(caster.getLocation(), dst, Mob.class, m -> {
-                        final LivingEntity tgt = m.getTarget();
-                        return tgt != null && tgt.getEntityId() == caster.getEntityId();
-                    })) mb.setTarget(null);
-                });
+                for (final Mob mb : LocUtil.getChEnts(caster.getLocation(), dst, Mob.class, m -> {
+                    final LivingEntity tgt = m.getTarget();
+                    return tgt != null && tgt.getEntityId() == caster.getEntityId();
+                })) mb.setTarget(null);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -224,7 +220,8 @@ public class Assasin implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Прячет чародея в тенях, давая",
-                TCUtil.N + "ему " + TIME.id + " сек. " + TCUtil.N + "невидимости"};
+                TCUtil.N + "ему " + TIME.id() + " сек. " + TCUtil.N + "невидимости,",
+                TCUtil.N + "и отвлекая сущности ближе " + DIST.id() + " бл."};
             public String[] descs() {
                 return desc;
             }
@@ -232,6 +229,9 @@ public class Assasin implements Scroll.Registerable {
                 return Rarity.COMMON;
             }
             public boolean selfCast() {return true;}
+            public InvCondition equip() {
+                return InvCondition.FIST_ANY;
+            }
             public Role role() {return Role.ASSASIN;}
         };
 
@@ -246,12 +246,10 @@ public class Assasin implements Scroll.Registerable {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
 
-                Bleeding.effect(tgt);
-
                 final double dmg = DAMAGE.modify(ch, lvl);
-                next(ch, () -> {
-                    Bleeding.bleed(tgt, dmg, TIME.modify(ch, lvl), caster);
-                });
+                final double time = TIME.modify(ch, lvl);
+                Effects.BLEED.apply(tgt, (int) (time * 20d), dmg);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -262,13 +260,16 @@ public class Assasin implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Атакуемая цель будет истекать " + CLR + "кровью",
-                TCUtil.N + "на " + TIME.id + " сек, " + TCUtil.N + "получая",
-                DAMAGE.id + " ед. " + TCUtil.N + "урона каждую секунду"};
+                TCUtil.N + "на " + TIME.id() + " сек, " + TCUtil.N + "получая",
+                DAMAGE.id() + " ед. " + TCUtil.N + "урона каждую секунду"};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
                 return Rarity.COMMON;
+            }
+            public InvCondition equip() {
+                return InvCondition.MELEE;
             }
             public boolean selfCast() {return false;}
             public Role role() {return Role.ASSASIN;}

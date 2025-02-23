@@ -9,20 +9,23 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.ItemUtil;
+import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.utils.inventory.*;
-import ru.romindous.skills.survs.Survivor;
-import ru.romindous.skills.skills.chas.Chastic;
-import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.guides.Entries;
 import ru.romindous.skills.menus.selects.AbilSelect;
 import ru.romindous.skills.menus.selects.ModSelect;
 import ru.romindous.skills.menus.selects.SelSelect;
 import ru.romindous.skills.menus.selects.TrigSelect;
-import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
+import ru.romindous.skills.skills.chas.ChasMod;
+import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Survivor;
 
 
 public class SkillMenu implements InventoryProvider {
@@ -57,9 +60,6 @@ public class SkillMenu implements InventoryProvider {
 //        empty[0] = empty[8] = light;
     }
 
-    private static final int NEW_SKILL_LVL = 10;
-    private static final int NEW_ABIL_LVL = 6;
-    private static final int NEW_MOD_LVL = 4;
     private static final ItemType EMPTY_TRIG = ItemType.HOPPER;
     private static final ItemType EMPTY_ABIL = ItemType.DRIED_KELP;
     private static final ItemType EMPTY_MOD = ItemType.GRAY_DYE;
@@ -72,16 +72,17 @@ public class SkillMenu implements InventoryProvider {
         this.sv = sv;
         this.skillIx = 0;
     }
-    
+
     @Override
     public void init(final Player p, final InventoryContent its) {
+//        p.sendMessage("'"  + sv.extracted(new StringBuilder()).toString() + "'");
         p.playSound(p.getLocation(), Sound.BLOCK_SCULK_SENSOR_CLICKING, 1f, skillIx * 0.2f);
         final Inventory inv = its.getInventory();
         if (inv != null) inv.setContents(empty);
 
         its.set(22, ClickableItem.from(new ItemBuilder(sv.role.getIcon())
             .name(TCUtil.sided(TCUtil.P + "Главное Меню", "🢙")).deLore().build(), e -> {
-                p.performCommand("skill");
+            MainMenu.open(p);
         }));
 
         final Skill sk = skillIx < sv.skills.size() ? sv.skills.get(skillIx) : null;
@@ -96,13 +97,21 @@ public class SkillMenu implements InventoryProvider {
                     .title(Trigger.color + "         §lВыбор Тригера")
                     .build().open(p);
             }));
+
+            if (skillIx != 0) {
+                its.set(2, 0, ClickableItem.of(ItemUtil.previosPage, e -> {
+                    skillIx--; reopen(p, its);
+                }));
+            }
             return;
         }
 
-        its.set(4, new InputButton(InputButton.InputType.ANVILL, new ItemBuilder(ItemType.COPPER_BULB)
+        its.set(4, new InputButton(InputButton.InputType.ANVILL, new ItemBuilder(skillIt(skillIx))
             .name(TCUtil.sided(TCUtil.P + sk.name, TCUtil.A + "✞") + " <dark_gray>(клик - назвать)")
             .lore("<dark_gray>При использовании:").lore(sk.describe(sv)).build(), sk.name, nm -> {
-            sv.setSkill(skillIx, new Skill(nm, sk.trig, sk.sels, sk.abils, sk.mods));
+            final String fnm = nm.replace(StringUtil.CHAR_0, '!')
+                .replace(StringUtil.CHAR_1, '|').replace(StringUtil.CHAR_2, ':');
+            sv.setSkill(p, skillIx, new Skill(fnm, sk.trig, sk.sels, sk.abils, sk.mods));
             reopen(p, its);
         }));
 
@@ -113,7 +122,7 @@ public class SkillMenu implements InventoryProvider {
                     for (final Ability.AbilState as : sk.abils) sv.change(as, 1);
                     for (final Modifier.ModState ms : sk.mods) sv.change(ms, 1);
                     for (final Selector.SelState ss : sk.sels) sv.change(ss, 1);
-                    sv.setSkill(skillIx, null);
+                    sv.setSkill(p, skillIx, null);
                     reopen(p, its);
                     return;
             }
@@ -127,12 +136,12 @@ public class SkillMenu implements InventoryProvider {
         }));
 
         final int lvl = sv.getLevel();
-        final int remLvl = lvl - (NEW_SKILL_LVL * skillIx);
+        final int remLvl = lvl - (SM.NEW_SKILL_LVL * skillIx);
         int slot = 0;
         for (; slot != sk.abils.length; slot++) {
             final int pos = slot;
             final Ability.AbilState as = sk.abils[pos];
-            its.set(12 + (pos << 1), ClickableItem.from(new ItemBuilder(as.abil().display(as.lvl()))
+            its.set(12 + (pos << 1), ClickableItem.from(new ItemBuilder(as.val().display(as.lvl()))
                 .lore("<dark_gray>(клик - заменить)").lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP)
                     + TCUtil.N + " - Убрать").build(), e -> {
                 switch (e.getClick()) {
@@ -150,10 +159,10 @@ public class SkillMenu implements InventoryProvider {
                     .build().open(p);
             }));
             final Selector.SelState ss = sk.sels[slot];
-            if (Selector.CASTER.equals(ss.sel())) {
-                its.set(11 + (pos << 1), ClickableItem.empty(ss.sel().display(ss.lvl())));
+            if (Selector.CASTER.equals(ss.val())) {
+                its.set(11 + (pos << 1), ClickableItem.empty(ss.val().display(ss.lvl())));
             } else {
-                its.set(11 + (pos << 1), ClickableItem.from(new ItemBuilder(ss.sel().display(ss.lvl()))
+                its.set(11 + (pos << 1), ClickableItem.from(new ItemBuilder(ss.val().display(ss.lvl()))
                     .lore("<dark_gray>(клик - заменить)").build(), e -> {
                     SmartInventory.builder()
                         .id("Sel "+p.getName())
@@ -165,7 +174,7 @@ public class SkillMenu implements InventoryProvider {
             }
         }
 
-        final int maxAbils = Math.min((remLvl / NEW_ABIL_LVL) + 1, 4);
+        final int maxAbils = Math.min((remLvl / SM.NEW_ABIL_LVL) + 1, 4);
         if (slot < maxAbils) {
             final int pos = slot;
             its.set(12 + (pos << 1), ClickableItem.from(new ItemBuilder(EMPTY_ABIL)
@@ -185,8 +194,8 @@ public class SkillMenu implements InventoryProvider {
             final int pos = slot;
             final Chastic[] chs = getChs(sk);
             final Modifier.ModState ms = sk.mods[slot];
-            its.set(23 * (19 + pos) / 22, ClickableItem.from(new ItemBuilder(ms.mod()
-                .display(ms.lvl())).lore("<dark_gray>(клик - заменить)").lore(relate(ms.mod(), chs))
+            its.set(23 * (19 + pos) / 22, ClickableItem.from(new ItemBuilder(ms.val()
+                .display(ms.lvl())).lore("<dark_gray>(клик - заменить)").lore(relate(ms.val(), chs))
                 .lore(TCUtil.A + TCUtil.bind(TCUtil.Input.DROP) + TCUtil.N + " - Убрать").build(), e -> {
                 switch (e.getClick()) {
                     case DROP, CONTROL_DROP:
@@ -204,7 +213,7 @@ public class SkillMenu implements InventoryProvider {
             }));
         }
 
-        final int maxMods = Math.min((remLvl / NEW_MOD_LVL) + 1, 7);
+        final int maxMods = Math.min((remLvl / SM.NEW_MOD_LVL) + 1, 6);
         if (slot < maxMods) {
             final int pos = slot;
             its.set(23 * (19 + pos) / 22, ClickableItem.from(new ItemBuilder(EMPTY_MOD)
@@ -222,17 +231,22 @@ public class SkillMenu implements InventoryProvider {
 
         if (skillIx != 0) {
             its.set(2, 0, ClickableItem.of(ItemUtil.previosPage, e -> {
-                    skillIx--; reopen(p, its);
-                })
-            );
+                skillIx--; reopen(p, its);
+            }));
         }
 
-        if (skillIx < lvl / NEW_SKILL_LVL) {
+        if (skillIx < lvl / SM.NEW_SKILL_LVL) {
             its.set(2, 8, ClickableItem.of(ItemUtil.nextPage, e -> {
-                    skillIx++; reopen(p, its);
-                })
-            );
+                Entries.new_skill.complete(p, sv, false);
+                skillIx++; reopen(p, its);
+            }));
         }
+    }
+
+    private static final ItemType[] IX_TYPES = {ItemType.COPPER_BULB, ItemType.EXPOSED_COPPER_BULB,
+        ItemType.WEATHERED_COPPER_BULB, ItemType.OXIDIZED_COPPER_BULB};
+    private ItemType skillIt(final int ix) {
+        return ix < IX_TYPES.length ? IX_TYPES[ix] : IX_TYPES[IX_TYPES.length - 1];
     }
 
     private static Chastic[] getChs(final Skill sk) {
@@ -240,13 +254,13 @@ public class SkillMenu implements InventoryProvider {
         final Set<Chastic> chs = EnumSet.noneOf(Chastic.class);
         chs.add(Chastic.MANA); chs.add(Chastic.COOLDOWN);
         for (final Selector.SelState sls : sk.sels) {
-            for (final ChasMod cm : sls.sel().stats()) {
-                chs.add(cm.chs);
+            for (final ChasMod cm : sls.val().stats()) {
+                chs.add(cm.chs());
             }
         }
         for (final Ability.AbilState abs : sk.abils) {
-            for (final ChasMod cm : abs.abil().stats()) {
-                chs.add(cm.chs);
+            for (final ChasMod cm : abs.val().stats()) {
+                chs.add(cm.chs());
             }
         }
         final Chastic[] cha = chs.toArray(new Chastic[0]);

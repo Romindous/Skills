@@ -45,11 +45,11 @@ public enum Role {
     private final String[] desc;
 
     public final String name;
-    public final Scroll.Registerable reg;
+    public final Scroll.Regable reg;
     public final ItemType icon;
     public final Stat stat;
 
-    Role(final String name, final String color, final ItemType icon, final Stat stat, final Scroll.Registerable reg, final String... desc) {
+    Role(final String name, final String color, final ItemType icon, final Stat stat, final Scroll.Regable reg, final String... desc) {
         this.name = name;
         this.color = color;
         this.icon = icon;

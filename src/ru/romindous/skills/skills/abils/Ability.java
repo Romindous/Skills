@@ -19,6 +19,7 @@ import ru.komiss77.boot.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.objects.IntHashMap;
+import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.TCUtil;
@@ -32,6 +33,7 @@ import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.survs.Stat;
 import ru.romindous.skills.survs.Survivor;
 
 public abstract class Ability implements Scroll {//способность
@@ -40,19 +42,15 @@ public abstract class Ability implements Scroll {//способность
     public static final IntHashMap<List<Ability>> RARITIES = new IntHashMap<>();
 
     public static final ArrayList<InterNext> nexts = new ArrayList<>();
-    public record InterNext(Chain ch, int time, @Nullable Runnable rn) {
+    public record InterNext(Chain ch, int time) {
         public void run() {
+//            Bukkit.getConsoleSender().sendMessage("run step=" + ch.curr());
             ch.sk().step(ch);
-            if (rn != null) rn.run();
         }
     }
 
     public void next(final Chain chain) {
-        nexts.add(new InterNext(chain.next(this), MainTask.tick, null));
-    }
-
-    public void next(final Chain chain, final Runnable run) {
-        nexts.add(new InterNext(chain.next(this), MainTask.tick, run));
+        nexts.add(new InterNext(chain.next(this), MainTask.tick));
     }
 
     public static final String data = "abil";
@@ -132,16 +130,14 @@ public abstract class Ability implements Scroll {//способность
         return data;
     }
 
-    private static final byte SIG_FIGS = 2;
-
     public List<String> context(final Skill sk, final int lvl) {
         final List<String> dscs = new ArrayList<>();
         final ChasMod[] stats = stats();
         for (final String d : descs()) {
             String ed = d.replace(CLR, rarity().color());
             for (final ChasMod st : stats) {
-                ed = ed.replace(st.id, st.chs.color()
-                    + StringUtil.toSigFigs(st.modify(sk, lvl), SIG_FIGS));
+                ed = ed.replace(st.id(), st.chs().color()
+                    + StringUtil.toSigFigs(st.modify(sk, lvl), Stat.SIG_FIGS_NUM));
             }
             dscs.add(ed);
         }
@@ -157,8 +153,8 @@ public abstract class Ability implements Scroll {//способность
         for (final String d : descs()) {
             String ed = d.replace(CLR, rarity().color());
             for (final ChasMod st : stats) {
-                ed = ed.replace(st.id, st.chs.color()
-                    + StringUtil.toSigFigs(st.calc(lvl), SIG_FIGS));
+                ed = ed.replace(st.id(), st.chs().color()
+                    + StringUtil.toSigFigs(st.calc(lvl), Stat.SIG_FIGS_NUM));
             }
             dscs.add(ed);
         }
@@ -172,12 +168,47 @@ public abstract class Ability implements Scroll {//способность
         dscs.add(TCUtil.N + "- " + Chastic.MANA.disName());
         dscs.add(TCUtil.N + "- " + Chastic.COOLDOWN.disName());
         for (final ChasMod st : stats()) {
-            dscs.add(TCUtil.N + "- " + st.chs.disName());
+            dscs.add(TCUtil.N + "- " + st.chs().disName());
         }
         dscs.add(" ");
-        dscs.add(TCUtil.N + "Стоимость: " + Main.manaClr + StringUtil.toSigFigs(MANA.calc(lvl), Skill.SIG_FIGS) + " душ");
-        dscs.add(TCUtil.N + "Перезарядка: " + Main.cdClr + StringUtil.toSigFigs(CD.calc(lvl), Skill.SIG_FIGS) + " сек");
+        dscs.add(TCUtil.N + "Стоимость: " + Main.manaClr + StringUtil.toSigFigs(MANA.calc(lvl), Stat.SIG_FIGS_PER) + " душ");
+        dscs.add(TCUtil.N + "Перезарядка: " + Main.cdClr + StringUtil.toSigFigs(CD.calc(lvl), Stat.SIG_FIGS_PER) + " сек");
+//        dscs.add(" ");
+        return dscs.toArray(new String[0]);
+    }
+
+    public String[] next(final int lvl) {
+        final List<String> dscs = new ArrayList<>();
+        dscs.add(TCUtil.N + "Применимая роль: " + (role() == null ? Role.ANY : role().disName()));
+        if (selfCast()) dscs.add(TCUtil.P + "Всегда подбирает пользователя!");
+        dscs.add("<dark_gray>Способность:");
+        final ChasMod[] stats = stats();
+        for (final String d : descs()) {
+            String ed = d.replace(CLR, rarity().color());
+            for (final ChasMod st : stats) {
+                ed = ed.replace(st.id(), st.chs().color() + StringUtil.toSigFigs(st.calc(lvl), Stat.SIG_FIGS_NUM) + TCUtil.P
+                    + (st.scale() > 0 ? " (+" : " (") + StringUtil.toSigFigs(st.scale(), Stat.SIG_FIGS_NUM) + ")" + st.chs().color());
+            }
+            dscs.add(ed);
+        }
+        if (equip() != null || trig() != null) {
+            dscs.add("<dark_gray>Требует:");
+            if (trig() != null) dscs.add(trig().describe());
+            if (equip() != null) dscs.add(equip().describe());
+        }
         dscs.add(" ");
+        dscs.add(TCUtil.N + "Влияющие Модификаторы:");
+        dscs.add(TCUtil.N + "- " + Chastic.MANA.disName());
+        dscs.add(TCUtil.N + "- " + Chastic.COOLDOWN.disName());
+        for (final ChasMod st : stats()) {
+            dscs.add(TCUtil.N + "- " + st.chs().disName());
+        }
+        dscs.add(" ");
+        dscs.add(TCUtil.N + "Стоимость: " + Main.manaClr + StringUtil.toSigFigs(MANA.calc(lvl), Stat.SIG_FIGS_PER) + TCUtil.P
+            + (MANA.scale() > 0 ? " (+" : " (") + StringUtil.toSigFigs(MANA.scale(), Stat.SIG_FIGS_NUM) + ")" + MANA.chs().color() + " душ");
+        dscs.add(TCUtil.N + "Перезарядка: " + Main.cdClr + StringUtil.toSigFigs(CD.calc(lvl), Stat.SIG_FIGS_PER) + TCUtil.P
+            + (CD.scale() > 0 ? " (+" : " (") + StringUtil.toSigFigs(CD.scale(), Stat.SIG_FIGS_NUM) + ")" + CD.chs().color() + " сек");
+//        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }
 
@@ -328,18 +359,22 @@ public abstract class Ability implements Scroll {//способность
 
     protected static Collection<LivingEntity> getChArcLents(final Location loc, final double dst, final double arc, final Predicate<LivingEntity> can) {
         final Vector dir = loc.getDirection();
+        final double dArc = arc * arc;
         return LocUtil.getChEnts(loc, dst,
-            LivingEntity.class, ent -> can.test(ent)
-                && ent.getEyeLocation().subtract(loc).toVector()
-                .normalize().subtract(dir).lengthSquared() < arc);
+            LivingEntity.class, ent -> {
+                return can.test(ent)
+                    && EntityUtil.center(ent).subtract(loc).toVector()
+                    .normalize().subtract(dir).lengthSquared() < dArc;
+            });
     }
 
-    private static LivingEntity getClsArcLent(final Location loc, final double dst, final double arc, final Predicate<LivingEntity> can) {
+    protected static LivingEntity getClsArcLent(final Location loc, final double dst, final double arc, final Predicate<LivingEntity> can) {
         final Vector dir = loc.getDirection();
+        final double dArc = arc * arc;
         return LocUtil.getClsChEnt(loc, dst,
             LivingEntity.class, ent -> can.test(ent)
-                && ent.getEyeLocation().subtract(loc).toVector()
-                .normalize().subtract(dir).lengthSquared() < arc);
+                && EntityUtil.center(ent).subtract(loc).toVector()
+                .normalize().subtract(dir).lengthSquared() < dArc);
     }
 
     protected static void addEffect(final LivingEntity le, final PotionEffectType type, final double dur, final int amp, final boolean vis) {
@@ -361,7 +396,7 @@ public abstract class Ability implements Scroll {//способность
     protected static void defKBLe(final LivingEntity caster, final LivingEntity tgt, final boolean up) {
         final Vector vel = tgt.getVelocity();
         final Vector kbv = tgt.getLocation().subtract(caster.getLocation()).toVector().normalize().multiply(defKB);
-        Bukkit.getConsoleSender().sendMessage("already-" + vel + " and " + balMul(vel));
+//        Bukkit.getConsoleSender().sendMessage("already-" + vel + " and " + balMul(vel));
         tgt.setVelocity(vel.add((up ? kbv.setY(kbv.getY() + defDY) : kbv).multiply(balMul(vel))));
     }
 
@@ -386,7 +421,7 @@ public abstract class Ability implements Scroll {//способность
         return Math.min(1d / vel.clone().multiply(defDEL).lengthSquared(), 1d);
     }
 
-    public record AbilState(Ability abil, int lvl) {}
+    public record AbilState(Ability val, int lvl) implements State {}
 
     @Override
     public int hashCode() {

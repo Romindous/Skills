@@ -243,7 +243,7 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
 
             }
 
-            Crafts.crafts.get(Main.subServer).put(nKey, nrc);
+            Crafts.crafts.val(Main.subServer).put(nKey, nrc);
 
 			try {
 				craftConfig.save(new File(Main.configDir.getAbsolutePath() + "/crafts/craft.yml"));
@@ -347,7 +347,7 @@ public class CraftMenu /*implements InventoryProvider*/ {/*
 		        	for (int r = 0; r < rad; r++) {
 		        		final String sr = shp.length > r ? shp[r] : "";
 			        	for (int c = 0; c < rad; c++) {
-			        		final RecipeChoice chs = rcm.get(sr.length() > c ? sr.charAt(c) : 'w');
+			        		final RecipeChoice chs = rcm.val(sr.length() > c ? sr.charAt(c) : 'w');
 				        	setEditSlot(SlotPos.of(r, c + 1), chs == null ? Main.air : ((CMDMatChoice) chs).getItemStack(), its, canEdit);
 			        	}
 		        	}

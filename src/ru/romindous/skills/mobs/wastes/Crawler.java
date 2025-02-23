@@ -1,5 +1,6 @@
 package ru.romindous.skills.mobs.wastes;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -15,9 +16,11 @@ import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.items.ItemRoll;
 import ru.komiss77.modules.rolls.NARoll;
 import ru.komiss77.modules.rolls.RollTree;
+import ru.komiss77.modules.world.BVec;
 import ru.komiss77.utils.BlockUtil;
+import ru.komiss77.utils.LocUtil;
 import ru.komiss77.utils.NumUtil;
-import ru.romindous.skills.items.Groups;
+import ru.romindous.skills.objects.Groups;
 import ru.romindous.skills.mobs.SednaMob;
 
 public class Crawler extends SednaMob {
@@ -36,6 +39,34 @@ public class Crawler extends SednaMob {
         return Map.of();
     }
 
+    public @Nullable MobGoal goal(final Mob mb) {
+        return new MobGoal() {
+            private static final int TARGET_DST = 24;
+            @Override
+            public void tick() {
+                if (!mb.isValid()) return;
+                final LivingEntity tgt = mb.getTarget();
+                if (tgt != null && tgt.isValid()) return;
+                final Player pl = LocUtil.getNearPl(BVec.of(mb.getLocation()),
+                    TARGET_DST, p -> !p.getGameMode().isInvulnerable());
+                if (pl == null || !new EntityTargetEvent(mb, pl,
+                    EntityTargetEvent.TargetReason.CLOSEST_PLAYER).callEvent()) return;
+                mb.setTarget(pl);
+            }
+        };
+    }
+
+    private final RollTree drop = RollTree.of(key().value())
+        .add(new ItemRoll(key().value() + "_string", new ItemBuilder(ItemType.STRING).build(), 0, 2), 4)
+        .add(new ItemRoll(key().value() + "_meat", Groups.CRAWLER.item(ItemType.MUTTON), 1, 0), 1)
+        .add(new ItemRoll(key().value() + "_eye", new ItemBuilder(ItemType.SPIDER_EYE).build(), 1, 0), 2)
+        .add(new NARoll(), 4).build(1, 1);
+
+    @Override
+    public RollTree loot() {
+        return drop;
+    }
+
     private static final BlockType WEB = BlockType.COBWEB;
 
     @Override
@@ -50,17 +81,6 @@ public class Crawler extends SednaMob {
                 if (sb.isValid()) sb.remove();
             }, 100);
         }
-    }
-
-    private final RollTree drop = RollTree.of(key().value())
-        .add(new ItemRoll(key().value() + "_string", new ItemBuilder(ItemType.STRING).build(), 0, 2), 4)
-        .add(new ItemRoll(key().value() + "_meat", Groups.CRAWLER.item(ItemType.MUTTON), 1, 0), 1)
-        .add(new ItemRoll(key().value() + "_eye", new ItemBuilder(ItemType.SPIDER_EYE).build(), 1, 0), 2)
-        .add(new NARoll(), 4).build(1, 1);
-
-    @Override
-    public RollTree loot() {
-        return drop;
     }
 
     public void onHit(final ProjectileHitEvent e) {

@@ -14,7 +14,7 @@ import ru.romindous.skills.config.ConfigVars;
 
 public abstract class SkillGroup extends ItemGroup {
 
-    protected static final String prefix = "item.";
+    public static final String prefix = "item.";
 
     private final Map<ItemType, Quest> quested = new HashMap<>();
 
@@ -37,7 +37,7 @@ public abstract class SkillGroup extends ItemGroup {
         return quested.get(type);
     }
 
-    protected SkillGroup conQuest(final Quest qs, final ItemType... its) {
+    public SkillGroup conQuest(final Quest qs, final ItemType... its) {
         for (final ItemType it : its) quested.put(it, qs); return this;
     }
 
@@ -149,7 +149,7 @@ public abstract class SkillGroup extends ItemGroup {
 
     private static final ItemStack[] eis = new ItemStack[0];
     public static ItemStack[] getCustomMats(final CustomItems ci) {
-    	final ItemStack[] is = materials.get(ci);
+    	final ItemStack[] is = materials.val(ci);
         return is == null ? eis : is;
     }
 

@@ -1,4 +1,4 @@
-package ru.romindous.skills.items;
+package ru.romindous.skills.objects;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -8,12 +8,16 @@ import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.guides.Entries;
+import ru.romindous.skills.items.ItemTags;
+import ru.romindous.skills.items.SkillGroup;
 import ru.romindous.skills.items.groups.Crawler;
 import ru.romindous.skills.items.groups.Medaline;
 import ru.romindous.skills.items.groups.Serebrite;
 
 public class Groups {
-    public static final Crawler CRAWLER = new Crawler(new ItemBuilder(ItemType.MUTTON).name("§fПолзунина").build());
+    public static final Crawler CRAWLER = new Crawler(
+        new ItemBuilder(ItemType.MUTTON).name("§fПолзунина").build(),
+        new ItemBuilder(ItemType.COOKED_MUTTON).name("§fЖареная Ползунина").build());
 
     public static final Medaline MEDAL = new Medaline(
         new ItemBuilder(ItemType.GOLD_NUGGET).name("§fКусочек медалина").build(),
@@ -48,6 +52,7 @@ public class Groups {
     private static final Map<ItemType, StaffType> STF_TPS = new HashMap<>();
     public static class StaffType {
         private static final String STF_DATA = "staff.";
+        public static final int STAFF_CD = ConfigVars.get(SkillGroup.prefix + STF_DATA + "shot_cd", 12);
         public final ItemType shell;
         public final double spd;
         public final double dmg;

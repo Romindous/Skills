@@ -32,7 +32,7 @@ import ru.romindous.skills.skills.sels.Selector;
 import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.survs.Role;
 
-public class All implements Scroll.Registerable {
+public class All implements Scroll.Regable {
     @Override
     public void register() {
 
@@ -50,8 +50,8 @@ public class All implements Scroll.Registerable {
             private final double arc = value("arc", 0.6d);
             private final String[] desc = new String[]{
                 TCUtil.N + "Сущности за стороной предыдушей " + CLR + "цели" + TCUtil.N + ", с",
-                TCUtil.N + "аркой в " + CLR + (int) (arc * 100) + "° " + TCUtil.N + "и дистанцией " + DIST.id + " бл.",
-                TCUtil.N + "Лимит - " + AMT.id + " сущ. (округляемо)"};
+                TCUtil.N + "аркой в " + CLR + (int) (arc * 100) + "° " + TCUtil.N + "и дистанцией " + DIST.id() + " бл.",
+                TCUtil.N + "Лимит - " + AMT.id() + " сущ. (округляемо)"};
             public String[] descs() {
                 return desc;
             }
@@ -89,8 +89,8 @@ public class All implements Scroll.Registerable {
             private final double arc = value("arc", 1.0d);
             private final String[] desc = new String[]{
                 TCUtil.N + "Сущности за стороной предыдушей " + CLR + "цели" + TCUtil.N + ", с",
-                TCUtil.N + "аркой в " + CLR + (int) (arc * 100) + "° " + TCUtil.N + "и дистанцией " + DIST.id + " бл.",
-                TCUtil.N + "Лимит - " + AMT.id + " сущ. (округляемо)"};
+                TCUtil.N + "аркой в " + CLR + (int) (arc * 100) + "° " + TCUtil.N + "и дистанцией " + DIST.id() + " бл.",
+                TCUtil.N + "Лимит - " + AMT.id() + " сущ. (округляемо)"};
             public String[] descs() {
                 return desc;
             }
@@ -128,7 +128,7 @@ public class All implements Scroll.Registerable {
             }
             private final String[] desc = new String[]{
                 TCUtil.N + "Ближайшую сущность от предыдушей",
-                TCUtil.N + CLR + "цели" + TCUtil.N + ", не далее " + DIST.id + " бл."};
+                TCUtil.N + CLR + "цели" + TCUtil.N + ", не далее " + DIST.id() + " бл."};
             public String[] descs() {
                 return desc;
             }
@@ -157,8 +157,8 @@ public class All implements Scroll.Registerable {
             }
             private final String[] desc = new String[]{
                 TCUtil.N + "Сущности, окружающие предыдущую",
-                TCUtil.N + CLR + "цель" + TCUtil.N + ", не далее " + DIST.id + " бл.",
-                TCUtil.N + "Лимит - " + AMT.id + " сущ. (округляемо)"};
+                TCUtil.N + CLR + "цель" + TCUtil.N + ", не далее " + DIST.id() + " бл.",
+                TCUtil.N + "Лимит - " + AMT.id() + " сущ. (округляемо)"};
             public String[] descs() {
                 return desc;
             }
@@ -209,7 +209,7 @@ public class All implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Позволяет совершить " + CLR + "рывок " + TCUtil.N + "в",
-                TCUtil.N + "сторону движения, на " + SPEED.id + " бл./сек." + TCUtil.N};
+                TCUtil.N + "сторону движения, на " + SPEED.id() + " бл./сек." + TCUtil.N};
             public String[] descs() {
                 return desc;
             }
@@ -248,7 +248,7 @@ public class All implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Атакует указаную цель, нанося",
-                TCUtil.N + "ей " + DAMAGE.id + " ед. " + TCUtil.N + "урона"};
+                TCUtil.N + "ей " + DAMAGE.id() + " ед. " + TCUtil.N + "урона"};
             public String[] descs() {
                 return desc;
             }
@@ -272,9 +272,8 @@ public class All implements Scroll.Registerable {
 
                 EntityUtil.effect(tgt, Sound.ENTITY_PLAYER_ATTACK_STRONG, 0.6f, Particle.DUST_PLUME);
 
-                next(ch, () -> {
-                    defKBLe(caster, tgt, true);
-                });
+                defKBLe(caster, tgt, true);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -293,7 +292,7 @@ public class All implements Scroll.Registerable {
                 return Rarity.COMMON;
             }
             public InvCondition equip() {
-                return InvCondition.FIST;
+                return InvCondition.FIST_ANY;
             }
             public boolean selfCast() {return false;}
             public Role role() {return null;}
@@ -310,7 +309,7 @@ public class All implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 if (!(ch.trig() instanceof final ProjectileLaunchEvent ee)) {
-                    inform(ch, name() + " должна следовать тригеру <u>"
+                    inform(ch, name() + " <red>должна следовать тригеру <u>"
                         + Trigger.PROJ_LAUNCH.disName());
                     return false;
                 }
@@ -331,7 +330,7 @@ public class All implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Отбрасывает пользователя при " + CLR + "выстреле, " + TCUtil.N + "со",
-                TCUtil.N + "скоростью равной " + SPEED.id + "x " + TCUtil.N + "скорости снаряда."};
+                TCUtil.N + "скоростью равной " + SPEED.id() + "x " + TCUtil.N + "скорости снаряда."};
             public String[] descs() {
                 return desc;
             }
@@ -339,7 +338,7 @@ public class All implements Scroll.Registerable {
                 return Rarity.COMMON;
             }
             public InvCondition equip() {
-                return InvCondition.BOW;
+                return InvCondition.BOW_ANY;
             }
             public boolean selfCast() {return true;}
             public Role role() {return null;}
@@ -376,8 +375,8 @@ public class All implements Scroll.Registerable {
             private final String[] desc = new String[] {
                 TCUtil.N + "Позволяет заживо поедать " + CLR + "сущность",
                 TCUtil.N + "имеющую " + CLR + "плоть" + TCUtil.N + ", получая регенерацию",
-                TCUtil.N + "на " + REGEN.id + " сек." + TCUtil.N + " и голод на "
-                    + HUNGER.id + " сек." + TCUtil.N + ", при ее ударе"};
+                TCUtil.N + "на " + REGEN.id() + " сек." + TCUtil.N + " и голод на "
+                    + HUNGER.id() + " сек." + TCUtil.N + ", при ее ударе"};
             public String[] descs() {
                 return desc;
             }
@@ -404,7 +403,7 @@ public class All implements Scroll.Registerable {
                 final LivingEntity caster = ch.caster();
                 if (!(ch.trig() instanceof final EntityDamageEvent e)
                     || e.getEntity().getEntityId() != caster.getEntityId()) {
-                    inform(ch, name() + " должна следовать тригеру <u>"
+                    inform(ch, name() + " <red>должна следовать тригеру <u>"
                         + Trigger.USER_HURT.disName());
                     return false;
                 }
@@ -425,16 +424,13 @@ public class All implements Scroll.Registerable {
                 return "Смягчение";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Смягчает полученный урон на " + HURT.id + " ед." + TCUtil.N + " если он",
-                TCUtil.N + "больше " + HEALTH.id + "x " + TCUtil.N + "здоровья пользователя"};
+                TCUtil.N + "Смягчает полученный урон на " + HURT.id() + " ед." + TCUtil.N + " если он",
+                TCUtil.N + "больше " + HEALTH.id() + "x " + TCUtil.N + "здоровья пользователя"};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
                 return Rarity.UNCOM;
-            }
-            public InvCondition equip() {
-                return InvCondition.FIST_OFF;
             }
             public boolean selfCast() {return true;}
             public Role role() {return null;}
@@ -462,7 +458,7 @@ public class All implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Дестабилизирует цель, давая",
-                TCUtil.N + "ей замедление на " + TIME.id + " сек."};
+                TCUtil.N + "ей замедление на " + TIME.id() + " сек."};
             public String[] descs() {
                 return desc;
             }

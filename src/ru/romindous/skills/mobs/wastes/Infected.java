@@ -39,7 +39,7 @@ public class Infected extends SednaMob {
                 new ItemBuilder(ItemType.SLIME_BLOCK).build(),
                 new ItemBuilder(ItemType.AZALEA).build(),
                 new ItemBuilder(ItemType.GREEN_STAINED_GLASS).build(),
-                new ItemBuilder(ItemType.CACTUS).build(), ItemUtil.air),
+                new ItemBuilder(ItemType.CACTUS).build()),
             EquipmentSlot.CHEST, ClassUtil.rndElmt(
                 new ItemBuilder(ItemType.LEATHER_CHESTPLATE).color(Color.GRAY).build(), ItemUtil.air),
             EquipmentSlot.LEGS, ClassUtil.rndElmt(
@@ -51,13 +51,16 @@ public class Infected extends SednaMob {
     private final RollTree drop = RollTree.of(key().value())
         .add(new ItemRoll(key().value() + "_flesh", new ItemBuilder(ItemType.ROTTEN_FLESH).build(), 1, 1), 2)
         .add(RollTree.of(key().value() + "_extra")
-            .add(new ItemRoll(key().value() + "_feather", new ItemBuilder(ItemType.FEATHER).build(), 1, 1), 2)
-            .add(new ItemRoll(key().value() + "_paper", new ItemBuilder(ItemType.PAPER).build(), 1, 0), 2)
-            .add(new ItemRoll(key().value() + "_hide", new ItemBuilder(ItemType.RABBIT_HIDE).build(), 1, 0), 2)
-            .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.WHEAT_SEEDS).build(), 1, 0), 1)
-            .add(new ItemRoll(key().value() + "_kelp", new ItemBuilder(ItemType.DRIED_KELP).build(), 1, 2), 2)
-            .add(new ItemRoll(key().value() + "_coal", new ItemBuilder(ItemType.CHARCOAL).build(), 1, 0), 2)
-            .add(new ItemRoll(key().value() + "_flint", new ItemBuilder(ItemType.FLINT).build(), 1, 0), 1)
+            .add(new ItemRoll(key().value() + "_feather", new ItemBuilder(ItemType.FEATHER).build(), 1, 1), 20)
+            .add(new ItemRoll(key().value() + "_paper", new ItemBuilder(ItemType.PAPER).build(), 1, 0), 20)
+            .add(new ItemRoll(key().value() + "_hide", new ItemBuilder(ItemType.RABBIT_HIDE).build(), 1, 0), 20)
+            .add(new ItemRoll(key().value() + "_seeds", new ItemBuilder(ItemType.WHEAT_SEEDS).build(), 1, 0), 10)
+            .add(new ItemRoll(key().value() + "_kelp", new ItemBuilder(ItemType.DRIED_KELP).build(), 1, 2), 20)
+            .add(new ItemRoll(key().value() + "_coal", new ItemBuilder(ItemType.CHARCOAL).build(), 1, 1), 20)
+            .add(new ItemRoll(key().value() + "_flint", new ItemBuilder(ItemType.FLINT).build(), 1, 0), 10)
+            .add(new ItemRoll(key().value() + "_sac", new ItemBuilder(ItemType.INK_SAC).build(), 1, 0), 10)
+            .add(new ItemRoll(key().value() + "_potato", new ItemBuilder(ItemType.POTATO).build(), 1, 0), 8)
+            .add(new ItemRoll(key().value() + "_potato", new ItemBuilder(ItemType.POISONOUS_POTATO).build(), 1, 0), 10)
             .build(1, 0), 1)
         .add(new NARoll(), 2)
         .build(1, 0);

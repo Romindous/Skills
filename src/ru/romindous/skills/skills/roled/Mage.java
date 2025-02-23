@@ -21,6 +21,8 @@ import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import ru.komiss77.utils.EntityUtil;
+import ru.komiss77.utils.ItemUtil;
+import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.skills.chas.Chastic;
@@ -36,7 +38,7 @@ import ru.romindous.skills.skills.abils.InvCondition;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
 
-public class Mage implements Scroll.Registerable {
+public class Mage implements Scroll.Regable {
     //
     @Override
     public void register() {
@@ -55,8 +57,8 @@ public class Mage implements Scroll.Registerable {
             private final double arc = value("arc", 0.6d);
             private final String[] desc = new String[]{
                 TCUtil.N + "Сущности по " + CLR + "сторонам " + TCUtil.N + "предыдушей " + CLR + "цели" + TCUtil.N + ", с",
-                TCUtil.N + "аркой в " + CLR + (int) (arc * 100) + "° " + TCUtil.N + "и дистанцией " + DIST.id + " бл.",
-                TCUtil.N + "Лимит - " + AMT.id + " сущ. (округляемо)"};
+                TCUtil.N + "аркой в " + CLR + (int) (arc * 100) + "° " + TCUtil.N + "и дистанцией " + DIST.id() + " бл.",
+                TCUtil.N + "Лимит - " + AMT.id() + " сущ. (округляемо)"};
             public String[] descs() {
                 return desc;
             }
@@ -122,15 +124,12 @@ public class Mage implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Воспламеняет указанную " + CLR + "цель,",
-                TCUtil.N + "на " + TIME.id + " сек. " + TCUtil.N + "горения"};
+                TCUtil.N + "на " + TIME.id() + " сек. " + TCUtil.N + "горения"};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
                 return Rarity.COMMON;
-            }
-            public InvCondition equip() {
-                return InvCondition.STAFF_ANY;
             }
             public boolean selfCast() {return false;}
             public Role role() {return Role.MAGE;}
@@ -150,10 +149,9 @@ public class Mage implements Scroll.Registerable {
 
                 final EntityDamageByEntityEvent fe = makeDamageEvent(caster, tgt);
                 fe.setDamage(DAMAGE.modify(ch, lvl));
-                next(ch, () -> {
-                    tgt.damage(fe.getDamage(), fe.getDamageSource());
-                    defKBLe(tgt);
-                });
+                tgt.damage(fe.getDamage(), fe.getDamageSource());
+                defKBLe(tgt);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -164,7 +162,7 @@ public class Mage implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Поражает цель могучей " + CLR + "молнией,",
-                TCUtil.N + "нанося " + DAMAGE.id + " ед. " + TCUtil.N + "урона"};
+                TCUtil.N + "нанося " + DAMAGE.id() + " ед. " + TCUtil.N + "урона"};
             public String[] descs() {
                 return desc;
             }
@@ -199,12 +197,12 @@ public class Mage implements Scroll.Registerable {
                 fin.getWorld().playSound(fin, Sound.ENTITY_BREEZE_SHOOT, 1f, 0.8f);
 
                 final double pwr = POWER.modify(ch, lvl);
-                next(ch, () -> {
-                    final LargeFireball fb = flc.getWorld().spawn(fin, LargeFireball.class, f -> {
-                        f.setShooter(caster); f.setDirection(vc); f.setVelocity(vc.normalize());
-                    });
-                    fb.setYield((float) pwr * 0.25f); ShotLst.damage(fb, pwr);
+                final LargeFireball fb = flc.getWorld().spawn(fin, LargeFireball.class, f -> {
+                    f.setShooter(caster); f.setIsIncendiary(false);
+                    f.setDirection(vc); f.setVelocity(vc.normalize());
                 });
+                fb.setYield((float) pwr); ShotLst.damage(fb, pwr);
+                next(ch);
                 return true;
             }
             public String id() {
@@ -215,12 +213,12 @@ public class Mage implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Вызывает метеор с небес, чей " + CLR + "размер",
-                TCUtil.N + "и сила взрыва равны " + POWER.id + " ед."};
+                TCUtil.N + "и сила взрыва равны " + POWER.id() + " ед."};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
-                return Rarity.COMMON;
+                return Rarity.UNCOM;
             }
             public InvCondition equip() {
                 return InvCondition.STAFF_ANY;
@@ -260,8 +258,8 @@ public class Mage implements Scroll.Registerable {
                 return "Обновление";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Дает пользователю " + HEAL.id + " сердец абсорбции",
-                TCUtil.N + "и регенерацию такого же уровня на " + TIME.id + " cек."};
+                TCUtil.N + "Дает пользователю " + HEAL.id() + " сердец абсорбции",
+                TCUtil.N + "и регенерацию такого же уровня на " + TIME.id() + " cек."};
             public String[] descs() {
                 return desc;
             }
@@ -311,8 +309,8 @@ public class Mage implements Scroll.Registerable {
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Создает снаряд, нацеленый на ближайшую",
-                TCUtil.N + "цель, в радиусе " + DIST.id + " бл. " + TCUtil.N + " и нанося",
-                TCUtil.N + DAMAGE.id + " ед. " + TCUtil.N + " урона при попадании"};
+                TCUtil.N + "цель, в радиусе " + DIST.id() + " бл. " + TCUtil.N + " и нанося",
+                TCUtil.N + DAMAGE.id() + " ед. " + TCUtil.N + " урона при попадании"};
             public String[] descs() {
                 return desc;
             }
@@ -326,7 +324,7 @@ public class Mage implements Scroll.Registerable {
         new Ability() {//Дисперсия
             final ChasMod SPEED = new ChasMod(this, "speed", Chastic.VELOCITY);
             final ChasMod AMOUNT = new ChasMod(this, "amount", Chastic.AMOUNT);
-            final ChasMod[] stats = new ChasMod[] {SPEED};
+            final ChasMod[] stats = new ChasMod[] {SPEED, AMOUNT};
             public ChasMod[] stats() {
                 return stats;
             }
@@ -335,15 +333,16 @@ public class Mage implements Scroll.Registerable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 if (!(ch.trig() instanceof final ProjectileLaunchEvent ee)) {
-                    inform(ch, name() + " должна следовать тригеру <u>"
+                    inform(ch, name() + " <red>должна следовать тригеру <u>"
                         + Trigger.PROJ_LAUNCH.disName());
                     return false;
                 }
                 if (!(ee.getEntity() instanceof final Snowball sb)
-                    || !ItemType.SNOWBALL.equals(sb.getItem().getType().asItemType())) {
+                    || ItemUtil.is(sb.getItem(), ItemType.SNOWBALL)) {
                     inform(ch, "Снаряд не был выпущен из посоха!");
                     return false;
                 }
+                final double dmg = ShotLst.damage(sb);
                 final LivingEntity caster = ch.caster();
                 final Location loc = sb.getLocation();
                 final Vector dir = sb.getVelocity();
@@ -352,17 +351,17 @@ public class Mage implements Scroll.Registerable {
                 loc.getWorld().playSound(caster, Sound.ENTITY_EVOKER_CAST_SPELL, 1f, 1.4f);
 
                 final float yw = loc.getYaw();
-                final double spd = dir.length() * SPEED.modify(ch, lvl);
-                final int amt = (int) AMOUNT.modify(ch, lvl);
+                final double pow = SPEED.modify(ch, lvl);
+                final double spd = dir.length() * pow;
+                final int amt = (int) Math.round(AMOUNT.modify(ch, lvl));
+                final int dis = NumUtil.randSign() * 10;
                 for (int i = amt; i != 0; i--) {
-                    final float yaw = ((i & 1) == 0 ? 5 : -5) * i + yw;
-                    next(ch, () -> {
-                        loc.setYaw(yaw);
-                        caster.launchProjectile(Snowball.class, loc.getDirection().multiply(spd), s -> {
-                            s.setItem(sb.getItem());
-                            s.setGravity(false);
-                        });
-                    });
+                    loc.setYaw((float) (((i & 1) == 0 ? dis : -dis) * i) + yw);
+                    ShotLst.damage(caster.launchProjectile(Snowball.class,
+                        loc.getDirection().multiply(spd), s -> {
+                            s.setItem(sb.getItem()); s.setGravity(false);
+                        }), dmg * pow);
+                    next(ch);
                 }
                 return true;
             }
@@ -373,13 +372,16 @@ public class Mage implements Scroll.Registerable {
                 return "Дисперсия";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Создает " + AMOUNT.id + " доп. " + TCUtil.N + "снаряда посоха, при" + CLR + "выстреле",
-                TCUtil.N + "по сторонам, с " + SPEED.id + "x " + TCUtil.N + "скорости оригинала"};
+                TCUtil.N + "Создает " + AMOUNT.id() + " доп. " + TCUtil.N + "снарядов посоха (округляемо)",
+                TCUtil.N + "по сторонам, с " + SPEED.id() + "x " + TCUtil.N + "силой оригинала"};
             public String[] descs() {
                 return desc;
             }
             public Rarity rarity() {
                 return Rarity.COMMON;
+            }
+            public InvCondition equip() {
+                return InvCondition.STAFF_ANY;
             }
             public boolean selfCast() {return true;}
             public Role role() {return Role.MAGE;}

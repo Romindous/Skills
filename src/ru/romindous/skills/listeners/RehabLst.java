@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.modules.world.BVec;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Main;
@@ -57,7 +58,7 @@ public class RehabLst implements Listener {
             if (p.isOnline() && !p.isDead()) {
                 sv.applySkill(p);
                 p.setHealth(sv.maxHP);
-                sv.currentLiveSec = 0;
+                sv.setXp(p, sv.exp);
             }
         }, 2);
         
@@ -72,9 +73,7 @@ public class RehabLst implements Listener {
 //        e.setRespawnLocation(rspLoc);
         final Location deathLoc = p.getLastDeathLocation();
         if (deathLoc == null) return;
-        if (Math.abs(deathLoc.getBlockX() - rspLoc.getBlockX()) < 2
-            && Math.abs(deathLoc.getBlockY() - rspLoc.getBlockY()) < 2
-            && Math.abs(deathLoc.getBlockZ() - rspLoc.getBlockZ()) < 2) {
+        if (BVec.of(deathLoc).distAbs(rspLoc) < 2) {
             p.sendMessage(TCUtil.form(Main.prefix + "Похоже что ты " + TCUtil.P + "застрял " + TCUtil.N + "возле своей " + TCUtil.P + "кровати " + TCUtil.N + "("
                 + TCUtil.P + rspLoc.getBlockX() + TCUtil.N + ", " + TCUtil.P + rspLoc.getBlockY() + TCUtil.N + ", " + TCUtil.P + rspLoc.getBlockZ()
                 + TCUtil.N + ")!\n" + TCUtil.N + "Перемещаем тебя в более " + TCUtil.P + "безопасное " + TCUtil.N + "место..."));

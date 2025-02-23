@@ -24,9 +24,10 @@ import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.config.ConfigVars;
+import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.survs.Role;
 import ru.romindous.skills.guides.Entries;
-import ru.romindous.skills.items.Groups;
+import ru.romindous.skills.objects.Groups;
 import ru.romindous.skills.items.SkillGroup;
 import ru.romindous.skills.mobs.Minion;
 import ru.romindous.skills.mobs.Mobs;
@@ -38,8 +39,8 @@ import ru.romindous.skills.utils.pets.IPetManager;
 public class Main extends JavaPlugin {
 
     public static Main main;
-    public static final String manaClr = "§9🔥 ";
-    public static final String cdClr = "§б⌚ ";
+    public static final String manaClr = Chastic.MANA.color() + "🔥 ";
+    public static final String cdClr = Chastic.COOLDOWN.color() + "⌚ ";
     public static final String prefix = "<sky>[<cardinal>SN<sky>] ";
     public static final SecureRandom srnd = new SecureRandom();
     public static final SubServer subServer = SubServer.get();

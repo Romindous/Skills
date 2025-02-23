@@ -42,9 +42,9 @@ public class Repair /*extends CuBlock*/ {/*
 	
 	@Override
 	public void setItem(final ItemStack itm) {
-		if (cube.get() != null) {
+		if (cube.val() != null) {
 			item = itm;
-			cube.get().getEquipment().setHelmet(itm);
+			cube.val().getEquipment().setHelmet(itm);
 		}
 	}
 	
