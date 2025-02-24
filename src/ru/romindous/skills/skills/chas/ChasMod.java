@@ -6,9 +6,9 @@ import ru.romindous.skills.skills.abils.Chain;
 
 public record ChasMod(String id, Chastic chs, double base, double scale) {
 
-    public ChasMod(final Scroll ability, final String id, final Chastic chs) {
-        this(id, chs, ability.value(id + "_base", 1d),
-            ability.value(id + "_scale", 0d));
+    public ChasMod(final Scroll abil, final String id, final Chastic chs) {
+        this(id, chs, abil.value(id + "_base", 1d),
+            abil.value(id + "_scale", 0d));
     }
 
     public double modify(final Skill sk, final int lvl) {

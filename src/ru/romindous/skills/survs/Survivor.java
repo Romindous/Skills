@@ -2,10 +2,7 @@ package ru.romindous.skills.survs;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import org.bukkit.GameMode;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.HumanEntity;
@@ -50,8 +47,9 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
     public int acBarPause; //пауза ActionBar
     public int maxMana = 10, maxHP = 20;
     private float mana = 0f;
+    public Input jump;
     public final StringBuffer abBuffer = new StringBuffer(); //для построения строки актионбар
-    private final EnumMap<Stat, Integer> stats = new EnumMap<>(Stat.class);
+    private final int[] stats = new int[Stat.VALUES.length];
     public final List<Skill> skills = new ArrayList<>();
     public final Set<Entry> unread = new HashSet<>();
     public final HashMap<Selector.SelState, Integer> sels = new HashMap<>();
@@ -66,7 +64,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
     public Survivor(final HumanEntity pl) {
         super(pl);
         for (final Stat st : Stat.values()) {
-            stats.put(st, 0);
+            stats[st.ordinal()] = 0;
         }
         transId = SM.tId++;
         skillMenu = new SkillMenu(this);
@@ -396,11 +394,11 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
     //===================== СТАТА =====================
 
     public void setStat(final Stat st, final int num) {
-        stats.put(st, num);
+        stats[st.ordinal()] = num;
     }
 
     public int getStat(final Stat st) {
-        return stats.get(st);
+        return stats[st.ordinal()];
     }
 
     //- после загрузки
@@ -412,6 +410,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
     public void recalcStats(final Player p) {
         maxMana = (int) Stat.mana(START_MAX_MANA, getStat(Stat.MAGIC));
         maxHP = (int) Stat.health(START_MAX_HP, getStat(Stat.STRENGTH));
+        eqStatPoint(getLevel());
         applySkill(p);
     }
 
@@ -438,12 +437,13 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
             return;
         }
 
-        final int currLvl = (int) Math.sqrt(exp * LVL_DEL);
+        final int currLvl = NumUtil.sqrt((int) (exp * LVL_DEL));
         final int lvlSq = currLvl * currLvl;
         p.setLevel(currLvl);
         p.setExp((exp - lvlSq * EXP_DEL) /
             ((NumUtil.square(currLvl + 1) - lvlSq) * EXP_DEL));
         updateBoard(p, SM.Info.LEVEL);
+        eqStatPoint(currLvl);
     }
 
     public void addXp(final Player p, final int ammount) {
@@ -457,22 +457,22 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         p.setExp((currExp - lvlSq * EXP_DEL) /
             ((NumUtil.square(currLvl + 1) - lvlSq) * EXP_DEL));
 
-        final int lvlAdd = currLvl - oldLvl;
-        if (lvlAdd == 0) return;
-        if (lvlAdd > 0) {//уровень добавляется
-            statsPoints += lvlAdd;
-            p.sendMessage(TCUtil.form(Main.prefix + "Достигнут уровень " + role.color() + currLvl));
-            ScreenUtil.sendTitle(p, TCUtil.N + "Новый Уровень " + role.color() + currLvl,
-                TCUtil.N + ClassUtil.rndElmt(SM.CONGRATS));
-            p.playSound(p.getEyeLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 0.6f);
-            updateBoard(p, SM.Info.LEVEL);
+        if (currLvl - oldLvl < 1) return;
+        //уровень добавляется
+        p.sendMessage(TCUtil.form(Main.prefix + "Достигнут уровень " + role.color() + currLvl));
+        ScreenUtil.sendTitle(p, TCUtil.N + "Новый Уровень " + role.color() + currLvl,
+            TCUtil.N + ClassUtil.rndElmt(SM.CONGRATS));
+        p.playSound(p.getEyeLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 2f, 0.6f);
+        updateBoard(p, SM.Info.LEVEL);
+        eqStatPoint(currLvl);
+    }
+
+    public void eqStatPoint(final int lvl) {
+        int st = lvl;
+        for (final Stat s : Stat.VALUES) {
+            st -= stats[s.ordinal()];
         }
-        if (currLvl > SM.NEW_ABIL_LVL) {
-            //TODO entry
-        }
-        if (currLvl > SM.NEW_SKILL_LVL) {
-            //TODO entry
-        }
+        statsPoints = st < 0 ? 0 : st;
     }
 
     public int getLevel() {

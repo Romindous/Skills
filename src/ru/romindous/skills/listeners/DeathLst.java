@@ -1,6 +1,8 @@
 package ru.romindous.skills.listeners;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -9,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,19 +29,19 @@ import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.skills.Rarity;
-import ru.romindous.skills.survs.Role;
-import ru.romindous.skills.survs.Stat;
-import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.events.PlayerKillEntityEvent;
 import ru.romindous.skills.guides.Entries;
+import ru.romindous.skills.mobs.Minion;
 import ru.romindous.skills.mobs.SednaMob;
+import ru.romindous.skills.skills.Rarity;
 import ru.romindous.skills.skills.Scroll;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.survs.Survivor;
 
 
 public class DeathLst implements Listener {
@@ -85,65 +88,15 @@ public class DeathLst implements Listener {
     public static void onCustomDeath(final EntityDeathEvent e, final SednaMob sm) {
         if (!(e.getEntity() instanceof final Mob mob)) return;
         final Player killer;
-        if (EntityUtil.lastDamager(mob, true) instanceof final Player pl) {
-            killer = pl;
+        if (EntityUtil.lastDamager(mob, true) instanceof final LivingEntity klr) {
+            if (klr instanceof Player) killer = (Player) klr;
+            else if (Minion.ownerOf(klr) instanceof final Player kp) killer = kp;
+            else killer = null;
         } else killer = null;
-        /*if (ee instanceof final EntityDamageByEntityEvent event) {
-            if (event.getDamager() instanceof Projectile) {
-                final ProjectileSource ps = ((Projectile) event.getDamager()).getShooter();
-                if (ps instanceof Player) killer = (Player) ps;
-            } else {
-                switch (event.getDamager().getType()) {
-                case TNT:
-                    if ((((TNTPrimed) event.getDamager()).getSource() instanceof final Player he)) {
-                        killer = he;
-                    }
-                    break;
-                case PLAYER:
-                    killer = (Player) event.getDamager();
-                    break;
-                default:
-                    if (event.getDamager() instanceof final Mob dmgr) {
-                        final String plNm = dmgr.getPersistentDataContainer()
-                                .val(EntUtil.ownerPlName, PersistentDataType.STRING);
-                        if (plNm != null) { //чей-то миньон атакует
-                            killer = Bukkit.getPlayerExact(plNm);
-                        }
-                    }
-                    break;
-                }
-            }
-        } else {
-            switch (ee.getCause()) {
-                case FIRE, FIRE_TICK, LAVA, POISON, WITHER:
-                    final LivingEntity target = mob.getTarget();
-                    if (target != null && target.getType() == EntityType.PLAYER && !Bots.npcs.containsKey(target.getEntityId())) {
-                        killer = (Player) target;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }*/
 
         if (killer == null) return;
         //если игрок-убийца не определён, дальше не пойдёт
         final Survivor kSv = PM.getOplayer(killer, Survivor.class);
-
-        //создает буффет кол-ва опыта полученом в конкретном чанке, т.е.
-        //если постоянно убивать мобов в одном и том же месте (ака фармилка / моб-дробилка)
-        //то опыта бедут все меньше и меньше даватся
-        //bfr - сам буфер
-        /*final Location kLoc = killer.getLocation();
-        final int encd = ((kLoc.blockX() >> COORD_DEL) << LOC_ENCD) + (kLoc.blockZ() >> COORD_DEL);
-        final Float bfr = farmLocs.val(encd);
-        final float mult = bfr == null ? 1f : bfr * DROP_MUL;
-        farmLocs.put(encd, mult);
-        if (farmLocs.size() > kLoc.getWorld().getPlayers().size() * PER_PLAYER) {
-            farmLocs.pollLastEntry();
-        }
-
-        if (mult < 0.1f) return;//checkpoint*/
 
         final double mhp = mob.getAttribute(Attribute.MAX_HEALTH).getBaseValue();
         final int exp = (int) Stat.exp(mhp, kSv.getStat(Stat.ACCURACY));
@@ -193,31 +146,26 @@ public class DeathLst implements Listener {
             NamedTextColor.nearestTo(tc), false);
     }
 
-    private static final Rarity[] RAR_VALS = Rarity.values();
-    private static final int RAR_MAX =
-        Math.min(RAR_VALS.length - 1, Main.subServer.ordinal() + 1);
-    private static final int RAR_CH = getMaxRar();
+    private static final int RAR_LEN = Math.min(Rarity.values().length,
+        Main.subServer.ordinal() + 2);//2 for wastes
     private static final int RAR_DEL = 1;
+    private static final Rarity[] RAR_VALS = getMaxRar();
 
-    private static int getMaxRar() {
-        int rar = 0;
-        for (int i = 1; i != RAR_MAX + 1; i++)
-            rar += i << RAR_DEL;
-        return rar;
+    private static Rarity[] getMaxRar() {
+        final List<Rarity> rrs = new ArrayList<>();
+        final Rarity[] vals = Rarity.values();
+        for (int i = 0; i != RAR_LEN; i++)
+            for (int j = i << RAR_DEL; j >= 0; j--)
+                rrs.add(vals[RAR_LEN - i - 1]);
+        return rrs.toArray(new Rarity[0]);
     }
 
-    private static <S extends Scroll> @Nullable S randScroll(final Survivor sv, final IntHashMap<List<S>> values) {
-        int ch = Main.srnd.nextInt(RAR_CH);
-        int i = 0; for (;ch != 0; i++) ch = ch >> RAR_DEL;
-        final List<S> rsc = values.get(Scroll.total(RAR_VALS[RAR_MAX - i], randRole(sv)));
-        if (rsc == null) return null;
+    @Nullable
+    private static <S extends Scroll> S randScroll(final Survivor sv, final IntHashMap<List<S>> values) {
+        final List<S> def = List.of();
+        final List<S> rsc = new ArrayList<>(values.getOrDefault(Scroll.total(ClassUtil.rndElmt(RAR_VALS), null), def));
+        rsc.addAll(values.getOrDefault(Scroll.total(ClassUtil.rndElmt(RAR_VALS), sv.role), def));
         return rsc.get(Main.srnd.nextInt(rsc.size()));
-    }
-
-    public static final Role[] ROLE_VALS = Role.values();
-    private static @Nullable Role randRole(final Survivor sv) {
-        return Main.srnd.nextInt(ROLE_VALS.length) == 0 ? ClassUtil.rndElmt(ROLE_VALS)
-            : Main.srnd.nextBoolean() ? null : sv.role;
     }
 
     /*@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)

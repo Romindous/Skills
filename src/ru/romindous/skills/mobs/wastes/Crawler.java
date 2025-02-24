@@ -3,6 +3,8 @@ package ru.romindous.skills.mobs.wastes;
 import javax.annotation.Nullable;
 import java.util.Map;
 import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockType;
 import org.bukkit.entity.*;
@@ -41,15 +43,22 @@ public class Crawler extends SednaMob {
 
     public @Nullable MobGoal goal(final Mob mb) {
         return new MobGoal() {
-            private static final int TARGET_DST = 24;
+            int tick = 0;
             @Override
             public void tick() {
                 if (!mb.isValid()) return;
                 final LivingEntity tgt = mb.getTarget();
                 if (tgt != null && tgt.isValid()) return;
-                final Player pl = LocUtil.getNearPl(BVec.of(mb.getLocation()),
+                final AttributeInstance fri = mb.getAttribute(Attribute.FOLLOW_RANGE);
+                final int TARGET_DST = fri == null ? 0 : (int) fri.getValue();
+                if ((tick++ & 3) != 0) return;
+                final Location mlc = mb.getLocation();
+                final Player pl = LocUtil.getNearPl(BVec.of(mlc),
                     TARGET_DST, p -> !p.getGameMode().isInvulnerable());
-                if (pl == null || !new EntityTargetEvent(mb, pl,
+                if (pl == null) return;
+                if (!LocUtil.trace(mlc, pl.getLocation().subtract(mlc).toVector(),
+                    (bp, bd) -> bd.getMaterial().asBlockType().hasCollision()).endDst()) return;
+                if (!new EntityTargetEvent(mb, pl,
                     EntityTargetEvent.TargetReason.CLOSEST_PLAYER).callEvent()) return;
                 mb.setTarget(pl);
             }

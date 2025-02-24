@@ -119,7 +119,7 @@ public class Stoner implements Scroll.Regable {
                 return "bump";
             }
             public String name() {
-                return "Толчок";
+                return "Здвиг";
             }
             private final String[] desc = new String[] {
                 TCUtil.N + "Создает малый подземный толчек под целью,",
@@ -149,7 +149,12 @@ public class Stoner implements Scroll.Regable {
             private static final BlockData bd = BlockType.SPONGE.createBlockData();
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final double abs = caster.getAbsorptionAmount() + HEAL.modify(ch, lvl);
+                final int regen = (int) HEAL.modify(ch, lvl);
+                if (regen << 1 < caster.getAbsorptionAmount()) {
+                    inform(ch, "Тебя уже переполняет абзорбция!");
+                    return false;
+                }
+                final double abs = caster.getAbsorptionAmount() + regen;
                 final AttributeInstance ain = caster.getAttribute(Attribute.MAX_ABSORPTION);
                 if (ain == null) {
                     inform(ch, "Нет атрибута абзорбции!");
@@ -312,7 +317,7 @@ public class Stoner implements Scroll.Regable {
                 return "Зубчатость";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Шипов на " + CLR + "чешуе " + TCUtil.N + "пользовотеля отражают",
+                TCUtil.N + "Шипы на " + CLR + "чешуе " + TCUtil.N + "пользовотеля отражают",
                 TCUtil.N + HURT.id() + " ед. " + TCUtil.N + " полученого урона обратно.",
                 TCUtil.N + "Отраженный урон множится на " + DAMAGE.id() + "x"};
             public String[] descs() {

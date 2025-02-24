@@ -96,7 +96,7 @@ public abstract class Modifier implements Scroll {//модификатор
             final Mod md = chMods[ch.ordinal()];
             dscs.add(TCUtil.N + "◇ " + ch.disName() + TCUtil.N + " - на");
             dscs.add(ch.color() + StringUtil.toSigFigs(md.conScale * lvl + md.conBase, Stat.SIG_FIGS_NUM)
-                + TCUtil.N + " или " + ch.color() + StringUtil.toSigFigs(md.mulScale * lvl + md.mulBase * 100f,
+                + TCUtil.N + " или " + ch.color() + StringUtil.toSigFigs((md.mulScale * lvl + md.mulBase) * 100f,
                 Stat.SIG_FIGS_PER) + "%" + TCUtil.N + ", смотря что ниже");
         }
         final String nds = needs();

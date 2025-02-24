@@ -20,6 +20,7 @@ import ru.komiss77.LocalDB;
 import ru.komiss77.Ostrov;
 import ru.komiss77.commands.TprCmd;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.modules.world.BVec;
 import ru.komiss77.modules.world.XYZ;
 import ru.komiss77.utils.ScreenUtil;
 import ru.komiss77.utils.StringUtil;
@@ -56,7 +57,7 @@ public class SM {
     public static final HashMap<Integer, CuBlock> cublocks = new HashMap<>();
     public static final int NEW_SKILL_LVL = value("new_skill_lvl", 14);
     public static final int NEW_ABIL_LVL = value("new_abil_lvl", 8);
-    public static final int NEW_MOD_LVL = value("new_mod_lvl", 2);
+    public static final int NEW_MOD_LVL = value("new_mod_lvl", 4);
     //public static final ArrayList<LentJob> jobs = new ArrayList<>();
     
     static {
@@ -179,7 +180,8 @@ public class SM {
 			}
 			sv.mysqlData.put("resps", sb.isEmpty() ? null : sb.substring(StringUtil.SPLIT_0.length()));
 		}
-		
+		final Location last = p.getRespawnLocation();
+        if (loc != null && last != null && BVec.of(last).distAbs(BVec.of(loc)) == 0) return;
 		p.setRespawnLocation(loc, false);
 		if (loc == null) {
 			p.sendMessage(TCUtil.form(Main.prefix + "Точка спавна " + TCUtil.P + "очищена" + TCUtil.N + ", переставь свой респавн!"));

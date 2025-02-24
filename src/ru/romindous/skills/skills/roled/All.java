@@ -408,9 +408,9 @@ public class All implements Scroll.Regable {
                     return false;
                 }
                 final double dmg = e.getDamage();
-                final double mod = HEALTH.modify(ch, lvl);
+                final double mod = HURT.modify(ch, lvl);
                 if (dmg < caster.getHealth() * mod) return false;
-                e.setDamage(dmg - HURT.modify(ch, lvl));
+                e.setDamage(dmg - HEALTH.modify(ch, lvl));
 
                 EntityUtil.effect(caster, Sound.BLOCK_DECORATED_POT_HIT, 0.8f, Particle.DAMAGE_INDICATOR);
 
@@ -424,8 +424,8 @@ public class All implements Scroll.Regable {
                 return "Смягчение";
             }
             private final String[] desc = new String[] {
-                TCUtil.N + "Смягчает полученный урон на " + HURT.id() + " ед." + TCUtil.N + " если он",
-                TCUtil.N + "больше " + HEALTH.id() + "x " + TCUtil.N + "здоровья пользователя"};
+                TCUtil.N + "Смягчает полученный урон на " + HEALTH.id() + " ед." + TCUtil.N + " если он",
+                TCUtil.N + "больше " + HURT.id() + "x " + TCUtil.N + "здоровья пользователя"};
             public String[] descs() {
                 return desc;
             }
@@ -593,10 +593,10 @@ public class All implements Scroll.Regable {
                 return new Chastic[] {Chastic.HUNGER};
             }
             public String id() {
-                return "food";
+                return "hunger";
             }
             public String name() {
-                return "Насыщение";
+                return "Голодание";
             }
             public ItemType icon() {
                 return ItemType.SHEAF_POTTERY_SHERD;

@@ -16,6 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import ru.komiss77.Ostrov;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.ScreenUtil;
 import ru.komiss77.utils.TCUtil;
@@ -28,9 +29,9 @@ import ru.romindous.skills.utils.EffectUtil;
 
 
 public class MainTask implements Runnable {
-    
-    public static int tick;
+	public static int tick;
 	public static int proccesTime;
+	public static final PotionEffect BLIND = new PotionEffect(PotionEffectType.BLINDNESS, 48, 1);
     private final World w = Bukkit.getWorlds().getFirst();
 	private static final List<LivingEntity> noDmg = new LinkedList<>();
 
@@ -220,6 +221,12 @@ public class MainTask implements Runnable {
 //                sv.transferTick(p.getWorld());
 				if (sv.acBarPause > 0) sv.acBarPause--;
 				else sv.updateBar(p);
+
+				if (isDark(EntityUtil.center(p))) {
+					p.addPotionEffect(BLIND);
+					p.playSound(p, Sound.ENTITY_WARDEN_HEARTBEAT, 1f, 0.8f);
+					sv.inform(p, "<gray>Здесь слишком темно...");
+				}
             }
 
 			if (!upd || sv.role == null) continue;
@@ -233,8 +240,13 @@ public class MainTask implements Runnable {
 
         proccesTime = (int) (System.currentTimeMillis() - start);
     }
-    
-    private void shiftHotBar(final PlayerInventory inv) {
+
+	private static final int LIGHT = SM.value("light_level", 2);
+	private boolean isDark(final Location loc) {
+		return EffectUtil.getLight(loc.getBlock()) < LIGHT;
+	}
+
+	private void shiftHotBar(final PlayerInventory inv) {
     	final ItemStack fst = inv.getItem(0) == null ? null : inv.getItem(0).clone();
     	for (int i = 0; i < 8; i++) {
     		inv.setItem(i, inv.getItem(i + 1));

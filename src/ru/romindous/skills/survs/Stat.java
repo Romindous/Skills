@@ -35,6 +35,8 @@ public enum Stat {
     private final String clr;
     private final ItemType icon;
 
+    public static final Stat[] VALUES = values();
+
     Stat(final String name, final String clr, final ItemType icon) {
         this.name = name;
         this.clr = clr;
@@ -111,7 +113,7 @@ public enum Stat {
                     rt, nrt, next, dropsMul, false, dscs);
                 break;
             case MAGIC:
-                numDesc(plus + clr + "Магический " + TCUtil.N + "урон",
+                numDesc(plus + "Урон от " + clr + "навыков",
                     rt, nrt, next, magicAdd, magicMul, dscs);
                 numDesc(plus + "Максимальное " + clr + "кол-во душ",
                     rt, nrt, next, manaAdd, true, dscs);
@@ -123,7 +125,7 @@ public enum Stat {
                     rt, nrt, next, expAdd, expMul, dscs);
                 break;
             case SPIRIT:
-                numDesc(plus + "Возобновление " + clr + "душ",
+                numDesc(plus + "Получение " + clr + "душ",
                     rt, nrt, next, reManaAdd, reManaMul, dscs);
                 numDesc(minus + "Затрата " + clr + "душ " + TCUtil.N + "на скиллы",
                     rt, nrt, next, skillManaAdd, skillManaMul, dscs);

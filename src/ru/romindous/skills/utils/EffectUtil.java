@@ -17,12 +17,12 @@ public class EffectUtil {
 
     public static int getLight(final Block b) {
         return switch (Main.subServer) {
-            default -> Math.max(b.getLightFromBlocks(), b.getWorld().getTime() > 13000
-                ? Math.max(0, b.getLightFromSky() - 8) : b.getLightFromSky());
             case WASTES -> Math.max(b.getLightFromBlocks(), b.getLightFromSky());
             case INFERNAL -> Math.max(b.getLightFromBlocks(), 4);
             case KALEUM -> Math.max(b.getLightFromBlocks(), 2);
             case KRIOLITE -> b.getLightFromBlocks();
+            default -> Math.max(b.getLightFromBlocks(), b.getWorld().getTime() > 13000
+                ? Math.max(0, b.getLightFromSky() - 8) : b.getLightFromSky());
         };
     }
 

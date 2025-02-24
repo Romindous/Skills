@@ -50,7 +50,7 @@ public interface Scroll {
     }
 
     static int total(final Rarity rar, final @Nullable Role rl) {
-        return rl == null ? rar.ordinal() : rar.ordinal() + (rl.ordinal() << 4);
+        return rl == null ? rar.ordinal() : rar.ordinal() + ((rl.ordinal() + 1) << 4);
     }
 
     ItemType icon();

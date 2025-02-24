@@ -237,6 +237,10 @@ public class Mage implements Scroll.Regable {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
                 final int regen = (int) HEAL.modify(ch, lvl);
+                if (regen << 1 < caster.getAbsorptionAmount()) {
+                    inform(ch, "Тебя уже переполняет абзорбция!");
+                    return false;
+                }
                 final double abs = caster.getAbsorptionAmount() + regen;
                 final AttributeInstance ain = caster.getAttribute(Attribute.MAX_ABSORPTION);
                 if (ain == null) {

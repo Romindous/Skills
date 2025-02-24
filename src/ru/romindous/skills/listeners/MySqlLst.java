@@ -11,24 +11,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import ru.komiss77.Ostrov;
 import ru.komiss77.Timer;
 import ru.komiss77.enums.Data;
 import ru.komiss77.events.FriendTeleportEvent;
 import ru.komiss77.events.LocalDataLoadEvent;
 import ru.komiss77.events.QuestCompleteEvent;
-import ru.komiss77.modules.player.Oplayer;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.modules.world.XYZ;
 import ru.komiss77.utils.*;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.survs.SM;
-import ru.romindous.skills.survs.Survivor;
-import ru.romindous.skills.survs.Role;
-import ru.romindous.skills.survs.Stat;
 import ru.romindous.skills.SubServer;
-import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.guides.Entries;
 import ru.romindous.skills.guides.Entry;
 import ru.romindous.skills.menus.WorldMenu;
@@ -36,13 +29,18 @@ import ru.romindous.skills.skills.Skill;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Role;
+import ru.romindous.skills.survs.SM;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.survs.Survivor;
 
 
 public class MySqlLst implements Listener {
 
     public static final String eq = "=";
 
-    @EventHandler (priority = EventPriority.MONITOR)
+    /*@EventHandler (priority = EventPriority.MONITOR)
     public void onJoin (final PlayerJoinEvent e) {
         Ostrov.sync(() -> {
             final Player pl = e.getPlayer();
@@ -50,7 +48,7 @@ public class MySqlLst implements Listener {
             op.firstJoin = true;
             new LocalDataLoadEvent(pl, op, pl.getLocation()).callEvent();
         }, 20);
-    }
+    }*/
 
     @EventHandler (priority = EventPriority.MONITOR)
     public void onQuest (final QuestCompleteEvent e) {
@@ -230,7 +228,7 @@ public class MySqlLst implements Listener {
                             continue;
                         }
                         sv.sels.put(new Selector.SelState(s,
-                            NumUtil.intOf(sl.substring(eqn2 + 1), 0)), amt);
+                            NumUtil.intOf(sss.substring(eqn2 + 1), 0)), amt);
                     }
                     sv.sels.put(Selector.SAME_ST, 1);
                     sv.sels.put(Selector.CASTER_ST, 1);
@@ -260,7 +258,7 @@ public class MySqlLst implements Listener {
                             continue;
                         }
                         sv.abils.put(new Ability.AbilState(a,
-                            NumUtil.intOf(ab.substring(eqn2 + 1), 0)), amt);
+                            NumUtil.intOf(ass.substring(eqn2 + 1), 0)), amt);
                     }
                     break;
                 case "mods":
@@ -288,7 +286,7 @@ public class MySqlLst implements Listener {
                             continue;
                         }
                         sv.mods.put(new Modifier.ModState(m,
-                            NumUtil.intOf(md.substring(eqn2 + 1), 0)), amt);
+                            NumUtil.intOf(mss.substring(eqn2 + 1), 0)), amt);
                     }
                     break;
                 /*case "unread":

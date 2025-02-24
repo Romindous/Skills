@@ -1,6 +1,7 @@
 package ru.romindous.skills.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
+import org.bukkit.Input;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockType;
@@ -50,11 +51,19 @@ public class MoveLst implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onInput(final PlayerInputEvent e) {
-        if (!e.getInput().isJump()) return;
         final Player p = e.getPlayer();
-        if (p.isInsideVehicle() || p.getVelocity().getY() <= 0d) return;
+        if (p.isInsideVehicle()) return;
         final Survivor sv = PM.getOplayer(p, Survivor.class);
         if (sv == null) return;
+        final Input in = e.getInput();
+        if (!in.isJump()) {
+            if (p.getVelocity().getY() < 0) return;
+            sv.jump = in;
+            return;
+        }
+        if (sv.jump == null) return;
+        sv.jump = null;
+        if (p.getVelocity().getY() < 0) return;
         sv.trigger(Trigger.DOUBLE_JUMP, e, p);
     }
 

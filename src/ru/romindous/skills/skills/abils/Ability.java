@@ -3,7 +3,6 @@ package ru.romindous.skills.skills.abils;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.LivingEntity;
@@ -18,6 +17,7 @@ import org.bukkit.util.Vector;
 import ru.komiss77.boot.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.modules.world.BVec;
 import ru.komiss77.objects.IntHashMap;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.LocUtil;
@@ -395,14 +395,20 @@ public abstract class Ability implements Scroll {//способность
 
     protected static void defKBLe(final LivingEntity caster, final LivingEntity tgt, final boolean up) {
         final Vector vel = tgt.getVelocity();
-        final Vector kbv = tgt.getLocation().subtract(caster.getLocation()).toVector().normalize().multiply(defKB);
+        final Location tcl = EntityUtil.center(tgt);
+        final Location ccl = EntityUtil.center(caster);
+        if (BVec.of(tcl).distAbs(BVec.of(ccl)) == 0) return;
+        final Vector kbv = tcl.subtract(ccl).toVector().normalize().multiply(defKB);
 //        Bukkit.getConsoleSender().sendMessage("already-" + vel + " and " + balMul(vel));
         tgt.setVelocity(vel.add((up ? kbv.setY(kbv.getY() + defDY) : kbv).multiply(balMul(vel))));
     }
 
     protected static void defKBLe(final LivingEntity caster, final LivingEntity tgt, final boolean up, final double mul) {
         final Vector vel = tgt.getVelocity();
-        final Vector kbv = tgt.getLocation().subtract(caster.getLocation()).toVector().normalize().multiply(defKB * mul);
+        final Location tcl = EntityUtil.center(tgt);
+        final Location ccl = EntityUtil.center(caster);
+        if (BVec.of(tcl).distAbs(BVec.of(ccl)) == 0) return;
+        final Vector kbv = tcl.subtract(ccl).toVector().normalize().multiply(defKB * mul);
         tgt.setVelocity(vel.add((up ? kbv.setY(kbv.getY() + defDY) : kbv).multiply(balMul(vel))));
     }
 

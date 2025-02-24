@@ -35,12 +35,12 @@ public class Entries {
 
                     public static final Entry silver = new Entry('e', new ItemBuilder(ItemType.RAW_IRON).glint(true).build(), 0, null, smith, "Сияющие камни",
                         "Скомбинируй сырое железо с медью", "", Quest.QuestVis.PARENT, Quest.QuestFrame.TASK, Section.MATS,
-                        "Честно говоря, меня удивила стабильность этого 0[<gray>'сплава']. Его можно использовать для создания 2[<gray>оружия] и 3[<gray>инструментов], но самое странное - его совместимость с 1[<dark_gray>чешуёй] местной твари, для создания 4[<gray>особой брони]...",
+                        "Меня удивила стабильность этого 0[<gray>'сплава']. Из него можно создать 2[<gray>оружие] и 3[<gray>инструменты], или совместить с 1[<dark_gray>чешуёй] местной твари, для создания 4[<gray>особой брони]. Их рецепты теперь записаны в крафт книжке!",
                         Groups.SILVER.item(ItemType.IRON_INGOT), Groups.SILVER.item(ItemType.PHANTOM_MEMBRANE), Groups.SILVER.item(ItemType.IRON_SWORD), Groups.SILVER.item(ItemType.IRON_PICKAXE), Groups.SILVER.item(ItemType.CHAINMAIL_CHESTPLATE));
 
             public static final Entry copper = new Entry('f', ItemType.COPPER_INGOT, 12, null, table, "Медный филиал",
                 "Выплавь слитки меди для снаряжения", "", Quest.QuestVis.PARENT, Quest.QuestFrame.TASK, Section.MATS,
-                "По моим первым наблюдениям, 0[<amber>медь] была намного хрупче железа. Однако, 1[<gold>оружие] и 2[<gold>броня] скованые из нее собирает и выдает электрические заряды в сторону врагов, что может быть полезно в бою...",
+                "По моим наблюдениям, 0[<amber>медь] была хрупче железа. Однако, 1[<gold>оружие] и 2[<gold>броня] скованые из нее выдают электрические заряды в сторону врагов, что может быть полезно в бою. Их рецепты теперь записаны в крафт книжке!",
                 ItemType.COPPER_INGOT.createItemStack(), Groups.MEDAL.item(ItemType.GOLDEN_SWORD), Groups.MEDAL.item(ItemType.GOLDEN_CHESTPLATE));
 
         public static final Entry mob = new Entry('g', ItemType.ROTTEN_FLESH, 0, null, WASTES, "Чужая кровь",

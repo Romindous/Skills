@@ -280,10 +280,10 @@ public class Assasin implements Scroll.Regable {
 
         new Modifier() {
             public Chastic[] chastics() {
-                return new Chastic[] {Chastic.DAMAGE_DEALT, Chastic.DISTANCE};
+                return new Chastic[] {Chastic.DAMAGE_DEALT, Chastic.TIME};
             }
             public String id() {
-                return "dmg_and_dst";
+                return "dmg_and_time";
             }
             public String name() {
                 return "Синедра";
