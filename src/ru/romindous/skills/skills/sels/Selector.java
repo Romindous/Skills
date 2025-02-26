@@ -110,11 +110,11 @@ public abstract class Selector implements Scroll {//подборник
             dscs.add(" ");
         }
         final int manaMul = (int) ((this.manaMul.calc(lvl) - 1d) * 100d);
-        if (manaMul != 0) dscs.add(TCUtil.N + "Эффект на затрату душ: "
-            + Main.manaClr + manaMul + "%");
+        if (manaMul != 0) dscs.add(TCUtil.N + "Требуемые души: "
+            + Main.manaClr + (manaMul < 0 ? "" : "+") + manaMul + "%");
         final int cdMul = (int) ((this.cdMul.calc(lvl) - 1d) * 100d);
-        if (cdMul != 0) dscs.add(TCUtil.N + "Эффект на перезарядку: "
-            + Main.cdClr + cdMul + "%");
+        if (cdMul != 0) dscs.add(TCUtil.N + "Время перезарядки: "
+            + Main.cdClr + (cdMul < 0 ? "" : "+") + cdMul + "%");
 //        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }
@@ -129,7 +129,7 @@ public abstract class Selector implements Scroll {//подборник
             String ed = d.replace(CLR, rarity().color());
             for (final ChasMod st : stats) {
                 ed = ed.replace(st.id(), st.chs().color() + StringUtil.toSigFigs(st.calc(lvl), Stat.SIG_FIGS_NUM) + TCUtil.P
-                    + (st.scale() > 0 ? " (+" : " (") + StringUtil.toSigFigs(st.scale(), Stat.SIG_FIGS_PER) + ")" + st.chs().color());
+                    + (st.scale() < 0 ? " (" : " (+") + StringUtil.toSigFigs(st.scale(), Stat.SIG_FIGS_PER) + ")" + st.chs().color());
             }
             dscs.add(ed);
         }
@@ -142,11 +142,15 @@ public abstract class Selector implements Scroll {//подборник
             dscs.add(" ");
         }
         final int manaMul = (int) ((this.manaMul.calc(lvl) - 1d) * 100d);
-        if (manaMul != 0) dscs.add(TCUtil.N + "Эффект на затрату душ: "
-            + Main.manaClr + manaMul + "%");
+        final int manaScl = (int) (this.manaMul.scale() * 100d);
+        if (manaMul != 0) dscs.add(TCUtil.N + "Требуемые души: "
+            + Main.manaClr + (manaMul < 0 ? "" : "+") + manaMul + "%"
+            + TCUtil.P + (manaScl < 0 ? " (" : " (+") + manaScl + "%)");
         final int cdMul = (int) ((this.cdMul.calc(lvl) - 1d) * 100d);
-        if (cdMul != 0) dscs.add(TCUtil.N + "Эффект на перезарядку: "
-            + Main.cdClr + cdMul + "%");
+        final int cdScl = (int) (this.cdMul.scale() * 100d);
+        if (cdMul != 0) dscs.add(TCUtil.N + "Время перезарядки: "
+            + Main.cdClr + (cdMul < 0 ? "" : "+") + cdMul + "%"
+            + TCUtil.P + (cdScl < 0 ? " (" : " (+") + cdScl + "%)");
 //        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }

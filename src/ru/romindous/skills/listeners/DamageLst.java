@@ -5,7 +5,11 @@ import java.util.Set;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
@@ -17,12 +21,14 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.utils.EntityUtil;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.MainTask;
 import ru.romindous.skills.config.ConfigVars;
 import ru.romindous.skills.mobs.Minion;
 import ru.romindous.skills.mobs.SednaMob;
 import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.SM;
 import ru.romindous.skills.survs.Stat;
 import ru.romindous.skills.survs.Survivor;
 
@@ -34,6 +40,8 @@ public class DamageLst implements Listener {
     public static final Set<DamageType> RANGED = Set.of(DamageType.THROWN, DamageType.ARROW, DamageType.FIREWORKS, DamageType.TRIDENT,
         DamageType.SPIT, DamageType.WITHER_SKULL, DamageType.UNATTRIBUTED_FIREBALL, DamageType.MOB_PROJECTILE);
     public static final Set<DamageType> MAGIC = Set.of(DamageType.MAGIC, DamageType.INDIRECT_MAGIC);
+    public static final float FALL_MUL = (float) SM.value("fall_dmg_add", 0.2d);
+    public static final float FALL_DST = 2f;
 
     @SuppressWarnings("deprecation")
     private static final EnumMap<EntityDamageEvent.DamageModifier, Function<@Nullable Object, Double>> MOD_FUN =
@@ -84,15 +92,17 @@ public class DamageLst implements Listener {
 
         final boolean trig;
         if (DIRECT.contains(dt)) {
-            e.setDamage(Stat.direct(dmg, sv.getStat(Stat.STRENGTH)));
+            dmg = fallDmg(tgt, dmgr, dmg);
+            dmg = Stat.direct(dmg, sv.getStat(Stat.STRENGTH));
             trig = true;
         } else if (RANGED.contains(dt)) {
-            e.setDamage(Stat.ranged(dmg, sv.getStat(Stat.ACCURACY)));
+            dmg = Stat.direct(dmg, sv.getStat(Stat.ACCURACY));
             trig = true;
         } else if (MAGIC.contains(dt)) {
-            e.setDamage(Stat.magic(dmg, sv.getStat(Stat.MAGIC)));
+            dmg = Stat.direct(dmg, sv.getStat(Stat.MAGIC));
             trig = false;
         } else return;
+        e.setDamage(dmg);
         if (trig && tgt.getHealth() > e.getFinalDamage())
             sv.trigger(Trigger.ATTACK_ENTITY, e, p);
     }
@@ -119,6 +129,7 @@ public class DamageLst implements Listener {
 
         final boolean trig;
         if (DIRECT.contains(dt)) {
+            dmg = fallDmg(tgt, dmgr, dmg);
             dmg = Stat.direct(dmg, dmgrSv.getStat(Stat.STRENGTH));
             trig = true;
         } else if (RANGED.contains(dt)) {
@@ -128,7 +139,6 @@ public class DamageLst implements Listener {
             dmg = Stat.magic(dmg, dmgrSv.getStat(Stat.MAGIC));
             trig = false;
         } else return;
-
         e.setDamage(Stat.defense(dmg, tgtSv.getStat(Stat.PASSIVE)));
         if (trig && tgt.getHealth() > e.getFinalDamage())
             dmgrSv.trigger(Trigger.ATTACK_ENTITY, e, dmgr);
@@ -142,6 +152,20 @@ public class DamageLst implements Listener {
         final double pd = ShotLst.damage(prj);
 //        Bukkit.getConsoleSender().sendMessage(prj.getType().name() + " dmg2-" + pd);
         return pd == 0d ? dmg : pd;
+    }
+
+    private static double fallDmg(final LivingEntity tgt, final LivingEntity dmgr, final double dmg) {
+        final float fall = dmgr.getFallDistance();
+        final AttributeInstance ai = dmgr.getAttribute(Attribute.SAFE_FALL_DISTANCE);
+        if ((ai == null ? FALL_DST : (float) ai.getValue()) > fall) return dmg;
+        final float fd = fall * FALL_MUL;
+        final BlockData bd = tgt.getLocation().add(0d, -0.4d, 0d).getBlock().getBlockData();
+        if (bd.getMaterial().isAir()) EntityUtil.effect(tgt,
+            Sound.ITEM_MACE_SMASH_AIR, 1.6f - 0.1f * fd, Particle.WHITE_SMOKE);
+        else EntityUtil.effect(tgt, Sound.ITEM_MACE_SMASH_AIR,
+            1.6f - 0.1f * fd, Particle.DUST_PILLAR, bd);
+        dmgr.setFallDistance(fd);
+        return dmg + fd;
     }
 
     private static final double envDmgPer = ConfigVars.get("damage.envFrac", 0.05d);

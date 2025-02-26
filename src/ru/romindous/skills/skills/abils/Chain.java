@@ -1,6 +1,5 @@
 package ru.romindous.skills.skills.abils;
 
-import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
@@ -10,7 +9,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
 import ru.komiss77.utils.EntityUtil;
 import ru.romindous.skills.events.EntityCastEvent;
 import ru.romindous.skills.events.PlayerKillEntityEvent;
@@ -21,11 +19,6 @@ public record Chain(Skill sk, LivingEntity caster, LivingEntity target, Event tr
     public Chain next(final Ability ab) {return new Chain(sk, caster, target, new EntityCastEvent(this, ab), at, curr);}
     public Chain target(final LivingEntity tgt) {return new Chain(sk, caster, tgt, trig, at, curr);}
     public Chain curr(final int step) {return new Chain(sk, caster, target, trig, at, step);}
-//    public EntityCastEvent on(final Ability ab) {return new EntityCastEvent(this, ab);}
-    public static Chain of(final Skill sk, final LivingEntity caster,
-        final Event ev, final Location at, final int curr) {
-        return new Chain(sk, caster, caster, ev, at, curr);
-    }
     public static Chain of(final Skill sk, final LivingEntity caster, final Event ev, final int curr) {
         return new Chain(sk, caster, tgtOf(ev, caster), ev, locOf(ev, caster), curr);
     }
@@ -57,19 +50,19 @@ public record Chain(Skill sk, LivingEntity caster, LivingEntity target, Event tr
                     yield b.getLocation().toCenterLocation();
                 }
                 yield ee.getInteractionPoint();
-            case final PlayerJumpEvent ee:
-                yield ee.getPlayer().getLocation();
-            case final PlayerToggleFlightEvent ee:
-                yield ee.getPlayer().getLocation();
             case final EntityDeathEvent ee:
                 yield EntityUtil.center(ee.getEntity());
             case final Minion.MinionSpawnEvent ee:
                 yield EntityUtil.center(ee.getEntity());
             case final EntityCastEvent ee:
-                yield ee.getEntity().getEyeLocation();
+                yield EntityUtil.center(ee.getTarget());
             default: yield null;
         };
-        return loc == null ? cst.getEyeLocation() : loc;
+        return loc == null ? EntityUtil.center(cst) : direct(loc, cst.getEyeLocation());
+    }
+
+    private static Location direct(final Location loc, final Location dir) {
+        loc.setPitch(dir.getPitch()); loc.setYaw(dir.getYaw()); return loc;
     }
 
     private static LivingEntity tgtOf(final Event e, final LivingEntity cst) {
@@ -88,9 +81,6 @@ public record Chain(Skill sk, LivingEntity caster, LivingEntity target, Event tr
                 instanceof final LivingEntity sh ? sh : null;
             case final Minion.MinionSpawnEvent ee: yield ee.getEntity();
             case final EntityCastEvent ee: yield ee.getTarget();
-//            case final PlayerInteractEvent ee: yield ee.getPlayer();
-//            case final PlayerJumpEvent ee: yield ee.getPlayer();
-//            case final PlayerToggleFlightEvent ee: yield ee.getPlayer();
             default: yield null;
         };
         return ent == null ? cst : ent;

@@ -187,7 +187,7 @@ public abstract class Ability implements Scroll {//способность
             String ed = d.replace(CLR, rarity().color());
             for (final ChasMod st : stats) {
                 ed = ed.replace(st.id(), st.chs().color() + StringUtil.toSigFigs(st.calc(lvl), Stat.SIG_FIGS_NUM) + TCUtil.P
-                    + (st.scale() > 0 ? " (+" : " (") + StringUtil.toSigFigs(st.scale(), Stat.SIG_FIGS_NUM) + ")" + st.chs().color());
+                    + (st.scale() < 0 ? " (" : " (+") + StringUtil.toSigFigs(st.scale(), Stat.SIG_FIGS_NUM) + ")" + st.chs().color());
             }
             dscs.add(ed);
         }
@@ -205,9 +205,9 @@ public abstract class Ability implements Scroll {//способность
         }
         dscs.add(" ");
         dscs.add(TCUtil.N + "Стоимость: " + Main.manaClr + StringUtil.toSigFigs(MANA.calc(lvl), Stat.SIG_FIGS_PER) + TCUtil.P
-            + (MANA.scale() > 0 ? " (+" : " (") + StringUtil.toSigFigs(MANA.scale(), Stat.SIG_FIGS_NUM) + ")" + MANA.chs().color() + " душ");
+            + (MANA.scale() < 0 ? " (" : " (+") + StringUtil.toSigFigs(MANA.scale(), Stat.SIG_FIGS_NUM) + ")" + MANA.chs().color() + " душ");
         dscs.add(TCUtil.N + "Перезарядка: " + Main.cdClr + StringUtil.toSigFigs(CD.calc(lvl), Stat.SIG_FIGS_PER) + TCUtil.P
-            + (CD.scale() > 0 ? " (+" : " (") + StringUtil.toSigFigs(CD.scale(), Stat.SIG_FIGS_NUM) + ")" + CD.chs().color() + " сек");
+            + (CD.scale() < 0 ? " (" : " (+") + StringUtil.toSigFigs(CD.scale(), Stat.SIG_FIGS_NUM) + ")" + CD.chs().color() + " сек");
 //        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }

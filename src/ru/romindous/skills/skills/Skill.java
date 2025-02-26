@@ -185,7 +185,7 @@ public class Skill {//скилл
                 if (ch.caster() instanceof final Player pl)
                     cst.inform(pl, "<red>Недостаточно " + TCUtil.A + "душ "
                         + TCUtil.N + "<red>для активации " + TCUtil.P + name);
-                return false;
+                break;
             }
             if (!ab.cast(ch.target(tgt), abs.lvl())) continue;
             if (ch.caster() instanceof final Player pl) cst.chgMana(pl, -useMana);

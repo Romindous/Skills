@@ -92,7 +92,7 @@ public class Warrior implements Scroll.Regable {
             private static final Color CLR = TCUtil.getBukkitColor(TCUtil.getTextColor(Role.WARRIOR.color()));
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-                final Location start = caster.getEyeLocation();
+                final Location start = EntityUtil.center(caster);
                 final Vector dir = start.getDirection();
                 final double dst = DIST.modify(ch, lvl);
                 final Vector vl = caster.getVelocity();

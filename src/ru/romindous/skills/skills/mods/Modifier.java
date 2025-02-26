@@ -95,16 +95,14 @@ public abstract class Modifier implements Scroll {//модификатор
         for (final Chastic ch : chastics()) {
             final Mod md = chMods[ch.ordinal()];
             dscs.add(TCUtil.N + "◇ " + ch.disName() + TCUtil.N + " - на");
-            dscs.add(ch.color() + StringUtil.toSigFigs(md.conScale * lvl + md.conBase, Stat.SIG_FIGS_NUM)
-                + TCUtil.N + " или " + ch.color() + StringUtil.toSigFigs((md.mulScale * lvl + md.mulBase) * 100f,
-                Stat.SIG_FIGS_PER) + "%" + TCUtil.N + ", смотря что ниже");
+            dscs.add(ch.color() + sign(md.conScale * lvl + md.conBase, ch.dec(), Stat.SIG_FIGS_NUM) + TCUtil.N + " или " + ch.color()
+                + sign((md.mulScale * lvl + md.mulBase) * 100d, ch.dec(), Stat.SIG_FIGS_PER) + "%" + TCUtil.N + ", смотря что ниже");
         }
         final String nds = needs();
         if (!nds.isEmpty()) {
             dscs.add("<dark_gray>Требования:");
             dscs.add(nds.replace(CLR, rarity().color()));
         }
-//        dscs.add(" ");
         return dscs.toArray(new String[0]);
     }
 
@@ -115,20 +113,22 @@ public abstract class Modifier implements Scroll {//модификатор
         dscs.add("<dark_gray>Модифицирует:");
         for (final Chastic ch : chastics()) {
             final Mod md = chMods[ch.ordinal()];
-            dscs.add(TCUtil.N + "◇ " + ch.disName() + TCUtil.N + " - на "
-                + ch.color() + StringUtil.toSigFigs(md.conScale * lvl + md.conBase, Stat.SIG_FIGS_NUM) + TCUtil.P
-                + (md.conScale > 0 ? " (+" : " (") + StringUtil.toSigFigs(md.conScale, Stat.SIG_FIGS_NUM) + ")");
-            dscs.add(TCUtil.N + "или " + ch.color() + StringUtil.toSigFigs((md.mulScale * lvl + md.mulBase) * 100d,
-                Stat.SIG_FIGS_PER) + "%" + TCUtil.P + (md.mulScale > 0 ? " (+" : " (")
-                + StringUtil.toSigFigs(md.mulScale * 100d, Stat.SIG_FIGS_PER) + "%)" + TCUtil.N + ", смотря что ниже");
+            dscs.add(TCUtil.N + "◇ " + ch.disName() + TCUtil.N + " - на " + ch.color() + sign(md.conScale * lvl + md.conBase,
+                ch.dec(), Stat.SIG_FIGS_NUM) + TCUtil.P + " (" + sign(md.conScale, ch.dec(), Stat.SIG_FIGS_NUM) + ")");
+            dscs.add(TCUtil.N + "или " + ch.color() + sign((md.mulScale * lvl + md.mulBase) * 100d, ch.dec(), Stat.SIG_FIGS_PER)
+                + "%" + TCUtil.P + " (" + sign(md.mulScale * 100d, ch.dec(), Stat.SIG_FIGS_PER) + "%)" + TCUtil.N + ", смотря что ниже");
         }
         final String nds = needs();
         if (!nds.isEmpty()) {
             dscs.add("<dark_gray>Требования:");
             dscs.add(nds.replace(CLR, rarity().color()));
         }
-//        dscs.add(" ");
         return dscs.toArray(new String[0]);
+    }
+
+    private String sign(final double val, final boolean inv, final byte sig) {
+        final double fvl = inv ? -val : val;
+        return (fvl < 0 ? "" : "+") + StringUtil.toSigFigs(fvl, sig);
     }
 
     @Override

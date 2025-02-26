@@ -68,7 +68,6 @@ public class Mage implements Scroll.Regable {
             public Role role() {return Role.MAGE;}
             public Collection<LivingEntity> select(final Chain ch, final int lvl) {
                 final Location loc = ch.at();
-                loc.setDirection(loc.toVector().subtract(ch.caster().getLocation().toVector()));
                 final float yw = loc.getYaw();
                 loc.setYaw(yw + 90f);
                 final Collection<LivingEntity> chLEnts = getChArcLents(loc, DIST.modify(ch, lvl), arc,

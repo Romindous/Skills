@@ -273,13 +273,13 @@ public class SkillMenu implements InventoryProvider {
     private static String[] relate(final Modifier md, final Chastic[] chs) {
         if (chs.length == 0) return UNRELATED;
         final List<String> fnd = new ArrayList<>();
+        fnd.add("<apple>Общие " + TCUtil.P + "статы " + "<apple>с навыком:");
         for (final Chastic ch : md.chastics()) {
             if (Arrays.binarySearch(chs, ch) < 0) continue;
-            fnd.add(ch.disName());
+            fnd.add(TCUtil.N + "◇ " + ch.disName());
         }
-        if (fnd.isEmpty()) return UNRELATED;
-        return new String[]{"<apple>Общие " + TCUtil.P + "статы " + "<apple>с навыком:",
-            String.join(TCUtil.N + ", ", fnd)};
+        if (fnd.size() < 2) return UNRELATED;
+        return fnd.toArray(new String[0]);
     }
 }
 

@@ -60,9 +60,8 @@ public class All implements Scroll.Regable {
             }
             public Collection<LivingEntity> select(final Chain ch, final int lvl) {
                 final Location loc = ch.at();
-                loc.setDirection(loc.toVector().subtract(ch.caster().getLocation().toVector()));
-                final Collection<LivingEntity> chEnts = getChArcLents(loc, DIST.modify(ch, lvl), arc,
-                    ent -> Main.canAttack(ch.caster(), ent, false));
+                final Collection<LivingEntity> chEnts = getChArcLents(loc, DIST.modify(ch, lvl),
+                    arc, ent -> Main.canAttack(ch.caster(), ent, false));
                 if (chEnts.isEmpty()) return List.of();
                 final List<LivingEntity> les = new ArrayList<>();
                 final Iterator<LivingEntity> chi = chEnts.iterator();
@@ -99,9 +98,8 @@ public class All implements Scroll.Regable {
             }
             public Collection<LivingEntity> select(final Chain ch, final int lvl) {
                 final Location loc = ch.at();
-                loc.setDirection(loc.toVector().subtract(ch.caster().getLocation().toVector()));
-                final Collection<LivingEntity> chEnts = getChArcLents(loc, DIST.modify(ch, lvl), arc,
-                    ent -> Main.canAttack(ch.caster(), ent, false));
+                final Collection<LivingEntity> chEnts = getChArcLents(loc, DIST.modify(ch, lvl),
+                    arc, ent -> Main.canAttack(ch.caster(), ent, false));
                 if (chEnts.isEmpty()) return List.of();
                 final List<LivingEntity> les = new ArrayList<>();
                 final Iterator<LivingEntity> chi = chEnts.iterator();

@@ -179,8 +179,10 @@ public class ModSelect extends SvSelect {
         "<red>с " + TCUtil.P + "подборниками " + "<red>или " + TCUtil.P + "способностями " + "<red>навыка!"};
     private static String[] relate(final List<String> fnd) {
         if (fnd.isEmpty()) return UNRELATED;
-        return new String[]{"<apple>Общие " + TCUtil.P + "статы " + "<apple>с навыком:",
-            String.join(TCUtil.N + ", ", fnd)};
+        final List<String> same = new LinkedList<>();
+        same.addFirst("<apple>Общие " + TCUtil.P + "статы " + "<apple>с навыком:");
+        for (final String d : fnd) same.add(TCUtil.N + "◇ " + d);
+        return same.toArray(new String[0]);
     }
 
 }

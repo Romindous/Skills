@@ -11,20 +11,21 @@ import ru.romindous.skills.skills.sels.Selector;
 
 public enum Trigger {//тригер
 
-    ATTACK_ENTITY("Нанесение Урона", null, ItemType.IRON_SWORD, "Срабатывает при нанесении", "физического урона пользователем"), //EntityDamageByEntityEvent
-    PROJ_LAUNCH("Запуск Снаряда", null, ItemType.FIRE_CHARGE, "Срабатывает при запуске", "любого снаряда пользователем"), //ProjectileLaunchEvent
-    RANGED_HIT("Попадание с Дистанции", null, ItemType.APPLE, "Срабатывает при попадании", "снарядом любого моба игроком"), //ProjectileHitEvent
-    KILL_ENTITY("Убийство Сущности", null, ItemType.ROTTEN_FLESH, "Срабатывает при убийстве", "любого моба игроком"), //PlayerKillEntityEvent
-    SHIFT_LEFT("Шифт с ЛКМ", null, ItemType.TNT_MINECART, "Срабатывает при нажатии", "ЛКМ в крадущемся виде"), //PlayerInteractEvent
-    SHIFT_RIGHT("Шифт с ПКМ", null, ItemType.CHEST_MINECART, "Срабатывает при нажатии", "ПКМ в крадущемся виде", "(надо дерать что-то в руке)"), //PlayerInteractEvent
-    SHIFT_JUMP("Шифт с Прыжком", null, ItemType.BIG_DRIPLEAF, "Срабатывает при прыжке", "пользователя в крадущемся виде"), //PlayerJumpEvent -
-    DOUBLE_JUMP("Двойной Прыжок", null, ItemType.SMALL_DRIPLEAF, "Срабатывает при двойном", "прыжке пользователя"), //PlayerToggleFlightEvent -
-    USER_DEATH("Смертельный Урон", null, ItemType.SKELETON_SKULL, "Срабатывает при получении", "смертельного урона пользователем"), //EntityDeathEvent -
-    USER_HURT("Получение Урона", null, ItemType.FERMENTED_SPIDER_EYE, "Срабатывает при получении", "физического урона пользователем"), //EntityDamageEvent -
-    SPAWN_MINION("Спавн Приспешника", null, ItemType.GLOW_SQUID_SPAWN_EGG, "Срабатывает при спавне", "мобов-пресмешников пользователя"), //MinionSpawnEvent -
-    ABIL_CAST("Прокаст Способности", null, ItemType.ENDER_EYE, "Срабатывает при использовании", "предыдущей способности в списке"), //EntityCastEvent -
-    UNKNOWN("Неизвестный", null, ItemType.SCULK_SENSOR, "Срабатывает при", "неописуемых обстоятельствах"); //Event -
+    ATTACK_ENTITY("Нанесение Урона", null, ItemType.IRON_SWORD, false, "Срабатывает при нанесении физического", "урона по цели. §Использует ее локацию"), //EntityDamageByEntityEvent
+    PROJ_LAUNCH("Запуск Снаряда", null, ItemType.FIRE_CHARGE, true, "Срабатывает при запуске любого", "снаряда. §Использует его локацию"), //ProjectileLaunchEvent
+    RANGED_HIT("Попадание с Дистанции", null, ItemType.APPLE, false, "Срабатывает при попадании снарядом в", "любую цель. §Использует ее локацию"), //ProjectileHitEvent
+    KILL_ENTITY("Убийство Сущности", null, ItemType.ROTTEN_FLESH, false, "Срабатывает при убийстве любой цели", "игроком. §Использует ее локацию"), //PlayerKillEntityEvent
+    SHIFT_LEFT("Шифт с ЛКМ", null, ItemType.TNT_MINECART, true, "Срабатывает при нажатии ЛКМ в крадущемся", "виде. §Использует локацию блока, на", "§который смотрит пользователь"), //PlayerInteractEvent
+    SHIFT_RIGHT("Шифт с ПКМ", null, ItemType.CHEST_MINECART, true, "Срабатывает при нажатии ПКМ в крадущемся", "виде. §Использует локацию блока, на", "§который смотрит пользователь"), //PlayerInteractEvent
+    SHIFT_JUMP("Шифт с Прыжком", null, ItemType.BIG_DRIPLEAF, true, "Срабатывает при прыжке в крадущемся", "виде. §Использует локацию пользователя"), //PlayerJumpEvent -
+    DOUBLE_JUMP("Двойной Прыжок", null, ItemType.SMALL_DRIPLEAF, true, "Срабатывает при двойном прыжке.", "§Использует локацию пользователя"), //PlayerToggleFlightEvent -
+    USER_DEATH("Смертельный Урон", null, ItemType.SKELETON_SKULL, true, "Срабатывает при получении смертельного", "урона. §Использует локацию пользователя"), //EntityDeathEvent -
+    USER_HURT("Получение Урона", null, ItemType.FERMENTED_SPIDER_EYE, false, "Срабатывает при получении физического", "урона. §Использует локацию цели"), //EntityDamageEvent -
+    SPAWN_MINION("Спавн Приспешника", null, ItemType.GLOW_SQUID_SPAWN_EGG, false, "Срабатывает при спавне приспешника.", "§Использует его локацию"), //MinionSpawnEvent -
+    ABIL_CAST("Прокаст Способности", null, ItemType.ENDER_EYE, true, "Срабатывает при использовании любой", "способности. §Использует указанную ей локацию"), //EntityCastEvent -
+    UNKNOWN("Неизвестный", null, ItemType.SCULK_SENSOR, true, "Срабатывает при неописуемых обстоятельствах.", "§Использует локацию пользователя"); //Event -
 
+    private static final String LOC_CLR = "<gray>";
     private static final String prefix = "trigs.";
     public static final String color = "<pink>";
     public static final String SIDE = "🟃";
@@ -37,14 +38,17 @@ public enum Trigger {//тригер
     private final ItemType icon;
     private final String[] desc;
 
-    Trigger(final String name, final Selector sel, final ItemType icon, final String... desc) {
+    Trigger(final String name, final Selector sel,
+    final ItemType icon, final boolean self, final String... desc) {
         this.sel = sel;
         this.name = name;
         this.icon = icon;
-        final String[] dsc = new String[desc.length];
-        for (int i = 0; i != dsc.length; i++) {
-            dsc[i] = TCUtil.N + desc[i];
+        final String[] dsc = new String[desc.length + 1];
+        for (int i = 0; i != desc.length; i++) {
+            dsc[i] = TCUtil.N + desc[i].replace("§", LOC_CLR);
         }
+        dsc[desc.length] = "<dark_gray>Цель: " + TCUtil.A
+            + (self ? "Пользователь (Ты)" : "Примененная Сущность");
         this.desc = dsc;
     }
 
