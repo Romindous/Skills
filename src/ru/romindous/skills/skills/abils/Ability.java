@@ -56,6 +56,7 @@ public abstract class Ability implements Scroll {//способность
     public static final String data = "abil";
 
     public static final int stepCd = ConfigVars.get(data + ".stepCd", 10);
+    public static final int shotCd = ConfigVars.get(data + ".shotCd", 2);
     public static final double defKB = ConfigVars.get(data + ".defKb", 1d);
     public static final double defDY = ConfigVars.get(data + ".defY", 1d);
     public static final double defDEL = ConfigVars.get(data + ".defDEL", 2d);

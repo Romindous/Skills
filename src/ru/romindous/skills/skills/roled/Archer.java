@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
+import ru.komiss77.Ostrov;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.LocUtil;
@@ -76,16 +77,18 @@ public class Archer implements Scroll.Regable {
                 .withColor(Color.YELLOW).with(FireworkEffect.Type.BURST).build();
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity caster = ch.caster();
-
                 final double dmg = POWER.modify(ch, lvl);
-                final Firework fw = caster.launchProjectile(Firework.class);
-                final FireworkMeta fm = fw.getFireworkMeta();
-                fm.addEffect(FW_EFF);
-                fw.setFireworkMeta(fm);
-                fw.setShotAtAngle(true);
-                fw.setTicksToDetonate((int) (dmg * timeMul));
-                ShotLst.damage(fw, dmg);
+
                 next(ch);
+                Ostrov.sync(() -> {
+                    final Firework fw = caster.launchProjectile(Firework.class);
+                    final FireworkMeta fm = fw.getFireworkMeta();
+                    fm.addEffect(FW_EFF);
+                    fw.setFireworkMeta(fm);
+                    fw.setShotAtAngle(true);
+                    fw.setTicksToDetonate((int) (dmg * timeMul));
+                    ShotLst.damage(fw, dmg);
+                }, shotCd);
                 return true;
             }
             public String id() {
@@ -126,14 +129,17 @@ public class Archer implements Scroll.Regable {
                     return false;
                 }
                 final LivingEntity caster = ch.caster();
+                final ItemStack wpn = ar.getWeapon();
+                final Vector vc = ar.getVelocity().multiply(SPEED.modify(ch, lvl));
 
                 EntityUtil.effect(caster, Sound.ITEM_CROSSBOW_SHOOT, 1.4f, Particle.LANDING_HONEY);
 
-                final ItemStack wpn = ar.getWeapon();
-                final Vector vc = ar.getVelocity().multiply(SPEED.modify(ch, lvl));
-                final SpectralArrow spa = caster.launchProjectile(SpectralArrow.class, vc);
-                if (wpn != null) spa.setWeapon(wpn);
                 next(ch);
+                Ostrov.sync(() -> {
+                    final SpectralArrow spa = caster
+                        .launchProjectile(SpectralArrow.class, vc);
+                    if (wpn != null) spa.setWeapon(wpn);
+                }, shotCd);
                 return true;
             }
             public String id() {
@@ -287,20 +293,23 @@ public class Archer implements Scroll.Regable {
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
                 final LivingEntity caster = ch.caster();
+                final double dmg = DAMAGE.modify(ch, lvl);
                 final Location start = caster.getEyeLocation()
                     .add(Main.srnd.nextFloat() - 0.5d, height, Main.srnd.nextFloat() - 0.5d);
+
                 new ParticleBuilder(Particle.SQUID_INK).location(start).count(8)
                     .offset(0.4d, 0.4d, 0.4d).extra(0.0).allPlayers().spawn();
                 start.getWorld().playSound(start, Sound.ENTITY_DROWNED_SHOOT, 1f, 1.4f);
 
-                final double dmg = DAMAGE.modify(ch, lvl);
-                final Snowball sb = caster.launchProjectile(Snowball.class, EntityUtil.center(tgt).subtract(start)
-                    .toVector().normalize().multiply(speed).add(tgt.getVelocity().multiply(0.5d)), s -> {
-                    s.setItem(FWS); s.setGravity(false); s.setGlowing(true);
-                });
-                sb.teleport(start);
-                ShotLst.damage(sb, dmg);
                 next(ch);
+                Ostrov.sync(() -> {
+                    final Snowball sb = caster.launchProjectile(Snowball.class, EntityUtil.center(tgt).subtract(start)
+                        .toVector().normalize().multiply(speed).add(tgt.getVelocity().multiply(0.5d)), s -> {
+                        s.setItem(FWS); s.setGravity(false); s.setGlowing(true);
+                    });
+                    sb.teleport(start);
+                    ShotLst.damage(sb, dmg);
+                }, shotCd);
                 return true;
             }
             public String id() {

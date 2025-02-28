@@ -111,8 +111,8 @@ public class Warrior implements Scroll.Regable {
                     fe.setDamage(dmg);
                     le.damage(fe.getDamage(), fe.getDamageSource());
                     defKBLe(caster, le, false);
-                    next(ch);
                 }
+                next(ch);
                 return true;
             }
             public String id() {

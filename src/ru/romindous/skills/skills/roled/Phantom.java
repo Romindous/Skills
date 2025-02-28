@@ -323,7 +323,6 @@ public class Phantom implements Scroll.Regable {
             }
             public boolean cast(final Chain ch, final int lvl) {
                 final LivingEntity tgt = ch.target();
-                final LivingEntity caster = ch.caster();
 
                 final Location loc = EntityUtil.center(tgt);
                 new ParticleBuilder(Particle.SWEEP_ATTACK).extra(0d)

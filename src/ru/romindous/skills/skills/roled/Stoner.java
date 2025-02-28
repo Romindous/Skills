@@ -201,7 +201,7 @@ public class Stoner implements Scroll.Regable {
                 final LivingEntity caster = ch.caster();
                 caster.setVelocity(caster.getEyeLocation().getDirection().setY(0d).normalize()
                     .setY(defY).multiply(SPEED.modify(ch, lvl) * balMul(caster.getVelocity())));
-                if (caster instanceof final Player pl) Nms.noFallDmg(pl);
+
                 EntityUtil.effect(caster, Sound.ENTITY_ENDER_DRAGON_FLAP, 0.8f, Particle.GUST);
 
                 next(ch);

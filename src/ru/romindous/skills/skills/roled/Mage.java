@@ -17,26 +17,28 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Snowball;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import ru.komiss77.Ostrov;
 import ru.komiss77.utils.EntityUtil;
 import ru.komiss77.utils.ItemUtil;
 import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.skills.chas.Chastic;
-import ru.romindous.skills.skills.Rarity;
-import ru.romindous.skills.survs.Role;
-import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.listeners.ShotLst;
+import ru.romindous.skills.skills.Rarity;
 import ru.romindous.skills.skills.Scroll;
-import ru.romindous.skills.skills.chas.ChasMod;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.abils.Chain;
 import ru.romindous.skills.skills.abils.InvCondition;
+import ru.romindous.skills.skills.chas.ChasMod;
+import ru.romindous.skills.skills.chas.Chastic;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Role;
 
 public class Mage implements Scroll.Regable {
     //
@@ -190,18 +192,20 @@ public class Mage implements Scroll.Regable {
                 final Vector vc = flc.toVector().subtract(elc.toVector()).multiply(0.8d);
                 vc.setY(vc.getY() - range);
                 final Location fin = flc.subtract(vc);
+                final double pwr = POWER.modify(ch, lvl);
 
                 new ParticleBuilder(Particle.SQUID_INK).location(fin).count(8)
                     .offset(0.4d, 0.4d, 0.4d).extra(0.0).allPlayers().spawn();
                 fin.getWorld().playSound(fin, Sound.ENTITY_BREEZE_SHOOT, 1f, 0.8f);
 
-                final double pwr = POWER.modify(ch, lvl);
-                final LargeFireball fb = flc.getWorld().spawn(fin, LargeFireball.class, f -> {
-                    f.setShooter(caster); f.setIsIncendiary(false);
-                    f.setDirection(vc); f.setVelocity(vc.normalize());
-                });
-                fb.setYield((float) pwr); ShotLst.damage(fb, pwr);
                 next(ch);
+                Ostrov.sync(() -> {
+                    final LargeFireball fb = flc.getWorld().spawn(fin, LargeFireball.class, f -> {
+                        f.setShooter(caster); f.setIsIncendiary(false);
+                        f.setDirection(vc); f.setVelocity(vc.normalize());
+                    });
+                    fb.setYield((float) pwr); ShotLst.damage(fb, pwr);
+                }, shotCd);
                 return true;
             }
             public String id() {
@@ -358,14 +362,17 @@ public class Mage implements Scroll.Regable {
                 final double spd = dir.length() * pow;
                 final int amt = (int) Math.round(AMOUNT.modify(ch, lvl));
                 final int dis = NumUtil.randSign() * 10;
-                for (int i = amt; i != 0; i--) {
-                    loc.setYaw((float) (((i & 1) == 0 ? dis : -dis) * i) + yw);
-                    ShotLst.damage(caster.launchProjectile(Snowball.class,
-                        loc.getDirection().multiply(spd), s -> {
-                            s.setItem(sb.getItem()); s.setGravity(false);
-                        }), dmg * pow);
-                    next(ch);
-                }
+                final ItemStack it = sb.getItem();
+                next(ch);
+                Ostrov.sync(() -> {
+                    for (int i = amt; i != 0; i--) {
+                        loc.setYaw((float) (((i & 1) == 0 ? dis : -dis) * i) + yw);
+                        ShotLst.damage(caster.launchProjectile(Snowball.class,
+                            loc.getDirection().multiply(spd), s -> {
+                                s.setItem(it); s.setGravity(false);
+                            }), dmg * pow);
+                    }
+                }, shotCd);
                 return true;
             }
             public String id() {
