@@ -1,5 +1,6 @@
 package ru.romindous.skills.effects;
 
+import com.destroystokyo.paper.ParticleBuilder;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -18,6 +19,8 @@ public class Bleeding extends CustomEffect<Bleeding.Bleed> {
 
     protected void onStart(final LivingEntity tgt, final Bleed in) {
         EntityUtil.effect(tgt, Sound.ITEM_AXE_SCRAPE, 0.6f, Particle.BLOCK, Bleeding.blood);
+        new ParticleBuilder(Particle.SWEEP_ATTACK).location(EntityUtil.center(tgt))
+            .count(2).receivers(40).spawn();
     }
 
     public void apply(final LivingEntity tgt, final int ticks, final double power) {

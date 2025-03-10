@@ -1,24 +1,32 @@
-package ru.romindous.skills.listeners;
+package ru.romindous.skills.listeners.worlds;
 
+import java.util.Iterator;
+import java.util.Set;
+import io.papermc.paper.registry.RegistryKey;
+import io.papermc.paper.registry.keys.tags.BlockTypeTagKeys;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.BlockType;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockFertilizeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
+import ru.komiss77.boot.OStrap;
 import ru.romindous.skills.Main;
 import ru.romindous.skills.SubServer;
+import ru.romindous.skills.listeners.RehabLst;
 
 
-public class WorldLst implements Listener  {
+public class WastesLst implements Listener  {
     
     //жестко багануло Skills.jar//ru.romindous.skills.listener.WorldLst.wastesWaterControl(WorldLst.java:22)
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void wastesWaterControl(final BlockPhysicsEvent e) {
+    public void onPhys(final BlockPhysicsEvent e) {
         if (BlockType.WATER.equals(e.getBlock().getType().asBlockType()) && Main.subServer == SubServer.WASTES) {
             int i = 0;
             for (final BlockFace bf : RehabLst.near) {
@@ -37,8 +45,18 @@ public class WorldLst implements Listener  {
     }
 
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void wastesCancelWaterlogged(final BlockFromToEvent e) {
+    public void onTrans(final BlockFromToEvent e) {
         e.setCancelled(Main.subServer == SubServer.WASTES && e.getToBlock().getBlockData() instanceof Waterlogged);
+    }
+
+    private static final Set<BlockType> CROPS = OStrap.getAll(BlockTypeTagKeys.CROPS, RegistryKey.BLOCK);
+    @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onInter(final BlockFertilizeEvent e) {
+        for (final Iterator<BlockState> it = e.getBlocks().iterator(); it.hasNext();) {
+            if (CROPS.contains(it.next().getType().asBlockType())) continue;
+            it.remove();
+            return;
+        }
     }
 
     /*@EventHandler (priority = EventPriority.MONITOR, ignoreCancelled = true)

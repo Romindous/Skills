@@ -2,14 +2,15 @@ package ru.romindous.skills.listeners;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
@@ -17,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
@@ -85,13 +87,21 @@ public class DeathLst implements Listener {
         sv.trigger(Trigger.USER_DEATH, e, p);
     }
 
+    private static final Set<DamageType> TICKED = Set.of(DamageType.ON_FIRE,
+        DamageType.FREEZE, DamageType.WITHER, DamageType.INDIRECT_MAGIC);
     public static void onCustomDeath(final EntityDeathEvent e, final SednaMob sm) {
         if (!(e.getEntity() instanceof final Mob mob)) return;
         final Player killer;
+        final EntityDamageEvent lde = mob.getLastDamageCause();
         if (EntityUtil.lastDamager(mob, true) instanceof final LivingEntity klr) {
             if (klr instanceof Player) killer = (Player) klr;
             else if (Minion.ownerOf(klr) instanceof final Player kp) killer = kp;
             else killer = null;
+        } else if (TICKED.contains(lde.getDamageSource().getDamageType())) {
+            final Player kpl = mob.getKiller();
+            final LivingEntity tgt = mob.getTarget();
+            killer = kpl != null && tgt instanceof final Player tpl
+                && tpl.getEntityId() == kpl.getEntityId() ? tpl : null;
         } else killer = null;
 
         if (killer == null) return;

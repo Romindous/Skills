@@ -426,7 +426,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
     }
 
     public static final float EXP_DEL = (float) SM.value("delimit", 6d);
-    public static final double LVL_DEL = 1d / EXP_DEL;
+    public static final float LVL_DEL = 1f / EXP_DEL;
 
     public void setXp(final Player p, final int ammount) {
         exp = ammount;
@@ -440,8 +440,8 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         final int currLvl = NumUtil.sqrt((int) (exp * LVL_DEL));
         final int lvlSq = currLvl * currLvl;
         p.setLevel(currLvl);
-        p.setExp((exp - lvlSq * EXP_DEL) /
-            ((NumUtil.square(currLvl + 1) - lvlSq) * EXP_DEL));
+        p.setExp(Math.clamp((exp - lvlSq * EXP_DEL) /
+            ((NumUtil.square(currLvl + 1) - lvlSq) * EXP_DEL), 0f, 1f));
         updateBoard(p, SM.Info.LEVEL);
         eqStatPoint(currLvl);
     }
@@ -454,8 +454,8 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
         final int lvlSq = currLvl * currLvl;
         exp = currExp;
         p.setLevel(currLvl);
-        p.setExp((currExp - lvlSq * EXP_DEL) /
-            ((NumUtil.square(currLvl + 1) - lvlSq) * EXP_DEL));
+        p.setExp(Math.clamp((currExp - lvlSq * EXP_DEL) /
+            ((NumUtil.square(currLvl + 1) - lvlSq) * EXP_DEL), 0f, 1f));
 
         if (currLvl - oldLvl < 1) return;
         //уровень добавляется

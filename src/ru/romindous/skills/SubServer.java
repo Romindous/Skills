@@ -6,18 +6,20 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.utils.TCUtil;
+import ru.romindous.skills.listeners.worlds.WastesLst;
 
 public enum SubServer {
 
-    WASTES("§cПустошь", "textures/block/coarse_dirt.png", ItemType.COARSE_DIRT, EntityType.HUSK, 0.75f, EntityType.PILLAGER),
-    KRIOLITE("§bКриолит", "textures/block/calcite.png", ItemType.CALCITE, EntityType.STRAY, 0.90f, null),
-    LOCUS("§2Локус", "textures/block/azalea_leaves.png", ItemType.MOSS_BLOCK, EntityType.ZOMBIE_VILLAGER, 1.05f, EntityType.WITCH),
-    INFERNAL("§4Инфернал", "textures/block/nether_bricks.png", ItemType.CRIMSON_NYLIUM, EntityType.WITHER_SKELETON, 1.15f, EntityType.PIGLIN_BRUTE),
-    AQUAROD("§9Акварод", "textures/block/dark_prismarine.png", ItemType.WARPED_HYPHAE, EntityType.DROWNED, 1.25f, null),
-    KALEUM("§5Калеум", "textures/block/obsidian.png", ItemType.END_STONE_BRICKS, EntityType.SKELETON, 1.30f, null),
-    TERRA("§6Терра", "textures/block/honeycomb_block.png", ItemType.GRASS_BLOCK, EntityType.ZOMBIE, 1.35f, EntityType.WANDERING_TRADER);
+    WASTES("§cПустошь", "textures/block/coarse_dirt.png", ItemType.COARSE_DIRT, EntityType.HUSK, 0.75f, EntityType.PILLAGER, new WastesLst()),
+    KRIOLITE("§bКриолит", "textures/block/calcite.png", ItemType.CALCITE, EntityType.STRAY, 0.90f, null, null),
+    LOCUS("§2Локус", "textures/block/azalea_leaves.png", ItemType.MOSS_BLOCK, EntityType.ZOMBIE_VILLAGER, 1.05f, EntityType.WITCH, null),
+    INFERNAL("§4Инфернал", "textures/block/nether_bricks.png", ItemType.CRIMSON_NYLIUM, EntityType.WITHER_SKELETON, 1.15f, EntityType.PIGLIN_BRUTE, null),
+    AQUAROD("§9Акварод", "textures/block/dark_prismarine.png", ItemType.WARPED_HYPHAE, EntityType.DROWNED, 1.25f, null, null),
+    KALEUM("§5Калеум", "textures/block/obsidian.png", ItemType.END_STONE_BRICKS, EntityType.SKELETON, 1.30f, null, null),
+    TERRA("§6Терра", "textures/block/honeycomb_block.png", ItemType.GRASS_BLOCK, EntityType.ZOMBIE, 1.35f, EntityType.WANDERING_TRADER, null);
 	
 	public static int size = SubServer.values().length;
 	
@@ -27,15 +29,17 @@ public enum SubServer {
     public final ItemType displayMat;
     public final EntityType mobType;
     public final float bfr;
-	public final EntityType taskNPC;
+	public final @Nullable EntityType taskNPC;
+    public final @Nullable Listener lst;
 
-    SubServer(final String dName, final String bGrndTxtr, final ItemType displayMat, final EntityType mobType, final float bfr, final EntityType taskNPC) {
+    SubServer(final String dName, final String bGrndTxtr, final ItemType displayMat, final EntityType mobType, final float bfr, final @Nullable EntityType taskNPC, final @Nullable Listener lst) {
         this.disName = dName;
         this.bGrndTxtr = bGrndTxtr;
         this.displayMat = displayMat;
         this.mobType = mobType;
         this.bfr = bfr;
         this.taskNPC = taskNPC;
+        this.lst = lst;
     }
     
     public static SubServer get() {
@@ -51,6 +55,8 @@ public enum SubServer {
 
     public static void init() {
         final World w = Bukkit.getWorlds().getFirst();
+        if (Main.subServer.lst != null)
+            Bukkit.getPluginManager().registerEvents(Main.subServer.lst, Main.main);
 
         w.setGameRule(GameRule.DO_MOB_LOOT, true);
         w.setGameRule(GameRule.DO_MOB_SPAWNING, true);

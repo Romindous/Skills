@@ -238,7 +238,7 @@ public class Assasin implements Scroll.Regable {
         new Ability() {//Порез
             final ChasMod TIME = new ChasMod(this, "time", Chastic.TIME);
             final ChasMod DAMAGE = new ChasMod(this, "damage", Chastic.DAMAGE_DEALT);
-            final ChasMod[] stats = new ChasMod[] {TIME};
+            final ChasMod[] stats = new ChasMod[] {TIME, DAMAGE};
             public ChasMod[] stats() {
                 return stats;
             }
