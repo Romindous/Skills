@@ -2,7 +2,6 @@ package ru.romindous.skills.listeners.worlds;
 
 import java.util.Iterator;
 import java.util.Set;
-import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.keys.tags.BlockTypeTagKeys;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -49,7 +48,7 @@ public class WastesLst implements Listener  {
         e.setCancelled(Main.subServer == SubServer.WASTES && e.getToBlock().getBlockData() instanceof Waterlogged);
     }
 
-    private static final Set<BlockType> CROPS = OStrap.getAll(BlockTypeTagKeys.CROPS, RegistryKey.BLOCK);
+    private static final Set<BlockType> CROPS = OStrap.getAll(BlockTypeTagKeys.CROPS);
     @EventHandler (priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onInter(final BlockFertilizeEvent e) {
         for (final Iterator<BlockState> it = e.getBlocks().iterator(); it.hasNext();) {

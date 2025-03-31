@@ -18,6 +18,7 @@ import ru.komiss77.events.FriendTeleportEvent;
 import ru.komiss77.events.LocalDataLoadEvent;
 import ru.komiss77.events.QuestCompleteEvent;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.modules.world.BVec;
 import ru.komiss77.modules.world.XYZ;
 import ru.komiss77.utils.*;
 import ru.romindous.skills.Main;
@@ -67,7 +68,7 @@ public class MySqlLst implements Listener {
         final Survivor sv = (Survivor) e.getOplayer();
 //        int fstHp = 1;
         
-        if (sv.mysqlError) {
+        if (e.hasSqlError()) {
             Ostrov.log_err(p.getName()+":LocalDataLoadEvent-hasSqlError!");
             p.sendMessage("§cОшибка загрузки скилл, при выходе данные не будут сохраняться!");
             ScreenUtil.sendBossbarDirect(p, "§4Ошибка загрузки",
@@ -106,8 +107,8 @@ public class MySqlLst implements Listener {
                     final String wnm = p.getWorld().getName();
                     for (final String s : en.getValue().split(StringUtil.SPLIT_0)) {
                         if (!s.startsWith(wnm)) continue;
-                        p.setRespawnLocation(XYZ.fromString(s)
-                            .getCenterLoc(p.getWorld()), false);
+                        p.setRespawnLocation(BVec.parse(s)
+                            .center(p.getWorld()), false);
                     }
                     break;
                 case "stats":

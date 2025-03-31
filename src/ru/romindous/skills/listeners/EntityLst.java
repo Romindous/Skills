@@ -53,7 +53,6 @@ public class EntityLst implements Listener {
             if (Main.srnd.nextInt(BVec.of(tgt.getLocation())
                 .dist(e.getEntity().getLocation()) + ipe.getAmplifier()) != 0) {
                 e.setCancelled(true);
-                return;
             }
         }
     }

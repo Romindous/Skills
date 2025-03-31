@@ -6,6 +6,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.ApiOstrov;
+import ru.komiss77.Timer;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.utils.TimeUtil;
@@ -47,7 +48,7 @@ public class RoleMenu implements InventoryProvider {
             return;
         }
 
-        final int timeLeft = 86400 - (ApiOstrov.currentTimeSec() - sv.roleStamp);
+        final int timeLeft = 86400 - (Timer.secTime() - sv.roleStamp);
 
         if (timeLeft > 0 && !ApiOstrov.isLocalBuilder(p)) {
             for (final Role rl : Role.values()) {

@@ -3,12 +3,12 @@ package ru.romindous.skills.skills.abils;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.Location;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.potion.PotionEffect;
@@ -105,12 +105,15 @@ public abstract class Ability implements Scroll {//способность
 
     public ItemStack display(final int lvl) {
         return new ItemBuilder(icon()).name(TCUtil.sided(name(lvl), side()))
-            .flags(true, ItemFlag.HIDE_ADDITIONAL_TOOLTIP).lore(desc(lvl)).build();
+            .hide(DataComponentTypes.PROVIDES_TRIM_MATERIAL, DataComponentTypes.TRIM)
+            .lore(desc(lvl)).build();
     }
 
     public ItemStack drop(final int lvl) {
-        return new ItemBuilder(icon()).name(TCUtil.sided("<u>" + name(lvl) + "</u>", side())).flags(true, ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
-            .lore(desc(lvl)).data(OStrap.key(data()), id()).data(OStrap.key(LVL), lvl).lore(TCUtil.P + "ПКМ " + TCUtil.N + "- присвоить").build();
+        return new ItemBuilder(icon()).name(TCUtil.sided("<u>" + name(lvl) + "</u>", side()))
+            .hide(DataComponentTypes.PROVIDES_TRIM_MATERIAL, DataComponentTypes.TRIM)
+            .lore(desc(lvl)).data(OStrap.key(data()), id()).data(OStrap.key(LVL), lvl)
+            .lore(TCUtil.P + "ПКМ " + TCUtil.N + "- присвоить").build();
     }
 
     public ItemType icon() {

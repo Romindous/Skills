@@ -593,7 +593,7 @@ public class Survivor extends Oplayer implements Caster/*, Transfer*/ {
 
     @OverrideMe
     public void preDataSave(final Player p, final boolean async) {
-        if (mysqlError) { //при загрузке были ошибки - не срохран., чтобы не запороть данные
+        if (dbError != null) { //при загрузке были ошибки - не срохран., чтобы не запороть данные
             Ostrov.log_err(p.getName()+":PlayerQuitEvent-Survivor loadError - не сохраняем");
             return;
         }

@@ -58,8 +58,7 @@ public class Serebrite extends SkillGroup {
                 return tb.build();
             }),
             new Data<>(DataComponentTypes.ATTRIBUTE_MODIFIERS, ats -> {
-                final ItemAttributeModifiers.Builder tb = ItemAttributeModifiers
-                    .itemAttributes().showInTooltip(ats.showInTooltip());
+                final ItemAttributeModifiers.Builder tb = ItemAttributeModifiers.itemAttributes();
                 for (final ItemAttributeModifiers.Entry en : ats.modifiers()) {
                     tb.addModifier(en.attribute(), en.modifier(), en.getGroup());
                     if (Attribute.ARMOR.equals(en.attribute())) {

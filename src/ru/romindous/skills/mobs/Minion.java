@@ -26,13 +26,13 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import ru.komiss77.modules.player.PM;
 import ru.komiss77.modules.world.AreaSpawner;
-import ru.komiss77.modules.world.WXYZ;
+import ru.komiss77.modules.world.BVec;
 import ru.komiss77.utils.LocUtil;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.survs.Survivor;
-import ru.romindous.skills.survs.Stat;
-import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.listeners.DamageLst;
+import ru.romindous.skills.skills.trigs.Trigger;
+import ru.romindous.skills.survs.Stat;
+import ru.romindous.skills.survs.Survivor;
 
 public abstract class Minion extends SednaMob {
 
@@ -200,7 +200,7 @@ public abstract class Minion extends SednaMob {
     public static void setAgroOf(final LivingEntity owner, final LivingEntity target) {
         final Location olc = owner.getLocation();
         //Bukkit.getConsoleSender().sendMessage("ow-" + owner.getType().name() +  " tgt1-" + target.getType().name());
-        for (final Mob mb : LocUtil.getChEnts(new WXYZ(olc), AGRO_DST, Mob.class, ent -> {
+        for (final Mob mb : LocUtil.getChEnts(BVec.of(olc), AGRO_DST, Mob.class, ent -> {
             final LivingEntity tgt = ent.getTarget();
             return isOwner(ent, owner) && (tgt == null || !tgt.isValid());
         })) mb.setTarget(target);

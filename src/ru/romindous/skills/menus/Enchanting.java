@@ -25,16 +25,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.komiss77.boot.OStrap;
 import ru.komiss77.modules.items.ItemBuilder;
-import ru.komiss77.modules.world.WXYZ;
-import ru.komiss77.utils.*;
+import ru.komiss77.modules.world.BVec;
+import ru.komiss77.utils.ClassUtil;
+import ru.komiss77.utils.ItemUtil;
+import ru.komiss77.utils.NumUtil;
+import ru.komiss77.utils.StringUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
 import ru.komiss77.utils.inventory.InventoryProvider;
 import ru.komiss77.utils.inventory.SlotPos;
 import ru.komiss77.version.Nms;
 import ru.romindous.skills.Main;
-import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.config.ConfigVars;
+import ru.romindous.skills.survs.Survivor;
 
 public class Enchanting implements InventoryProvider {
 
@@ -46,7 +49,7 @@ public class Enchanting implements InventoryProvider {
     static {
         final List<Enchantment> enchs = new ArrayList<>();
         final List<Enchantment> crss = new ArrayList<>();
-        OStrap.retrieveAll(RegistryKey.ENCHANTMENT).stream().forEach(e -> {
+        OStrap.getAll(RegistryKey.ENCHANTMENT).stream().forEach(e -> {
             if (e.isCursed()) enchs.add(e);
             else crss.add(e);
         });
@@ -100,11 +103,11 @@ public class Enchanting implements InventoryProvider {
     	int finBoost = 0;
     	final World w = loc.getWorld();
     	for (final BlockFace bf : SIDES) {
-            final WXYZ bsh = new WXYZ(w, (bf.getModX() << 1) + loc.getBlockX(),
+            final BVec bsh = BVec.of(w, (bf.getModX() << 1) + loc.getBlockX(),
                 (bf.getModY() << 1) + loc.getBlockY(), (bf.getModZ() << 1) + loc.getBlockZ());
     		if (Nms.fastType(w, loc.getBlockX() + bf.getModX(),
                 loc.getBlockY() + bf.getModY(), loc.getBlockZ() + bf.getModZ()).isAir()) {
-        		final int boost = bookBuff(Nms.fastData(bsh));
+        		final int boost = bookBuff(Nms.fastData(w, bsh));
                 if (boost == 0) continue;
                 finBoost += boost;
                 final BlockData ud = w.getBlockAt(bsh.x, bsh.y + 1, bsh.z).getBlockData();
@@ -256,6 +259,7 @@ public class Enchanting implements InventoryProvider {
                                         public @Nullable Inventory getInventory(int i) {return inv;}
                                         public int convertSlot(int i) {return SLOT;}
                                         public @NotNull InventoryType.SlotType getSlotType(int i) {return InventoryType.SlotType.RESULT;}
+                                        public void open() {p.openInventory(inv);}
                                         public void close() {p.closeInventory();}
                                         public int countSlots() {return 1;}
                                         @Deprecated(forRemoval = true)
@@ -294,6 +298,7 @@ public class Enchanting implements InventoryProvider {
                                         public @Nullable Inventory getInventory(int i) {return inv;}
                                         public int convertSlot(int i) {return SLOT;}
                                         public @NotNull InventoryType.SlotType getSlotType(int i) {return InventoryType.SlotType.RESULT;}
+                                        public void open() {p.openInventory(inv);}
                                         public void close() {p.closeInventory();}
                                         public int countSlots() {return 1;}
                                         @Deprecated(forRemoval = true)

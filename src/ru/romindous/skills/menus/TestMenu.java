@@ -1,6 +1,5 @@
 package ru.romindous.skills.menus;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemType;

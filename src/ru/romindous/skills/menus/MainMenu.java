@@ -9,8 +9,10 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.ApiOstrov;
+import ru.komiss77.Timer;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.modules.player.Perm;
 import ru.komiss77.utils.TimeUtil;
 import ru.komiss77.utils.inventory.ClickableItem;
 import ru.komiss77.utils.inventory.InventoryContent;
@@ -198,7 +200,7 @@ public class MainMenu implements InventoryProvider {
         }
         lore.add("");
 
-        final int timeLeft = ApiOstrov.isLocalBuilder(p) ? 0 : 86400 - (ApiOstrov.currentTimeSec()-sv.roleStamp);
+        final int timeLeft = ApiOstrov.isLocalBuilder(p) ? 0 : 86400 - (Timer.secTime()-sv.roleStamp);
         //p.sendMessage("tm=" + timeLeft);
         if (timeLeft>0) {
             lore.add("§7До смены класса:");
@@ -206,7 +208,7 @@ public class MainMenu implements InventoryProvider {
             content.set(49, ClickableItem.empty(new ItemBuilder(ItemType.CAMPFIRE)
                 .name("§c<obf>k</obf> "+sv.role.disName()+" §c<obf>k").lore(lore).build()));
         } else {
-            if (PM.getOplayer(p).hasGroup("legend")) {
+            if (Perm.isRank(sv, 1)) {
                 lore.add("§6Клик §7- сменить без штрафа");
             } else {
                 lore.add("§6Клик §7- сменить с потерей опыта");

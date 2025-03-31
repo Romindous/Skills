@@ -158,7 +158,7 @@ public class InteractLst implements Listener {
                                 break;
                             case CAVE_VINES_PLANT:
                                 final CaveVinesPlant cpd = (CaveVinesPlant) b.getBlockData();
-                                if (cpd.isBerries()) {
+                                if (cpd.hasBerries()) {
                                     cpd.setBerries(false);
                                     b.setBlockData(cpd, false);
                                     hand.setAmount(hand.getAmount() - 1);

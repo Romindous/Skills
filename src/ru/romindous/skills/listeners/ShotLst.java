@@ -1,6 +1,5 @@
 package ru.romindous.skills.listeners;
 
-import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.enchantments.Enchantment;
