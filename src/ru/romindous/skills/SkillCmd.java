@@ -9,7 +9,9 @@ import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import ru.komiss77.ApiOstrov;
+import ru.komiss77.Timer;
 import ru.komiss77.modules.player.PM;
+import ru.komiss77.modules.player.Perm;
 import ru.komiss77.utils.*;
 import ru.komiss77.utils.inventory.ConfirmationGUI;
 import ru.komiss77.utils.inventory.SmartInventory;
@@ -107,7 +109,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
         final Player p = cs instanceof Player ? (Player) cs : null;
         final Survivor sv = p==null ? null : PM.getOplayer(p, Survivor.class);
 
-        if (p!=null && (sv==null || sv.mysqlError) ) { //командует игрок, но его данные не загружены - отказ
+        if (p!=null && (sv==null || sv.dbError != null) ) { //командует игрок, но его данные не загружены - отказ
             p.sendMessage(TCUtil.form("§cДанные не были загружены, команда отключена!"));
             return true;
         }
@@ -146,7 +148,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                     cs.sendMessage("§cSurvivor==null!");
                     return true;
                 }
-                if (srv.mysqlError) {
+                if (srv.dbError != null) {
                     cs.sendMessage("§cОшибка загрузки данных игрока");
                     return true;
                 }
@@ -310,14 +312,14 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                         if (ApiOstrov.isLocalBuilder(p)) {
                             p.sendMessage("§e*билдер-смена без задержки");
                         } else {
-                            final int timeLeft = Math.max(0, 86400 - (ApiOstrov.currentTimeSec()-sv.roleStamp));
+                            final int timeLeft = Math.max(0, 86400 - (Timer.secTime()-sv.roleStamp));
                             if (timeLeft>0){
                                 p.sendMessage(Main.prefix + "Смена возможна через §4" + TimeUtil.secondToTime(timeLeft));
                                 return true;
                             }
                         }
 
-                        if (sv.hasGroup("legend")) {
+                        if (Perm.isRank(sv, 1)) {
                             for (final Stat st : Stat.values()) {
                                 sv.statsPoints += sv.getStat(st);
                                 sv.setStat(st, 0);
@@ -334,7 +336,7 @@ public class SkillCmd implements CommandExecutor, TabCompleter {
                         }
                     }
 
-                    sv.roleStamp = ApiOstrov.currentTimeSec();
+                    sv.roleStamp = Timer.secTime();
                     sv.showScoreBoard = true;
                     sv.showActionBar = true;
                     sv.role = role;

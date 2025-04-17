@@ -1,19 +1,19 @@
 package ru.romindous.skills.guides;
 
-import org.bukkit.inventory.ItemFlag;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.quests.Quest;
 import ru.komiss77.modules.quests.QuestManager;
 import ru.komiss77.utils.TCUtil;
-import ru.romindous.skills.skills.Rarity;
 import ru.romindous.skills.SubServer;
-import ru.romindous.skills.skills.trigs.Trigger;
 import ru.romindous.skills.objects.Groups;
+import ru.romindous.skills.skills.Rarity;
 import ru.romindous.skills.skills.abils.Ability;
 import ru.romindous.skills.skills.mods.Modifier;
 import ru.romindous.skills.skills.sels.Selector;
+import ru.romindous.skills.skills.trigs.Trigger;
 
 public class Entries {
 
@@ -49,7 +49,7 @@ public class Entries {
         private static final ItemStack TRIG_IT = new ItemBuilder(ItemType.HOPPER).name(TCUtil.sided(Rarity.COMMON.color() + "<i>Тригер<!i>", Trigger.SIDE))
             .lore("<mithril>[Описание цели / действия]").build();
         private static final ItemStack ABIL_IT = new ItemBuilder(ItemType.COAST_ARMOR_TRIM_SMITHING_TEMPLATE).name(TCUtil.sided(Rarity.COMMON.color() + "<i>Способность<!i> I", Ability.SIDE))
-            .lore("<mithril>[Требуемая роль]", "", "<mithril>[Описание способности]", "<mithril>(Нужная экипировка)", "", "<mithril>[Влияющие модификаторы]").flags(true, ItemFlag.HIDE_ADDITIONAL_TOOLTIP).build();
+            .lore("<mithril>[Требуемая роль]", "", "<mithril>[Описание способности]", "<mithril>(Нужная экипировка)", "", "<mithril>[Влияющие модификаторы]").hide(DataComponentTypes.PROVIDES_TRIM_MATERIAL, DataComponentTypes.TRIM).build();
         public static final Entry trig = new Entry('h', ItemType.HOPPER, 0, null, WASTES, "Начало цикла",
             "Выбери тригер своему навыку", "", Quest.QuestVis.PARENT, Quest.QuestFrame.TASK, Section.SKILLS,
             "Суровые условия этой местности заставляют меня експерементировать с навыками. Выбранный мной 0[<pink>тригер] - начало навыка, исполняющий конкретную 1[<indigo>способность]. Т.е. эффект навыка напрямую зависит от выбранного тригера...",

@@ -13,13 +13,13 @@ import ru.romindous.skills.listeners.worlds.WastesLst;
 
 public enum SubServer {
 
-    WASTES("§cПустошь", "textures/block/coarse_dirt.png", ItemType.COARSE_DIRT, EntityType.HUSK, 0.75f, EntityType.PILLAGER, new WastesLst()),
-    KRIOLITE("§bКриолит", "textures/block/calcite.png", ItemType.CALCITE, EntityType.STRAY, 0.90f, null, null),
-    LOCUS("§2Локус", "textures/block/azalea_leaves.png", ItemType.MOSS_BLOCK, EntityType.ZOMBIE_VILLAGER, 1.05f, EntityType.WITCH, null),
-    INFERNAL("§4Инфернал", "textures/block/nether_bricks.png", ItemType.CRIMSON_NYLIUM, EntityType.WITHER_SKELETON, 1.15f, EntityType.PIGLIN_BRUTE, null),
-    AQUAROD("§9Акварод", "textures/block/dark_prismarine.png", ItemType.WARPED_HYPHAE, EntityType.DROWNED, 1.25f, null, null),
-    KALEUM("§5Калеум", "textures/block/obsidian.png", ItemType.END_STONE_BRICKS, EntityType.SKELETON, 1.30f, null, null),
-    TERRA("§6Терра", "textures/block/honeycomb_block.png", ItemType.GRASS_BLOCK, EntityType.ZOMBIE, 1.35f, EntityType.WANDERING_TRADER, null);
+    WASTES("§cПустошь", "block/coarse_dirt", ItemType.COARSE_DIRT, EntityType.HUSK, 0.75f, EntityType.PILLAGER, new WastesLst()),
+    KRIOLITE("§bКриолит", "block/calcite", ItemType.CALCITE, EntityType.STRAY, 0.90f, null, null),
+    LOCUS("§2Локус", "block/azalea_leaves", ItemType.MOSS_BLOCK, EntityType.ZOMBIE_VILLAGER, 1.05f, EntityType.WITCH, null),
+    INFERNAL("§4Инфернал", "block/nether_bricks", ItemType.CRIMSON_NYLIUM, EntityType.WITHER_SKELETON, 1.15f, EntityType.PIGLIN_BRUTE, null),
+    AQUAROD("§9Акварод", "block/dark_prismarine", ItemType.WARPED_HYPHAE, EntityType.DROWNED, 1.25f, null, null),
+    KALEUM("§5Калеум", "block/obsidian", ItemType.END_STONE_BRICKS, EntityType.SKELETON, 1.30f, null, null),
+    TERRA("§6Терра", "block/honeycomb_block", ItemType.GRASS_BLOCK, EntityType.ZOMBIE, 1.35f, EntityType.WANDERING_TRADER, null);
 	
 	public static int size = SubServer.values().length;
 	

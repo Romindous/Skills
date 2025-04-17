@@ -1,6 +1,5 @@
 package ru.romindous.skills;
 
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -11,7 +10,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemType;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.komiss77.OConfigManager;
@@ -20,17 +18,18 @@ import ru.komiss77.modules.items.ItemBuilder;
 import ru.komiss77.modules.menuItem.MenuItem;
 import ru.komiss77.modules.menuItem.MenuItemBuilder;
 import ru.komiss77.modules.player.PM;
-import ru.komiss77.utils.ClassUtil;
 import ru.komiss77.utils.NumUtil;
 import ru.komiss77.utils.TCUtil;
 import ru.romindous.skills.config.ConfigVars;
-import ru.romindous.skills.skills.chas.Chastic;
-import ru.romindous.skills.survs.Role;
 import ru.romindous.skills.guides.Entries;
-import ru.romindous.skills.objects.Groups;
 import ru.romindous.skills.items.SkillGroup;
+import ru.romindous.skills.listeners.*;
+import ru.romindous.skills.listeners.worlds.WastesLst;
 import ru.romindous.skills.mobs.Minion;
 import ru.romindous.skills.mobs.Mobs;
+import ru.romindous.skills.objects.Groups;
+import ru.romindous.skills.skills.chas.Chastic;
+import ru.romindous.skills.survs.Role;
 import ru.romindous.skills.survs.SM;
 import ru.romindous.skills.survs.Survivor;
 import ru.romindous.skills.utils.pets.IPetManager;
@@ -89,14 +88,25 @@ public class Main extends JavaPlugin {
         Entries.init();
         SM.init();
 
-        for (final Class<?> clazz : ClassUtil.getClasses(main.getFile(), "ru.romindous.skills.listeners")) {
+        getServer().getPluginManager().registerEvents(new WastesLst(), this);
+        getServer().getPluginManager().registerEvents(new BlockLst(), this);
+        getServer().getPluginManager().registerEvents(new DamageLst(), this);
+        getServer().getPluginManager().registerEvents(new DeathLst(), this);
+        getServer().getPluginManager().registerEvents(new EntityLst(), this);
+        getServer().getPluginManager().registerEvents(new InteractLst(), this);
+        getServer().getPluginManager().registerEvents(new InventoryLst(), this);
+        getServer().getPluginManager().registerEvents(new MoveLst(), this);
+        getServer().getPluginManager().registerEvents(new MySqlLst(), this);
+        getServer().getPluginManager().registerEvents(new RehabLst(), this);
+        getServer().getPluginManager().registerEvents(new ShotLst(), this);
+        /*for (final Class<?> clazz : ClassUtil.getClasses(main.getFile(), "ru.romindous.skills.listeners", this.getClass())) {
             try {
                 getServer().getPluginManager().registerEvents((Listener) clazz.getDeclaredConstructor().newInstance(), this);
             } catch (IllegalAccessException | IllegalArgumentException | InstantiationException
                      | NoSuchMethodException | SecurityException | InvocationTargetException ex) {
                 Ostrov.log_err("Инициализация listener " + clazz.getName() + " -> " + ex.getMessage());
             }
-        }
+        }*/
 
         getCommand("skill").setExecutor(new SkillCmd());
 

@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import ru.komiss77.modules.items.ItemBuilder;
@@ -131,8 +131,10 @@ public class Entry extends Quest {
     }
 
     public ClickableItem item(final Player p, final Survivor sv) {
-        return ClickableItem.of(new ItemBuilder(icon).flags(true, ItemFlag.HIDE_ADDITIONAL_TOOLTIP).name(displayName)
-            .lore(description).lore("<dark_gray>Клик - прочесть").glint(sv.unread.contains(this)).build(), e -> {
+        return ClickableItem.of(new ItemBuilder(icon).hide(DataComponentTypes.BANNER_PATTERNS,
+                DataComponentTypes.PROVIDES_BANNER_PATTERNS, DataComponentTypes.PROVIDES_TRIM_MATERIAL,
+                DataComponentTypes.TRIM, DataComponentTypes.DYED_COLOR).name(displayName).lore(description)
+            .lore("<dark_gray>Клик - прочесть").glint(sv.unread.contains(this)).build(), e -> {
             if (sec == null || page == null) return;
             p.closeInventory(); p.playSound(p, Sound.BLOCK_CAVE_VINES_HIT, 1f, 0.6f);
             p.openBook(Book.book(TCUtil.form(displayName), Component.text(p.getName()), page));
