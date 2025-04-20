@@ -47,7 +47,8 @@ public class Medaline extends SkillGroup {
                         tb.addRule(rl);
                         continue;
                     }
-                    tb.addRule(Tool.rule(rl.blocks(), rl.speed() * gold_speed_mul, rl.correctForDrops()));
+                    //TODO paper Infinity fix
+                    tb.addRule(Tool.rule(rl.blocks(), Math.clamp(rl.speed() * gold_speed_mul, 0f, Float.MAX_VALUE), rl.correctForDrops()));
                 }
                 return tb.build();
             }),
